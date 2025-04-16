@@ -13,7 +13,7 @@ export const BaseCheckbox: FC<BaseCheckboxProps> = (props) => {
   const { containerSx, label, checked, onChange } = props;
 
   return (
-    <FormGroup sx={{ mt: 2, ...containerSx }}>
+    <FormGroup sx={{ mt: 1, ...containerSx }}>
       <FormControlLabel
         onChange={(_, checked) => onChange && onChange(checked)}
         control={<Checkbox checked={checked} />}
