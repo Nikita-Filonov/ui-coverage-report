@@ -1,15 +1,35 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { InitialStateProvider } from './Providers/InitialStateProvider';
+import { AppConfigView } from './Views/Config/ConfigView';
+import { MainLayout } from './Components/Layouts/MainLayout';
+import { AppToolbarView } from './Components/Toolbar/AppToolbarView';
+import { ThemeProvider } from './Providers/ThemeProvider';
+import { AgentView } from './Views/Agent/AgentView';
+import { AppCoverageHistoryView } from './Views/CoverageHistory/AppCoverageHistoryView';
+import { ElementCoverageView } from './Views/Coverage/ElementCoverageView';
 
-const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
-);
+const IndexRoute = () => {
+  return (
+    <MainLayout>
+      <AppToolbarView />
+      <AppConfigView />
+      <AppCoverageHistoryView />
+      <AgentView />
+      <ElementCoverageView />
+    </MainLayout>
+  );
+};
+
+const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
   <React.StrictMode>
-    <App />
+    <ThemeProvider>
+      <InitialStateProvider>
+        <IndexRoute />
+      </InitialStateProvider>
+    </ThemeProvider>
   </React.StrictMode>
 );
 

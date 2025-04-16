@@ -1,0 +1,951 @@
+{
+  "config": {
+    "apps": [
+      {
+        "key": "ui-course",
+        "url": "http://localhost:3001/",
+        "name": "UI Course",
+        "tags": [
+          "UI",
+          "COURSES"
+        ],
+        "repository": "https://github.com/Nikita-Filonov/swagger-coverage-tool"
+      }
+    ]
+  },
+  "createdAt": "2025-04-15T15:29:35.167413",
+  "appsCoverage": {
+    "ui-course": {
+      "history": [
+        {
+          "actions": [
+            {
+              "type": "ASSERT_HAVE_TEXT",
+              "count": 30
+            },
+            {
+              "type": "ASSERT_VISIBLE",
+              "count": 60
+            },
+            {
+              "type": "CLICK",
+              "count": 14
+            }
+          ],
+          "createdAt": "2025-04-15T15:28:39.578781",
+          "totalActions": 104,
+          "totalElements": 19
+        },
+        {
+          "actions": [
+            {
+              "type": "ASSERT_HAVE_TEXT",
+              "count": 30
+            },
+            {
+              "type": "ASSERT_VISIBLE",
+              "count": 60
+            },
+            {
+              "type": "CLICK",
+              "count": 14
+            }
+          ],
+          "createdAt": "2025-04-15T15:29:34.306845",
+          "totalActions": 104,
+          "totalElements": 19
+        },
+        {
+          "actions": [
+            {
+              "type": "ASSERT_HAVE_TEXT",
+              "count": 30
+            },
+            {
+              "type": "ASSERT_VISIBLE",
+              "count": 60
+            },
+            {
+              "type": "CLICK",
+              "count": 14
+            }
+          ],
+          "createdAt": "2025-04-15T15:29:35.170812",
+          "totalActions": 104,
+          "totalElements": 19
+        }
+      ],
+      "elements": [
+        {
+          "history": [
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 4
+                }
+              ],
+              "createdAt": "2025-04-15T15:28:39.578781"
+            },
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 4
+                }
+              ],
+              "createdAt": "2025-04-15T15:29:34.306845"
+            },
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 4
+                }
+              ],
+              "createdAt": "2025-04-15T15:29:35.170812"
+            }
+          ],
+          "actions": [
+            {
+              "type": "ASSERT_VISIBLE",
+              "count": 4
+            }
+          ],
+          "selector": "[data-testid='courses-drawer-list-item-button']",
+          "selectorType": "CSS"
+        },
+        {
+          "history": [
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 4
+                }
+              ],
+              "createdAt": "2025-04-15T15:28:39.578781"
+            },
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 4
+                }
+              ],
+              "createdAt": "2025-04-15T15:29:34.306845"
+            },
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 4
+                }
+              ],
+              "createdAt": "2025-04-15T15:29:35.170812"
+            }
+          ],
+          "actions": [
+            {
+              "type": "ASSERT_VISIBLE",
+              "count": 4
+            }
+          ],
+          "selector": "[data-testid='courses-drawer-list-item-icon']",
+          "selectorType": "CSS"
+        },
+        {
+          "history": [
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 4
+                },
+                {
+                  "type": "ASSERT_HAVE_TEXT",
+                  "count": 4
+                }
+              ],
+              "createdAt": "2025-04-15T15:28:39.578781"
+            },
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 4
+                },
+                {
+                  "type": "ASSERT_HAVE_TEXT",
+                  "count": 4
+                }
+              ],
+              "createdAt": "2025-04-15T15:29:34.306845"
+            },
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 4
+                },
+                {
+                  "type": "ASSERT_HAVE_TEXT",
+                  "count": 4
+                }
+              ],
+              "createdAt": "2025-04-15T15:29:35.170812"
+            }
+          ],
+          "actions": [
+            {
+              "type": "ASSERT_VISIBLE",
+              "count": 4
+            },
+            {
+              "type": "ASSERT_HAVE_TEXT",
+              "count": 4
+            }
+          ],
+          "selector": "[data-testid='courses-drawer-list-item-title-text']",
+          "selectorType": "CSS"
+        },
+        {
+          "history": [
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 4
+                }
+              ],
+              "createdAt": "2025-04-15T15:28:39.578781"
+            },
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 4
+                }
+              ],
+              "createdAt": "2025-04-15T15:29:34.306845"
+            },
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 4
+                }
+              ],
+              "createdAt": "2025-04-15T15:29:35.170812"
+            }
+          ],
+          "actions": [
+            {
+              "type": "ASSERT_VISIBLE",
+              "count": 4
+            }
+          ],
+          "selector": "[data-testid='dashboard-drawer-list-item-button']",
+          "selectorType": "CSS"
+        },
+        {
+          "history": [
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 4
+                }
+              ],
+              "createdAt": "2025-04-15T15:28:39.578781"
+            },
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 4
+                }
+              ],
+              "createdAt": "2025-04-15T15:29:34.306845"
+            },
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 4
+                }
+              ],
+              "createdAt": "2025-04-15T15:29:35.170812"
+            }
+          ],
+          "actions": [
+            {
+              "type": "ASSERT_VISIBLE",
+              "count": 4
+            }
+          ],
+          "selector": "[data-testid='dashboard-drawer-list-item-icon']",
+          "selectorType": "CSS"
+        },
+        {
+          "history": [
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 4
+                },
+                {
+                  "type": "ASSERT_HAVE_TEXT",
+                  "count": 4
+                }
+              ],
+              "createdAt": "2025-04-15T15:28:39.578781"
+            },
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 4
+                },
+                {
+                  "type": "ASSERT_HAVE_TEXT",
+                  "count": 4
+                }
+              ],
+              "createdAt": "2025-04-15T15:29:34.306845"
+            },
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 4
+                },
+                {
+                  "type": "ASSERT_HAVE_TEXT",
+                  "count": 4
+                }
+              ],
+              "createdAt": "2025-04-15T15:29:35.170812"
+            }
+          ],
+          "actions": [
+            {
+              "type": "ASSERT_VISIBLE",
+              "count": 4
+            },
+            {
+              "type": "ASSERT_HAVE_TEXT",
+              "count": 4
+            }
+          ],
+          "selector": "[data-testid='dashboard-drawer-list-item-title-text']",
+          "selectorType": "CSS"
+        },
+        {
+          "history": [
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 4
+                },
+                {
+                  "type": "ASSERT_HAVE_TEXT",
+                  "count": 4
+                }
+              ],
+              "createdAt": "2025-04-15T15:28:39.578781"
+            },
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 4
+                },
+                {
+                  "type": "ASSERT_HAVE_TEXT",
+                  "count": 4
+                }
+              ],
+              "createdAt": "2025-04-15T15:29:34.306845"
+            },
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 4
+                },
+                {
+                  "type": "ASSERT_HAVE_TEXT",
+                  "count": 4
+                }
+              ],
+              "createdAt": "2025-04-15T15:29:35.170812"
+            }
+          ],
+          "actions": [
+            {
+              "type": "ASSERT_VISIBLE",
+              "count": 4
+            },
+            {
+              "type": "ASSERT_HAVE_TEXT",
+              "count": 4
+            }
+          ],
+          "selector": "[data-testid='dashboard-toolbar-title-text']",
+          "selectorType": "CSS"
+        },
+        {
+          "history": [
+            {
+              "actions": [
+                {
+                  "type": "CLICK",
+                  "count": 8
+                }
+              ],
+              "createdAt": "2025-04-15T15:28:39.578781"
+            },
+            {
+              "actions": [
+                {
+                  "type": "CLICK",
+                  "count": 8
+                }
+              ],
+              "createdAt": "2025-04-15T15:29:34.306845"
+            },
+            {
+              "actions": [
+                {
+                  "type": "CLICK",
+                  "count": 8
+                }
+              ],
+              "createdAt": "2025-04-15T15:29:35.170812"
+            }
+          ],
+          "actions": [
+            {
+              "type": "CLICK",
+              "count": 8
+            }
+          ],
+          "selector": "[data-testid='login-page-login-button']",
+          "selectorType": "CSS"
+        },
+        {
+          "history": [
+            {
+              "actions": [
+                {
+                  "type": "CLICK",
+                  "count": 2
+                }
+              ],
+              "createdAt": "2025-04-15T15:28:39.578781"
+            },
+            {
+              "actions": [
+                {
+                  "type": "CLICK",
+                  "count": 2
+                }
+              ],
+              "createdAt": "2025-04-15T15:29:34.306845"
+            },
+            {
+              "actions": [
+                {
+                  "type": "CLICK",
+                  "count": 2
+                }
+              ],
+              "createdAt": "2025-04-15T15:29:35.170812"
+            }
+          ],
+          "actions": [
+            {
+              "type": "CLICK",
+              "count": 2
+            }
+          ],
+          "selector": "[data-testid='login-page-registration-link']",
+          "selectorType": "CSS"
+        },
+        {
+          "history": [
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 6
+                },
+                {
+                  "type": "ASSERT_HAVE_TEXT",
+                  "count": 6
+                }
+              ],
+              "createdAt": "2025-04-15T15:28:39.578781"
+            },
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 6
+                },
+                {
+                  "type": "ASSERT_HAVE_TEXT",
+                  "count": 6
+                }
+              ],
+              "createdAt": "2025-04-15T15:29:34.306845"
+            },
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 6
+                },
+                {
+                  "type": "ASSERT_HAVE_TEXT",
+                  "count": 6
+                }
+              ],
+              "createdAt": "2025-04-15T15:29:35.170812"
+            }
+          ],
+          "actions": [
+            {
+              "type": "ASSERT_VISIBLE",
+              "count": 6
+            },
+            {
+              "type": "ASSERT_HAVE_TEXT",
+              "count": 6
+            }
+          ],
+          "selector": "[data-testid='login-page-wrong-email-or-password-alert']",
+          "selectorType": "CSS"
+        },
+        {
+          "history": [
+            {
+              "actions": [
+                {
+                  "type": "CLICK",
+                  "count": 2
+                },
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 4
+                }
+              ],
+              "createdAt": "2025-04-15T15:28:39.578781"
+            },
+            {
+              "actions": [
+                {
+                  "type": "CLICK",
+                  "count": 2
+                },
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 4
+                }
+              ],
+              "createdAt": "2025-04-15T15:29:34.306845"
+            },
+            {
+              "actions": [
+                {
+                  "type": "CLICK",
+                  "count": 2
+                },
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 4
+                }
+              ],
+              "createdAt": "2025-04-15T15:29:35.170812"
+            }
+          ],
+          "actions": [
+            {
+              "type": "CLICK",
+              "count": 2
+            },
+            {
+              "type": "ASSERT_VISIBLE",
+              "count": 4
+            }
+          ],
+          "selector": "[data-testid='logout-drawer-list-item-button']",
+          "selectorType": "CSS"
+        },
+        {
+          "history": [
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 4
+                }
+              ],
+              "createdAt": "2025-04-15T15:28:39.578781"
+            },
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 4
+                }
+              ],
+              "createdAt": "2025-04-15T15:29:34.306845"
+            },
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 4
+                }
+              ],
+              "createdAt": "2025-04-15T15:29:35.170812"
+            }
+          ],
+          "actions": [
+            {
+              "type": "ASSERT_VISIBLE",
+              "count": 4
+            }
+          ],
+          "selector": "[data-testid='logout-drawer-list-item-icon']",
+          "selectorType": "CSS"
+        },
+        {
+          "history": [
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 4
+                },
+                {
+                  "type": "ASSERT_HAVE_TEXT",
+                  "count": 4
+                }
+              ],
+              "createdAt": "2025-04-15T15:28:39.578781"
+            },
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 4
+                },
+                {
+                  "type": "ASSERT_HAVE_TEXT",
+                  "count": 4
+                }
+              ],
+              "createdAt": "2025-04-15T15:29:34.306845"
+            },
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 4
+                },
+                {
+                  "type": "ASSERT_HAVE_TEXT",
+                  "count": 4
+                }
+              ],
+              "createdAt": "2025-04-15T15:29:35.170812"
+            }
+          ],
+          "actions": [
+            {
+              "type": "ASSERT_VISIBLE",
+              "count": 4
+            },
+            {
+              "type": "ASSERT_HAVE_TEXT",
+              "count": 4
+            }
+          ],
+          "selector": "[data-testid='logout-drawer-list-item-title-text']",
+          "selectorType": "CSS"
+        },
+        {
+          "history": [
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 4
+                },
+                {
+                  "type": "ASSERT_HAVE_TEXT",
+                  "count": 4
+                }
+              ],
+              "createdAt": "2025-04-15T15:28:39.578781"
+            },
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 4
+                },
+                {
+                  "type": "ASSERT_HAVE_TEXT",
+                  "count": 4
+                }
+              ],
+              "createdAt": "2025-04-15T15:29:34.306845"
+            },
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 4
+                },
+                {
+                  "type": "ASSERT_HAVE_TEXT",
+                  "count": 4
+                }
+              ],
+              "createdAt": "2025-04-15T15:29:35.170812"
+            }
+          ],
+          "actions": [
+            {
+              "type": "ASSERT_VISIBLE",
+              "count": 4
+            },
+            {
+              "type": "ASSERT_HAVE_TEXT",
+              "count": 4
+            }
+          ],
+          "selector": "[data-testid='navigation-navbar-app-title-text']",
+          "selectorType": "CSS"
+        },
+        {
+          "history": [
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 4
+                },
+                {
+                  "type": "ASSERT_HAVE_TEXT",
+                  "count": 4
+                }
+              ],
+              "createdAt": "2025-04-15T15:28:39.578781"
+            },
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 4
+                },
+                {
+                  "type": "ASSERT_HAVE_TEXT",
+                  "count": 4
+                }
+              ],
+              "createdAt": "2025-04-15T15:29:34.306845"
+            },
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 4
+                },
+                {
+                  "type": "ASSERT_HAVE_TEXT",
+                  "count": 4
+                }
+              ],
+              "createdAt": "2025-04-15T15:29:35.170812"
+            }
+          ],
+          "actions": [
+            {
+              "type": "ASSERT_VISIBLE",
+              "count": 4
+            },
+            {
+              "type": "ASSERT_HAVE_TEXT",
+              "count": 4
+            }
+          ],
+          "selector": "[data-testid='navigation-navbar-welcome-title-text']",
+          "selectorType": "CSS"
+        },
+        {
+          "history": [
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 2
+                }
+              ],
+              "createdAt": "2025-04-15T15:28:39.578781"
+            },
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 2
+                }
+              ],
+              "createdAt": "2025-04-15T15:29:34.306845"
+            },
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 2
+                }
+              ],
+              "createdAt": "2025-04-15T15:29:35.170812"
+            }
+          ],
+          "actions": [
+            {
+              "type": "ASSERT_VISIBLE",
+              "count": 2
+            }
+          ],
+          "selector": "[data-testid='registration-form-email-input']",
+          "selectorType": "CSS"
+        },
+        {
+          "history": [
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 2
+                }
+              ],
+              "createdAt": "2025-04-15T15:28:39.578781"
+            },
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 2
+                }
+              ],
+              "createdAt": "2025-04-15T15:29:34.306845"
+            },
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 2
+                }
+              ],
+              "createdAt": "2025-04-15T15:29:35.170812"
+            }
+          ],
+          "actions": [
+            {
+              "type": "ASSERT_VISIBLE",
+              "count": 2
+            }
+          ],
+          "selector": "[data-testid='registration-form-password-input']",
+          "selectorType": "CSS"
+        },
+        {
+          "history": [
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 2
+                }
+              ],
+              "createdAt": "2025-04-15T15:28:39.578781"
+            },
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 2
+                }
+              ],
+              "createdAt": "2025-04-15T15:29:34.306845"
+            },
+            {
+              "actions": [
+                {
+                  "type": "ASSERT_VISIBLE",
+                  "count": 2
+                }
+              ],
+              "createdAt": "2025-04-15T15:29:35.170812"
+            }
+          ],
+          "actions": [
+            {
+              "type": "ASSERT_VISIBLE",
+              "count": 2
+            }
+          ],
+          "selector": "[data-testid='registration-form-username-input']",
+          "selectorType": "CSS"
+        },
+        {
+          "history": [
+            {
+              "actions": [
+                {
+                  "type": "CLICK",
+                  "count": 2
+                }
+              ],
+              "createdAt": "2025-04-15T15:28:39.578781"
+            },
+            {
+              "actions": [
+                {
+                  "type": "CLICK",
+                  "count": 2
+                }
+              ],
+              "createdAt": "2025-04-15T15:29:34.306845"
+            },
+            {
+              "actions": [
+                {
+                  "type": "CLICK",
+                  "count": 2
+                }
+              ],
+              "createdAt": "2025-04-15T15:29:35.170812"
+            }
+          ],
+          "actions": [
+            {
+              "type": "CLICK",
+              "count": 2
+            }
+          ],
+          "selector": "[data-testid='registration-page-registration-button']",
+          "selectorType": "CSS"
+        }
+      ]
+    }
+  }
+}
