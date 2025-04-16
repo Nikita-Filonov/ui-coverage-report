@@ -2,7 +2,6 @@ import { BarPlot } from '@mui/x-charts/BarChart';
 import {
   ChartsAxisHighlight,
   ChartsGrid,
-  ChartsLegend,
   ChartsTooltip,
   ChartsXAxis,
   ChartsYAxis,
@@ -10,9 +9,11 @@ import {
 } from '@mui/x-charts';
 import { AxisValueFormatterContext } from '@mui/x-charts/internals';
 import { DatasetType } from '@mui/x-charts/models/seriesType/config';
-import { useTheme } from '@mui/material';
+import { Box } from '@mui/material';
+import { Fragment } from 'react';
+import { BaseBarChartLegend } from './BaseBarChartLegend';
 
-interface BarChartYAxis {
+export interface BarChartYAxis {
   data?: (null | number)[];
   label: string;
   color?: string;
@@ -34,22 +35,23 @@ type BaseLineChartProps<T> = {
 };
 
 export const BaseBarChart = <T,>({ xAxis, yAxis, dataset }: BaseLineChartProps<T>) => {
-  const theme = useTheme();
-
   return (
-    <ResponsiveChartContainer xAxis={xAxis} series={yAxis.map((axis) => ({ ...axis, type: 'bar' }))} dataset={dataset}>
-      <BarPlot />
-      <ChartsGrid vertical={true} horizontal={true} />
-      <ChartsXAxis />
-      <ChartsYAxis />
-      <ChartsLegend
-        itemMarkHeight={13}
-        itemMarkWidth={13}
-        position={{ horizontal: 'middle', vertical: 'top' }}
-        labelStyle={{ fontSize: theme.typography.subtitle2.fontSize }}
-      />
-      <ChartsTooltip />
-      <ChartsAxisHighlight x={'band'} />
-    </ResponsiveChartContainer>
+    <Fragment>
+      <Box sx={{ height: 300 }}>
+        <ResponsiveChartContainer
+          xAxis={xAxis}
+          margin={{ top: 20, left: 35, right: 20, bottom: 35 }}
+          series={yAxis.map((axis) => ({ ...axis, type: 'bar' }))}
+          dataset={dataset}>
+          <BarPlot />
+          <ChartsGrid vertical={true} horizontal={true} />
+          <ChartsXAxis />
+          <ChartsYAxis />
+          <ChartsTooltip />
+          <ChartsAxisHighlight x={'band'} />
+        </ResponsiveChartContainer>
+      </Box>
+      <BaseBarChartLegend yAxis={yAxis} />
+    </Fragment>
   );
 };
