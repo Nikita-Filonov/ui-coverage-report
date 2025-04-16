@@ -48963,6 +48963,7 @@ var agent = function() {
     var import_jsx_runtime79 = __toESM(require_jsx_runtime());
     var BaseBarChart = function(param) {
         var xAxis = param.xAxis, yAxis = param.yAxis, dataset = param.dataset;
+        var theme = useTheme4();
         return /* @__PURE__ */ (0, import_jsx_runtime79.jsxs)(ResponsiveChartContainer, {
             xAxis: xAxis,
             series: yAxis.map(function(axis) {
@@ -48979,7 +48980,17 @@ var agent = function() {
                 }),
                 /* @__PURE__ */ (0, import_jsx_runtime79.jsx)(ChartsXAxis, {}),
                 /* @__PURE__ */ (0, import_jsx_runtime79.jsx)(ChartsYAxis, {}),
-                /* @__PURE__ */ (0, import_jsx_runtime79.jsx)(ChartsLegend, {}),
+                /* @__PURE__ */ (0, import_jsx_runtime79.jsx)(ChartsLegend, {
+                    itemMarkHeight: 13,
+                    itemMarkWidth: 13,
+                    position: {
+                        horizontal: "middle",
+                        vertical: "top"
+                    },
+                    labelStyle: {
+                        fontSize: theme.typography.subtitle2.fontSize
+                    }
+                }),
                 /* @__PURE__ */ (0, import_jsx_runtime79.jsx)(ChartsTooltip, {}),
                 /* @__PURE__ */ (0, import_jsx_runtime79.jsx)(ChartsAxisHighlight, {
                     x: "band"

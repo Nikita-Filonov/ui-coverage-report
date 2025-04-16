@@ -78,7 +78,8 @@
     "test": "node scripts/test.js",
     "linter": "eslint ./src --ext .js,.jsx,.ts,.tsx",
     "load-state": "node scripts/load-state.js",
-    "build:agent": "tsup"
+    "build:agent": "tsup",
+    "deploy:agent": "cp public/agent.global.js docs/agent.global.js"
   },
   "eslintConfig": {
     "extends": [
