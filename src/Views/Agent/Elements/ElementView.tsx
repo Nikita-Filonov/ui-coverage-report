@@ -25,7 +25,12 @@ export const ElementView: FC<Props> = ({ element }) => {
       <IconButton onClick={onElementDetails}>
         <Badge color={state.settings?.badgeColor} badgeContent={element.actions.length} />
       </IconButton>
-      <ElementDetailsModal modal={elementDetailsModal} setModal={setElementDetailsModal} element={element} />
+      <ElementDetailsModal
+        sx={{ zIndex: 1900 }}
+        modal={elementDetailsModal}
+        setModal={setElementDetailsModal}
+        element={element}
+      />
     </BasePopper>
   );
 };
