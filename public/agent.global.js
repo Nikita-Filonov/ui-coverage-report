@@ -924,8 +924,8 @@ var agent = function() {
                         "MUI: Seems like you called `styled(".concat(component, ")()` without a `style` argument."),
                         'You must provide a `styles` argument: `styled("div")(styleYouForgotToPass)`.'
                     ].join("\n"));
-                } else if (styles2.some(function(style3) {
-                    return style3 === void 0;
+                } else if (styles2.some(function(style4) {
+                    return style4 === void 0;
                 })) {
                     console.error("MUI: the styled(".concat(component, ")(...args) API requires all its args to be defined."));
                 }
@@ -1149,7 +1149,7 @@ var agent = function() {
         }, {});
         return breakpointsInOrder || {};
     };
-    var removeUnusedBreakpoints = function removeUnusedBreakpoints(breakpointKeys, style3) {
+    var removeUnusedBreakpoints = function removeUnusedBreakpoints(breakpointKeys, style4) {
         return breakpointKeys.reduce(function(acc, key) {
             var breakpointOutput = acc[key];
             var isBreakpointUnused = !breakpointOutput || Object.keys(breakpointOutput).length === 0;
@@ -1157,7 +1157,61 @@ var agent = function() {
                 delete acc[key];
             }
             return acc;
-        }, style3);
+        }, style4);
+    };
+    var mergeBreakpointsInOrder = function mergeBreakpointsInOrder(breakpointsInput) {
+        for(var _len = arguments.length, styles2 = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++){
+            styles2[_key - 1] = arguments[_key];
+        }
+        var emptyBreakpoints = createEmptyBreakpointObject(breakpointsInput);
+        var mergedOutput = [
+            emptyBreakpoints
+        ].concat(_to_consumable_array(styles2)).reduce(function(prev2, next2) {
+            return deepmerge(prev2, next2);
+        }, {});
+        return removeUnusedBreakpoints(Object.keys(emptyBreakpoints), mergedOutput);
+    };
+    var computeBreakpointsBase = function computeBreakpointsBase(breakpointValues, themeBreakpoints) {
+        if ((typeof breakpointValues === "undefined" ? "undefined" : _type_of(breakpointValues)) !== "object") {
+            return {};
+        }
+        var base = {};
+        var breakpointsKeys = Object.keys(themeBreakpoints);
+        if (Array.isArray(breakpointValues)) {
+            breakpointsKeys.forEach(function(breakpoint, i) {
+                if (i < breakpointValues.length) {
+                    base[breakpoint] = true;
+                }
+            });
+        } else {
+            breakpointsKeys.forEach(function(breakpoint) {
+                if (breakpointValues[breakpoint] != null) {
+                    base[breakpoint] = true;
+                }
+            });
+        }
+        return base;
+    };
+    var resolveBreakpointValues = function resolveBreakpointValues(param) {
+        var breakpointValues = param.values, themeBreakpoints = param.breakpoints, customBase = param.base;
+        var base = customBase || computeBreakpointsBase(breakpointValues, themeBreakpoints);
+        var keys = Object.keys(base);
+        if (keys.length === 0) {
+            return breakpointValues;
+        }
+        var previous;
+        return keys.reduce(function(acc, breakpoint, i) {
+            if (Array.isArray(breakpointValues)) {
+                acc[breakpoint] = breakpointValues[i] != null ? breakpointValues[i] : breakpointValues[previous];
+                previous = i;
+            } else if ((typeof breakpointValues === "undefined" ? "undefined" : _type_of(breakpointValues)) === "object") {
+                acc[breakpoint] = breakpointValues[breakpoint] != null ? breakpointValues[breakpoint] : breakpointValues[previous];
+                previous = breakpoint;
+            } else {
+                acc[breakpoint] = breakpointValues;
+            }
+            return acc;
+        }, {});
     };
     var capitalize = // node_modules/@mui/utils/esm/capitalize/capitalize.js
     function capitalize(string) {
@@ -1374,9 +1428,9 @@ var agent = function() {
         for(var _len = arguments.length, styles2 = new Array(_len), _key = 0; _key < _len; _key++){
             styles2[_key] = arguments[_key];
         }
-        var handlers = styles2.reduce(function(acc, style3) {
-            style3.filterProps.forEach(function(prop) {
-                acc[prop] = style3;
+        var handlers = styles2.reduce(function(acc, style4) {
+            style4.filterProps.forEach(function(prop) {
+                acc[prop] = style4;
             });
             return acc;
         }, {});
@@ -1388,11 +1442,11 @@ var agent = function() {
                 return acc;
             }, {});
         };
-        fn2.propTypes = false ? styles2.reduce(function(acc, style3) {
-            return Object.assign(acc, style3.propTypes);
+        fn2.propTypes = false ? styles2.reduce(function(acc, style4) {
+            return Object.assign(acc, style4.propTypes);
         }, {}) : {};
-        fn2.filterProps = styles2.reduce(function(acc, style3) {
-            return acc.concat(style3.filterProps);
+        fn2.filterProps = styles2.reduce(function(acc, style4) {
+            return acc.concat(style4.filterProps);
         }, []);
         return fn2;
     };
@@ -1445,7 +1499,7 @@ var agent = function() {
             if (!options) {
                 return _define_property({}, prop, val);
             }
-            var _options_cssProperty = options.cssProperty, cssProperty = _options_cssProperty === void 0 ? prop : _options_cssProperty, themeKey = options.themeKey, transform = options.transform, style3 = options.style;
+            var _options_cssProperty = options.cssProperty, cssProperty = _options_cssProperty === void 0 ? prop : _options_cssProperty, themeKey = options.themeKey, transform = options.transform, style4 = options.style;
             if (val == null) {
                 return null;
             }
@@ -1453,8 +1507,8 @@ var agent = function() {
                 return _define_property({}, prop, val);
             }
             var themeMapping = getPath(theme, themeKey) || {};
-            if (style3) {
-                return style3(props);
+            if (style4) {
+                return style4(props);
             }
             var styleFromPropValue = function(propValueFinal) {
                 var value = getStyleValue(themeMapping, transform, propValueFinal);
@@ -1585,13 +1639,13 @@ var agent = function() {
         return Object.keys(obj).length === 0;
     };
     var useTheme2 = function useTheme2() {
-        var defaultTheme4 = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : null;
+        var defaultTheme5 = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : null;
         var contextTheme = React7.useContext(ThemeContext);
-        return !contextTheme || isObjectEmpty(contextTheme) ? defaultTheme4 : contextTheme;
+        return !contextTheme || isObjectEmpty(contextTheme) ? defaultTheme5 : contextTheme;
     };
     var useTheme3 = function useTheme3() {
-        var defaultTheme4 = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : systemDefaultTheme;
-        return useThemeWithoutDefault_default(defaultTheme4);
+        var defaultTheme5 = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : systemDefaultTheme;
+        return useThemeWithoutDefault_default(defaultTheme5);
     };
     var extendSxProp = function extendSxProp(props) {
         var inSx = props.sx, other = _object_without_properties(props, [
@@ -1627,14 +1681,14 @@ var agent = function() {
     };
     var createBox = function createBox() {
         var options = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {};
-        var themeId = options.themeId, defaultTheme4 = options.defaultTheme, _options_defaultClassName = options.defaultClassName, defaultClassName = _options_defaultClassName === void 0 ? "MuiBox-root" : _options_defaultClassName, generateClassName = options.generateClassName;
+        var themeId = options.themeId, defaultTheme5 = options.defaultTheme, _options_defaultClassName = options.defaultClassName, defaultClassName = _options_defaultClassName === void 0 ? "MuiBox-root" : _options_defaultClassName, generateClassName = options.generateClassName;
         var BoxRoot = styled("div", {
             shouldForwardProp: function(prop) {
                 return prop !== "theme" && prop !== "sx" && prop !== "as";
             }
         })(styleFunctionSx_default);
         var Box2 = /* @__PURE__ */ React8.forwardRef(function Box3(inProps, ref) {
-            var theme = useTheme_default(defaultTheme4);
+            var theme = useTheme_default(defaultTheme5);
             var _extendSxProp = extendSxProp(inProps), className = _extendSxProp.className, _extendSxProp_component = _extendSxProp.component, component = _extendSxProp_component === void 0 ? "div" : _extendSxProp_component, other = _object_without_properties(_extendSxProp, [
                 "className",
                 "component"
@@ -1664,15 +1718,15 @@ var agent = function() {
     };
     var preprocessStyles = // node_modules/@mui/system/esm/preprocessStyles.js
     function preprocessStyles(input) {
-        var variants = input.variants, style3 = _object_without_properties(input, [
+        var variants = input.variants, style4 = _object_without_properties(input, [
             "variants"
         ]);
         var result = {
             variants: variants,
-            style: internal_serializeStyles(style3),
+            style: internal_serializeStyles(style4),
             isProcessed: true
         };
-        if (result.style === style3) {
+        if (result.style === style4) {
             return result;
         }
         if (variants) {
@@ -1695,8 +1749,8 @@ var agent = function() {
             return styles2[slot];
         };
     };
-    var attachTheme = function attachTheme(props, themeId, defaultTheme4) {
-        props.theme = isObjectEmpty2(props.theme) ? defaultTheme4 : props.theme[themeId] || props.theme;
+    var attachTheme = function attachTheme(props, themeId, defaultTheme5) {
+        props.theme = isObjectEmpty2(props.theme) ? defaultTheme5 : props.theme[themeId] || props.theme;
     };
     var processStyleVariants = function processStyleVariants(props, variants) {
         var results = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : [];
@@ -1731,15 +1785,15 @@ var agent = function() {
     };
     var createStyled3 = function createStyled3() {
         var input = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {};
-        var themeId = input.themeId, tmp = input.defaultTheme, defaultTheme4 = tmp === void 0 ? systemDefaultTheme2 : tmp, tmp1 = input.rootShouldForwardProp, rootShouldForwardProp2 = tmp1 === void 0 ? shouldForwardProp : tmp1, tmp2 = input.slotShouldForwardProp, slotShouldForwardProp2 = tmp2 === void 0 ? shouldForwardProp : tmp2;
+        var themeId = input.themeId, tmp = input.defaultTheme, defaultTheme5 = tmp === void 0 ? systemDefaultTheme2 : tmp, tmp1 = input.rootShouldForwardProp, rootShouldForwardProp2 = tmp1 === void 0 ? shouldForwardProp : tmp1, tmp2 = input.slotShouldForwardProp, slotShouldForwardProp2 = tmp2 === void 0 ? shouldForwardProp : tmp2;
         function styleAttachTheme(props) {
-            attachTheme(props, themeId, defaultTheme4);
+            attachTheme(props, themeId, defaultTheme5);
         }
         var styled4 = function(tag) {
             var inputOptions = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {};
             internal_mutateStyles(tag, function(styles2) {
-                return styles2.filter(function(style3) {
-                    return style3 !== styleFunctionSx_default;
+                return styles2.filter(function(style4) {
+                    return style4 !== styleFunctionSx_default;
                 });
             });
             var componentName = inputOptions.name, componentSlot = inputOptions.slot, inputSkipVariantsResolver = inputOptions.skipVariantsResolver, inputSkipSx = inputOptions.skipSx, _inputOptions_overridesResolver = inputOptions.// TODO v6: remove `lowercaseFirstLetter()` in the next major release
@@ -1767,14 +1821,14 @@ var agent = function() {
                 shouldForwardProp: shouldForwardPropOption,
                 label: generateStyledLabel(componentName, componentSlot)
             }, options));
-            var transformStyle = function(style3) {
-                if (typeof style3 === "function" && style3.__emotion_real !== style3) {
+            var transformStyle = function(style4) {
+                if (typeof style4 === "function" && style4.__emotion_real !== style4) {
                     return function styleFunctionProcessor(props) {
-                        return processStyle(props, style3);
+                        return processStyle(props, style4);
                     };
                 }
-                if (isPlainObject(style3)) {
-                    var serialized = preprocessStyles(style3);
+                if (isPlainObject(style4)) {
+                    var serialized = preprocessStyles(style4);
                     if (!serialized.variants) {
                         return serialized.style;
                     }
@@ -1782,7 +1836,7 @@ var agent = function() {
                         return processStyle(props, serialized);
                     };
                 }
-                return style3;
+                return style4;
             };
             var muiStyledResolver = function() {
                 for(var _len = arguments.length, expressionsInput = new Array(_len), _key = 0; _key < _len; _key++){
@@ -1886,8 +1940,8 @@ var agent = function() {
     };
     var useThemeProps = // node_modules/@mui/system/esm/useThemeProps/useThemeProps.js
     function useThemeProps(param) {
-        var props = param.props, name = param.name, defaultTheme4 = param.defaultTheme, themeId = param.themeId;
-        var theme = useTheme_default(defaultTheme4);
+        var props = param.props, name = param.name, defaultTheme5 = param.defaultTheme, themeId = param.themeId;
+        var theme = useTheme_default(defaultTheme5);
         if (themeId) {
             theme = theme[themeId] || theme;
         }
@@ -2629,7 +2683,7 @@ var agent = function() {
         var options = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {};
         var _options_createStyledComponent = options.// This will allow adding custom styled fn (for example for custom sx style function)
         createStyledComponent, createStyledComponent = _options_createStyledComponent === void 0 ? defaultCreateStyledComponent : _options_createStyledComponent, tmp = options.useThemeProps, useThemeProps3 = tmp === void 0 ? useThemePropsDefault : tmp, tmp1 = options.useTheme, useTheme5 = tmp1 === void 0 ? useTheme_default : tmp1, _options_componentName = options.componentName, componentName = _options_componentName === void 0 ? "MuiGrid" : _options_componentName;
-        var useUtilityClasses31 = function(ownerState, theme) {
+        var useUtilityClasses30 = function(ownerState, theme) {
             var container2 = ownerState.container, direction = ownerState.direction, spacing2 = ownerState.spacing, wrap = ownerState.wrap, size = ownerState.size;
             var slots = {
                 root: [
@@ -2713,7 +2767,7 @@ var agent = function() {
                 size: size,
                 offset: offset2
             });
-            var classes = useUtilityClasses31(ownerState, theme);
+            var classes = useUtilityClasses30(ownerState, theme);
             return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(GridRoot2, _object_spread_props(_object_spread({
                 ref: ref,
                 as: component,
@@ -2823,6 +2877,106 @@ var agent = function() {
         } : void 0;
         Grid.muiName = "Grid";
         return Grid;
+    };
+    var useThemePropsDefault2 = function useThemePropsDefault2(props) {
+        return useThemeProps({
+            props: props,
+            name: "MuiStack",
+            defaultTheme: defaultTheme2
+        });
+    };
+    var joinChildren = function joinChildren(children, separator) {
+        var childrenArray = React21.Children.toArray(children).filter(Boolean);
+        return childrenArray.reduce(function(output, child, index) {
+            output.push(child);
+            if (index < childrenArray.length - 1) {
+                output.push(/* @__PURE__ */ React21.cloneElement(separator, {
+                    key: "separator-".concat(index)
+                }));
+            }
+            return output;
+        }, []);
+    };
+    var createStack = function createStack() {
+        var options = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {};
+        var _options_createStyledComponent = options.// This will allow adding custom styled fn (for example for custom sx style function)
+        createStyledComponent, createStyledComponent = _options_createStyledComponent === void 0 ? defaultCreateStyledComponent2 : _options_createStyledComponent, tmp = options.useThemeProps, useThemeProps3 = tmp === void 0 ? useThemePropsDefault2 : tmp, _options_componentName = options.componentName, componentName = _options_componentName === void 0 ? "MuiStack" : _options_componentName;
+        var useUtilityClasses30 = function() {
+            var slots = {
+                root: [
+                    "root"
+                ]
+            };
+            return composeClasses(slots, function(slot) {
+                return generateUtilityClass(componentName, slot);
+            }, {});
+        };
+        var StackRoot = createStyledComponent(style3);
+        var Stack2 = /* @__PURE__ */ React21.forwardRef(function Grid(inProps, ref) {
+            var themeProps = useThemeProps3(inProps);
+            var props = extendSxProp(themeProps);
+            var _props_component = props.component, component = _props_component === void 0 ? "div" : _props_component, _props_direction = props.direction, direction = _props_direction === void 0 ? "column" : _props_direction, tmp = props.spacing, spacing2 = tmp === void 0 ? 0 : tmp, divider = props.divider, children = props.children, className = props.className, _props_useFlexGap = props.useFlexGap, useFlexGap = _props_useFlexGap === void 0 ? false : _props_useFlexGap, other = _object_without_properties(props, [
+                "component",
+                "direction",
+                "spacing",
+                "divider",
+                "children",
+                "className",
+                "useFlexGap"
+            ]);
+            var ownerState = {
+                direction: direction,
+                spacing: spacing2,
+                useFlexGap: useFlexGap
+            };
+            var classes = useUtilityClasses30();
+            return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(StackRoot, _object_spread_props(_object_spread({
+                as: component,
+                ownerState: ownerState,
+                ref: ref,
+                className: clsx_default(classes.root, className)
+            }, other), {
+                children: divider ? joinChildren(children, divider) : children
+            }));
+        });
+        false ? Stack2.propTypes = {
+            children: import_prop_types.default.node,
+            direction: import_prop_types.default.oneOfType([
+                import_prop_types.default.oneOf([
+                    "column-reverse",
+                    "column",
+                    "row-reverse",
+                    "row"
+                ]),
+                import_prop_types.default.arrayOf(import_prop_types.default.oneOf([
+                    "column-reverse",
+                    "column",
+                    "row-reverse",
+                    "row"
+                ])),
+                import_prop_types.default.object
+            ]),
+            divider: import_prop_types.default.node,
+            spacing: import_prop_types.default.oneOfType([
+                import_prop_types.default.arrayOf(import_prop_types.default.oneOfType([
+                    import_prop_types.default.number,
+                    import_prop_types.default.string
+                ])),
+                import_prop_types.default.number,
+                import_prop_types.default.object,
+                import_prop_types.default.string
+            ]),
+            sx: import_prop_types.default.oneOfType([
+                import_prop_types.default.arrayOf(import_prop_types.default.oneOfType([
+                    import_prop_types.default.func,
+                    import_prop_types.default.object,
+                    import_prop_types.default.bool
+                ])),
+                import_prop_types.default.func,
+                import_prop_types.default.object
+            ])
+        } : void 0;
+        return Stack2;
     };
     var getLight = // node_modules/@mui/material/styles/createPalette.js
     function getLight() {
@@ -3885,7 +4039,7 @@ var agent = function() {
     function useTheme4() {
         var theme = useTheme_default(defaultTheme_default);
         if (false) {
-            React21.useDebugValue(theme);
+            React22.useDebugValue(theme);
         }
         return theme[identifier_default] || theme;
     };
@@ -3915,7 +4069,7 @@ var agent = function() {
     };
     var createSvgIcon = function createSvgIcon(path, displayName) {
         function Component(props, ref) {
-            return /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(SvgIcon_default, _object_spread_props(_object_spread({
+            return /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(SvgIcon_default, _object_spread_props(_object_spread({
                 "data-testid": "".concat(displayName, "Icon"),
                 ref: ref
             }, props), {
@@ -3926,7 +4080,7 @@ var agent = function() {
             Component.displayName = "".concat(displayName, "Icon");
         }
         Component.muiName = SvgIcon_default.muiName;
-        return /* @__PURE__ */ React25.memo(/* @__PURE__ */ React25.forwardRef(Component));
+        return /* @__PURE__ */ React26.memo(/* @__PURE__ */ React26.forwardRef(Component));
     };
     var _objectWithoutPropertiesLoose = // node_modules/@babel/runtime/helpers/esm/objectWithoutPropertiesLoose.js
     function _objectWithoutPropertiesLoose(r2, e) {
@@ -4041,12 +4195,12 @@ var agent = function() {
         return children;
     };
     var getTransitionProps = function getTransitionProps(props, options) {
-        var timeout2 = props.timeout, easing2 = props.easing, tmp = props.style, style3 = tmp === void 0 ? {} : tmp;
-        var _style3_transitionDuration, _style3_transitionTimingFunction;
+        var timeout2 = props.timeout, easing2 = props.easing, tmp = props.style, style4 = tmp === void 0 ? {} : tmp;
+        var _style4_transitionDuration, _style4_transitionTimingFunction;
         return {
-            duration: (_style3_transitionDuration = style3.transitionDuration) !== null && _style3_transitionDuration !== void 0 ? _style3_transitionDuration : typeof timeout2 === "number" ? timeout2 : timeout2[options.mode] || 0,
-            easing: (_style3_transitionTimingFunction = style3.transitionTimingFunction) !== null && _style3_transitionTimingFunction !== void 0 ? _style3_transitionTimingFunction : (typeof easing2 === "undefined" ? "undefined" : _type_of(easing2)) === "object" ? easing2[options.mode] : easing2,
-            delay: style3.transitionDelay
+            duration: (_style4_transitionDuration = style4.transitionDuration) !== null && _style4_transitionDuration !== void 0 ? _style4_transitionDuration : typeof timeout2 === "number" ? timeout2 : timeout2[options.mode] || 0,
+            easing: (_style4_transitionTimingFunction = style4.transitionTimingFunction) !== null && _style4_transitionTimingFunction !== void 0 ? _style4_transitionTimingFunction : (typeof easing2 === "undefined" ? "undefined" : _type_of(easing2)) === "object" ? easing2[options.mode] : easing2,
+            delay: style4.transitionDelay
         };
     };
     var getPaperUtilityClass = // node_modules/@mui/material/Paper/paperClasses.js
@@ -4108,7 +4262,7 @@ var agent = function() {
     };
     var Ripple = function Ripple(props) {
         var className = props.className, classes = props.classes, _props_pulsate = props.pulsate, pulsate = _props_pulsate === void 0 ? false : _props_pulsate, rippleX = props.rippleX, rippleY = props.rippleY, rippleSize = props.rippleSize, inProp = props.in, onExited = props.onExited, timeout2 = props.timeout;
-        var _React31_useState = _sliced_to_array(React31.useState(false), 2), leaving = _React31_useState[0], setLeaving = _React31_useState[1];
+        var _React32_useState = _sliced_to_array(React32.useState(false), 2), leaving = _React32_useState[0], setLeaving = _React32_useState[1];
         var rippleClassName = clsx_default(className, classes.ripple, classes.rippleVisible, pulsate && classes.ripplePulsate);
         var rippleStyles = {
             width: rippleSize,
@@ -4120,7 +4274,7 @@ var agent = function() {
         if (!inProp && !leaving) {
             setLeaving(true);
         }
-        React31.useEffect(function() {
+        React32.useEffect(function() {
             if (!inProp && onExited != null) {
                 var timeoutId = setTimeout(onExited, timeout2);
                 return function() {
@@ -4133,10 +4287,10 @@ var agent = function() {
             inProp,
             timeout2
         ]);
-        return /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", {
+        return /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("span", {
             className: rippleClassName,
             style: rippleStyles,
-            children: /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("span", {
+            children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("span", {
                 className: childClassName
             })
         });
@@ -4244,13 +4398,13 @@ var agent = function() {
     function applyStyles2(_ref) {
         var state = _ref.state;
         Object.keys(state.elements).forEach(function(name) {
-            var style3 = state.styles[name] || {};
+            var style4 = state.styles[name] || {};
             var attributes = state.attributes[name] || {};
             var element = state.elements[name];
             if (!isHTMLElement(element) || !getNodeName(element)) {
                 return;
             }
-            Object.assign(element.style, style3);
+            Object.assign(element.style, style4);
             Object.keys(attributes).forEach(function(name2) {
                 var value = attributes[name2];
                 if (value === false) {
@@ -4285,14 +4439,14 @@ var agent = function() {
                 var element = state.elements[name];
                 var attributes = state.attributes[name] || {};
                 var styleProperties = Object.keys(state.styles.hasOwnProperty(name) ? state.styles[name] : initialStyles[name]);
-                var style3 = styleProperties.reduce(function(style4, property) {
-                    style4[property] = "";
-                    return style4;
+                var style4 = styleProperties.reduce(function(style5, property) {
+                    style5[property] = "";
+                    return style5;
                 }, {});
                 if (!isHTMLElement(element) || !getNodeName(element)) {
                     return;
                 }
-                Object.assign(element.style, style3);
+                Object.assign(element.style, style4);
                 Object.keys(attributes).forEach(function(attribute) {
                     element.removeAttribute(attribute);
                 });
@@ -5746,16 +5900,16 @@ var agent = function() {
     };
     var FocusTrap = function FocusTrap(props) {
         var children = props.children, _props_disableAutoFocus = props.disableAutoFocus, disableAutoFocus = _props_disableAutoFocus === void 0 ? false : _props_disableAutoFocus, _props_disableEnforceFocus = props.disableEnforceFocus, disableEnforceFocus = _props_disableEnforceFocus === void 0 ? false : _props_disableEnforceFocus, _props_disableRestoreFocus = props.disableRestoreFocus, disableRestoreFocus = _props_disableRestoreFocus === void 0 ? false : _props_disableRestoreFocus, _props_getTabbable = props.getTabbable, getTabbable = _props_getTabbable === void 0 ? defaultGetTabbable : _props_getTabbable, _props_isEnabled = props.isEnabled, isEnabled = _props_isEnabled === void 0 ? defaultIsEnabled : _props_isEnabled, open = props.open;
-        var ignoreNextEnforceFocus = React46.useRef(false);
-        var sentinelStart = React46.useRef(null);
-        var sentinelEnd = React46.useRef(null);
-        var nodeToRestore = React46.useRef(null);
-        var reactFocusEventTarget = React46.useRef(null);
-        var activated = React46.useRef(false);
-        var rootRef = React46.useRef(null);
+        var ignoreNextEnforceFocus = React47.useRef(false);
+        var sentinelStart = React47.useRef(null);
+        var sentinelEnd = React47.useRef(null);
+        var nodeToRestore = React47.useRef(null);
+        var reactFocusEventTarget = React47.useRef(null);
+        var activated = React47.useRef(false);
+        var rootRef = React47.useRef(null);
         var handleRef = useForkRef(getReactElementRef(children), rootRef);
-        var lastKeydown = React46.useRef(null);
-        React46.useEffect(function() {
+        var lastKeydown = React47.useRef(null);
+        React47.useEffect(function() {
             if (!open || !rootRef.current) {
                 return;
             }
@@ -5764,7 +5918,7 @@ var agent = function() {
             disableAutoFocus,
             open
         ]);
-        React46.useEffect(function() {
+        React47.useEffect(function() {
             if (!open || !rootRef.current) {
                 return;
             }
@@ -5795,7 +5949,7 @@ var agent = function() {
         }, [
             open
         ]);
-        React46.useEffect(function() {
+        React47.useEffect(function() {
             if (!open || !rootRef.current) {
                 return;
             }
@@ -5892,19 +6046,19 @@ var agent = function() {
             }
             activated.current = true;
         };
-        return /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)(React46.Fragment, {
+        return /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)(React47.Fragment, {
             children: [
-                /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", {
+                /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("div", {
                     tabIndex: open ? 0 : -1,
                     onFocus: handleFocusSentinel,
                     ref: sentinelStart,
                     "data-testid": "sentinelStart"
                 }),
-                /* @__PURE__ */ React46.cloneElement(children, {
+                /* @__PURE__ */ React47.cloneElement(children, {
                     ref: handleRef,
                     onFocus: onFocus
                 }),
-                /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", {
+                /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("div", {
                     tabIndex: open ? 0 : -1,
                     onFocus: handleFocusSentinel,
                     ref: sentinelEnd,
@@ -5921,11 +6075,11 @@ var agent = function() {
     };
     var useModal = function useModal(parameters) {
         var container2 = parameters.container, _parameters_disableEscapeKeyDown = parameters.disableEscapeKeyDown, disableEscapeKeyDown = _parameters_disableEscapeKeyDown === void 0 ? false : _parameters_disableEscapeKeyDown, _parameters_disableScrollLock = parameters.disableScrollLock, disableScrollLock = _parameters_disableScrollLock === void 0 ? false : _parameters_disableScrollLock, _parameters_closeAfterTransition = parameters.closeAfterTransition, closeAfterTransition = _parameters_closeAfterTransition === void 0 ? false : _parameters_closeAfterTransition, onTransitionEnter = parameters.onTransitionEnter, onTransitionExited = parameters.onTransitionExited, children = parameters.children, onClose = parameters.onClose, open = parameters.open, rootRef = parameters.rootRef;
-        var modal = React47.useRef({});
-        var mountNodeRef = React47.useRef(null);
-        var modalRef = React47.useRef(null);
+        var modal = React48.useRef({});
+        var mountNodeRef = React48.useRef(null);
+        var modalRef = React48.useRef(null);
         var handleRef = useForkRef(modalRef, rootRef);
-        var _React47_useState = _sliced_to_array(React47.useState(!open), 2), exited = _React47_useState[0], setExited = _React47_useState[1];
+        var _React48_useState = _sliced_to_array(React48.useState(!open), 2), exited = _React48_useState[0], setExited = _React48_useState[1];
         var hasTransition = getHasTransition(children);
         var ariaHiddenProp = true;
         if (parameters["aria-hidden"] === "false" || parameters["aria-hidden"] === false) {
@@ -5968,19 +6122,19 @@ var agent = function() {
                 ariaHidden(modalRef.current, ariaHiddenProp);
             }
         });
-        var handleClose = React47.useCallback(function() {
+        var handleClose = React48.useCallback(function() {
             manager.remove(getModal(), ariaHiddenProp);
         }, [
             ariaHiddenProp
         ]);
-        React47.useEffect(function() {
+        React48.useEffect(function() {
             return function() {
                 handleClose();
             };
         }, [
             handleClose
         ]);
-        React47.useEffect(function() {
+        React48.useEffect(function() {
             if (open) {
                 handleOpen();
             } else if (!hasTransition || !closeAfterTransition) {
@@ -6104,7 +6258,7 @@ var agent = function() {
     };
     var NoSsr = function NoSsr(props) {
         var children = props.children, _props_defer = props.defer, defer = _props_defer === void 0 ? false : _props_defer, _props_fallback = props.fallback, fallback = _props_fallback === void 0 ? null : _props_fallback;
-        var _React54_useState = _sliced_to_array(React54.useState(false), 2), mountedState = _React54_useState[0], setMountedState = _React54_useState[1];
+        var _React55_useState = _sliced_to_array(React55.useState(false), 2), mountedState = _React55_useState[0], setMountedState = _React55_useState[1];
         useEnhancedEffect_default(function() {
             if (!defer) {
                 setMountedState(true);
@@ -6112,7 +6266,7 @@ var agent = function() {
         }, [
             defer
         ]);
-        React54.useEffect(function() {
+        React55.useEffect(function() {
             if (defer) {
                 setMountedState(true);
             }
@@ -7065,7 +7219,7 @@ var agent = function() {
         });
     };
     var makeContext = function makeContext(target, init) {
-        Object.assign(target, React66.createContext(init));
+        Object.assign(target, React67.createContext(init));
         target.Provider._context = target;
         target.Consumer._context = target;
         return target;
@@ -7359,7 +7513,7 @@ var agent = function() {
             return false;
         }
         var isFilterElement = instance2.nodeName === "filter" || instance2.parentNode && instance2.parentNode.nodeName === "filter";
-        var className = props.className, style3 = props.style, children = props.children, scrollTop = props.scrollTop, scrollLeft = props.scrollLeft, viewBox = props.viewBox, attributes = _object_without_properties(props, [
+        var className = props.className, style4 = props.style, children = props.children, scrollTop = props.scrollTop, scrollLeft = props.scrollLeft, viewBox = props.viewBox, attributes = _object_without_properties(props, [
             "className",
             "style",
             "children",
@@ -7377,9 +7531,9 @@ var agent = function() {
         if (children !== void 0) {
             instance2.textContent = children;
         }
-        for(var name in style3){
-            if (style3.hasOwnProperty(name)) {
-                var value = dangerousStyleValue(name, style3[name]);
+        for(var name in style4){
+            if (style4.hasOwnProperty(name)) {
+                var value = dangerousStyleValue(name, style4[name]);
                 if (isCustomPropRE.test(name)) {
                     instance2.style.setProperty(name, value);
                 } else {
@@ -9169,7 +9323,7 @@ var agent = function() {
     };
     var useTicks = function useTicks(options) {
         var scale = options.scale, tickNumber = options.tickNumber, valueFormatter = options.valueFormatter, tickInterval = options.tickInterval, _options_tickPlacement = options.tickPlacement, tickPlacement = _options_tickPlacement === void 0 ? "extremities" : _options_tickPlacement, _options_tickLabelPlacement = options.tickLabelPlacement, tickLabelPlacement = _options_tickLabelPlacement === void 0 ? "middle" : _options_tickLabelPlacement;
-        return React67.useMemo(function() {
+        return React68.useMemo(function() {
             if (isBandScale(scale)) {
                 var domain2 = scale.domain();
                 if (scale.bandwidth() > 0) {
@@ -9398,9 +9552,9 @@ var agent = function() {
         };
     };
     var useGlobalId2 = function useGlobalId2(idOverride) {
-        var _React68_useState = _sliced_to_array(React68.useState(idOverride), 2), defaultId = _React68_useState[0], setDefaultId = _React68_useState[1];
+        var _React69_useState = _sliced_to_array(React69.useState(idOverride), 2), defaultId = _React69_useState[0], setDefaultId = _React69_useState[1];
         var id = idOverride || defaultId;
-        React68.useEffect(function() {
+        React69.useEffect(function() {
             if (defaultId == null) {
                 globalId2 += 1;
                 setDefaultId("mui-".concat(globalId2));
@@ -9421,7 +9575,7 @@ var agent = function() {
         var width2 = props.width, height2 = props.height, margin2 = props.margin, svgRef = props.svgRef, children = props.children;
         var drawingArea = useChartDimensions_default(width2, height2, margin2);
         var chartId = useId2();
-        var isPointInside = React70.useCallback(function(param, options) {
+        var isPointInside = React71.useCallback(function(param, options) {
             var x = param.x, y = param.y;
             if ((options === null || options === void 0 ? void 0 : options.targetElement) && (options === null || options === void 0 ? void 0 : options.targetElement.closest("[data-drawing-container]"))) {
                 return true;
@@ -9438,7 +9592,7 @@ var agent = function() {
         }, [
             drawingArea
         ]);
-        var value = React70.useMemo(function() {
+        var value = React71.useMemo(function() {
             return _extends1({
                 chartId: chartId !== null && chartId !== void 0 ? chartId : ""
             }, drawingArea, {
@@ -9449,7 +9603,7 @@ var agent = function() {
             drawingArea,
             isPointInside
         ]);
-        var refValue = React70.useMemo(function() {
+        var refValue = React71.useMemo(function() {
             return {
                 isInitialized: true,
                 data: svgRef
@@ -9457,9 +9611,9 @@ var agent = function() {
         }, [
             svgRef
         ]);
-        return /* @__PURE__ */ (0, import_jsx_runtime43.jsx)(SvgContext.Provider, {
+        return /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(SvgContext.Provider, {
             value: refValue,
-            children: /* @__PURE__ */ (0, import_jsx_runtime43.jsx)(DrawingContext.Provider, {
+            children: /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(DrawingContext.Provider, {
                 value: value,
                 children: children
             })
@@ -9467,8 +9621,8 @@ var agent = function() {
     };
     var useDrawingArea = // node_modules/@mui/x-charts/hooks/useDrawingArea.js
     function useDrawingArea() {
-        var _React71_useContext = React71.useContext(DrawingContext), left2 = _React71_useContext.left, top2 = _React71_useContext.top, width2 = _React71_useContext.width, height2 = _React71_useContext.height, bottom2 = _React71_useContext.bottom, right2 = _React71_useContext.right, isPointInside = _React71_useContext.isPointInside;
-        return React71.useMemo(function() {
+        var _React72_useContext = React72.useContext(DrawingContext), left2 = _React72_useContext.left, top2 = _React72_useContext.top, width2 = _React72_useContext.width, height2 = _React72_useContext.height, bottom2 = _React72_useContext.bottom, right2 = _React72_useContext.right, isPointInside = _React72_useContext.isPointInside;
+        return React72.useMemo(function() {
             return {
                 left: left2,
                 top: top2,
@@ -9813,7 +9967,7 @@ var agent = function() {
     };
     var PluginProvider = function PluginProvider(props) {
         var children = props.children, plugins = props.plugins;
-        var formattedSeries = React74.useMemo(function() {
+        var formattedSeries = React75.useMemo(function() {
             return {
                 isInitialized: true,
                 data: mergePlugins(plugins)
@@ -9821,13 +9975,13 @@ var agent = function() {
         }, [
             plugins
         ]);
-        return /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(PluginContext.Provider, {
+        return /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(PluginContext.Provider, {
             value: formattedSeries,
             children: children
         });
     };
     var useColorProcessor = function useColorProcessor(seriesType) {
-        var _React75_useContext = React75.useContext(PluginContext), isInitialized = _React75_useContext.isInitialized, data = _React75_useContext.data;
+        var _React76_useContext = React76.useContext(PluginContext), isInitialized = _React76_useContext.isInitialized, data = _React76_useContext.data;
         if (!isInitialized) {
             throw new Error([
                 "MUI X: Could not find the plugin context.",
@@ -9840,7 +9994,7 @@ var agent = function() {
         return data.colorProcessors[seriesType];
     };
     var useSeriesFormatter = function useSeriesFormatter(seriesType) {
-        var _React76_useContext = React76.useContext(PluginContext), isInitialized = _React76_useContext.isInitialized, data = _React76_useContext.data;
+        var _React77_useContext = React77.useContext(PluginContext), isInitialized = _React77_useContext.isInitialized, data = _React77_useContext.data;
         if (!isInitialized) {
             throw new Error([
                 "MUI X: Could not find the plugin context.",
@@ -9853,7 +10007,7 @@ var agent = function() {
         return data.seriesFormatters[seriesType];
     };
     var useXExtremumGetter = function useXExtremumGetter(seriesType) {
-        var _React77_useContext = React77.useContext(PluginContext), isInitialized = _React77_useContext.isInitialized, data = _React77_useContext.data;
+        var _React78_useContext = React78.useContext(PluginContext), isInitialized = _React78_useContext.isInitialized, data = _React78_useContext.data;
         if (!isInitialized) {
             throw new Error([
                 "MUI X: Could not find the plugin context.",
@@ -9866,7 +10020,7 @@ var agent = function() {
         return data.xExtremumGetters[seriesType];
     };
     var useYExtremumGetter = function useYExtremumGetter(seriesType) {
-        var _React78_useContext = React78.useContext(PluginContext), isInitialized = _React78_useContext.isInitialized, data = _React78_useContext.data;
+        var _React79_useContext = React79.useContext(PluginContext), isInitialized = _React79_useContext.isInitialized, data = _React79_useContext.data;
         if (!isInitialized) {
             throw new Error([
                 "MUI X: Could not find the plugin context.",
@@ -9882,7 +10036,7 @@ var agent = function() {
         var series = props.series, dataset = props.dataset, tmp = props.colors, colors3 = tmp === void 0 ? blueberryTwilightPalette : tmp, children = props.children;
         var seriesFormatters = useSeriesFormatter();
         var theme = useTheme4();
-        var formattedSeries = React79.useMemo(function() {
+        var formattedSeries = React80.useMemo(function() {
             return {
                 isInitialized: true,
                 data: preprocessSeries({
@@ -9899,14 +10053,14 @@ var agent = function() {
             seriesFormatters,
             dataset
         ]);
-        return /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(SeriesContext.Provider, {
+        return /* @__PURE__ */ (0, import_jsx_runtime46.jsx)(SeriesContext.Provider, {
             value: formattedSeries,
             children: children
         });
     };
     var useSeries = // node_modules/@mui/x-charts/hooks/useSeries.js
     function useSeries() {
-        var _React80_useContext = React80.useContext(SeriesContext), isInitialized = _React80_useContext.isInitialized, data = _React80_useContext.data;
+        var _React81_useContext = React81.useContext(SeriesContext), isInitialized = _React81_useContext.isInitialized, data = _React81_useContext.data;
         if (!isInitialized) {
             throw new Error([
                 "MUI X: Could not find the series ref context.",
@@ -9917,7 +10071,7 @@ var agent = function() {
     };
     var useBarSeries = function useBarSeries() {
         var series = useSeries();
-        return React80.useMemo(function() {
+        return React81.useMemo(function() {
             return series.bar;
         }, [
             series.bar
@@ -9929,7 +10083,7 @@ var agent = function() {
         var drawingArea = useDrawingArea();
         var xExtremumGetters = useXExtremumGetter();
         var yExtremumGetters = useYExtremumGetter();
-        var xValues = React82.useMemo(function() {
+        var xValues = React83.useMemo(function() {
             return computeAxisValue({
                 drawingArea: drawingArea,
                 formattedSeries: formattedSeries,
@@ -9943,7 +10097,7 @@ var agent = function() {
             xAxis,
             xExtremumGetters
         ]);
-        var yValues = React82.useMemo(function() {
+        var yValues = React83.useMemo(function() {
             return computeAxisValue({
                 drawingArea: drawingArea,
                 formattedSeries: formattedSeries,
@@ -9957,7 +10111,7 @@ var agent = function() {
             yAxis,
             yExtremumGetters
         ]);
-        var value = React82.useMemo(function() {
+        var value = React83.useMemo(function() {
             return {
                 isInitialized: true,
                 data: {
@@ -9971,7 +10125,7 @@ var agent = function() {
             xValues,
             yValues
         ]);
-        return /* @__PURE__ */ (0, import_jsx_runtime46.jsx)(CartesianContext.Provider, {
+        return /* @__PURE__ */ (0, import_jsx_runtime47.jsx)(CartesianContext.Provider, {
             value: value,
             children: children
         });
@@ -10002,8 +10156,8 @@ var agent = function() {
         for(var _len = arguments.length, refs = new Array(_len), _key = 0; _key < _len; _key++){
             refs[_key] = arguments[_key];
         }
-        var cleanupRef = React84.useRef(void 0);
-        var refEffect = React84.useCallback(function(instance2) {
+        var cleanupRef = React85.useRef(void 0);
+        var refEffect = React85.useCallback(function(instance2) {
             var cleanups = refs.map(function(ref) {
                 if (ref == null) {
                     return null;
@@ -10026,7 +10180,7 @@ var agent = function() {
                 });
             };
         }, refs);
-        return React84.useMemo(function() {
+        return React85.useMemo(function() {
             if (refs.every(function(ref) {
                 return ref == null;
             })) {
@@ -10161,33 +10315,33 @@ var agent = function() {
     };
     var InteractionProvider = function InteractionProvider(props) {
         var children = props.children;
-        var _React85_useReducer = _sliced_to_array(React85.useReducer(dataReducer, {
+        var _React86_useReducer = _sliced_to_array(React86.useReducer(dataReducer, {
             item: null,
             axis: {
                 x: null,
                 y: null
             },
             useVoronoiInteraction: false
-        }), 2), data = _React85_useReducer[0], dispatch = _React85_useReducer[1];
-        var value = React85.useMemo(function() {
+        }), 2), data = _React86_useReducer[0], dispatch = _React86_useReducer[1];
+        var value = React86.useMemo(function() {
             return _extends1({}, data, {
                 dispatch: dispatch
             });
         }, [
             data
         ]);
-        return /* @__PURE__ */ (0, import_jsx_runtime47.jsx)(InteractionContext.Provider, {
+        return /* @__PURE__ */ (0, import_jsx_runtime48.jsx)(InteractionContext.Provider, {
             value: value,
             children: children
         });
     };
     var useControlled = function useControlled(param) {
         var controlled = param.controlled, defaultProp = param.default, name = param.name, _param_state = param.state, state = _param_state === void 0 ? "value" : _param_state;
-        var _React86_useRef = React86.useRef(controlled !== void 0), isControlled = _React86_useRef.current;
-        var _React86_useState = _sliced_to_array(React86.useState(defaultProp), 2), valueState = _React86_useState[0], setValue = _React86_useState[1];
+        var _React87_useRef = React87.useRef(controlled !== void 0), isControlled = _React87_useRef.current;
+        var _React87_useState = _sliced_to_array(React87.useState(defaultProp), 2), valueState = _React87_useState[0], setValue = _React87_useState[1];
         var value = isControlled ? controlled : valueState;
         if (false) {
-            React86.useEffect(function() {
+            React87.useEffect(function() {
                 if (isControlled !== (controlled !== void 0)) {
                     console.error([
                         "MUI: A component is changing the ".concat(isControlled ? "" : "un", "controlled ").concat(state, " state of ").concat(name, " to be ").concat(isControlled ? "un" : "", "controlled."),
@@ -10202,8 +10356,8 @@ var agent = function() {
                 name,
                 controlled
             ]);
-            var _React86_useRef1 = React86.useRef(defaultProp), defaultValue = _React86_useRef1.current;
-            React86.useEffect(function() {
+            var _React87_useRef1 = React87.useRef(defaultProp), defaultValue = _React87_useRef1.current;
+            React87.useEffect(function() {
                 if (!isControlled && !Object.is(defaultValue, defaultProp)) {
                     console.error([
                         "MUI: A component is changing the default ".concat(state, " state of an uncontrolled ").concat(name, " after being initialized. To suppress this warning opt to use a controlled ").concat(name, ".")
@@ -10213,7 +10367,7 @@ var agent = function() {
                 JSON.stringify(defaultProp)
             ]);
         }
-        var setValueIfUncontrolled = React86.useCallback(function(newValue) {
+        var setValueIfUncontrolled = React87.useCallback(function(newValue) {
             if (!isControlled) {
                 setValue(newValue);
             }
@@ -10232,7 +10386,7 @@ var agent = function() {
             state: "highlightedItem"
         }), 2), highlightedItem = _useControlled[0], setHighlightedItem = _useControlled[1];
         var series = useSeries();
-        var seriesById = React88.useMemo(function() {
+        var seriesById = React89.useMemo(function() {
             var map2 = /* @__PURE__ */ new Map();
             Object.keys(series).forEach(function(seriesType) {
                 var seriesData = series[seriesType];
@@ -10248,7 +10402,7 @@ var agent = function() {
         ]);
         var _seriesById_get;
         var highlightScope = highlightedItem && highlightedItem.seriesId ? (_seriesById_get = seriesById.get(highlightedItem.seriesId)) !== null && _seriesById_get !== void 0 ? _seriesById_get : void 0 : void 0;
-        var providerValue = React88.useMemo(function() {
+        var providerValue = React89.useMemo(function() {
             return {
                 isInitialized: true,
                 data: {
@@ -10272,13 +10426,13 @@ var agent = function() {
             setHighlightedItem,
             onHighlightChange
         ]);
-        return /* @__PURE__ */ (0, import_jsx_runtime48.jsx)(HighlightedContext.Provider, {
+        return /* @__PURE__ */ (0, import_jsx_runtime49.jsx)(HighlightedContext.Provider, {
             value: providerValue,
             children: children
         });
     };
     var useHighlighted = function useHighlighted() {
-        var _React89_useContext = React89.useContext(HighlightedContext), isInitialized = _React89_useContext.isInitialized, data = _React89_useContext.data;
+        var _React90_useContext = React90.useContext(HighlightedContext), isInitialized = _React90_useContext.isInitialized, data = _React90_useContext.data;
         if (!isInitialized) {
             throw new Error([
                 "MUI X: Could not find the highlighted ref context.",
@@ -10305,7 +10459,7 @@ var agent = function() {
     };
     var ZAxisContextProvider = function ZAxisContextProvider(props) {
         var inZAxis = props.zAxis, dataset = props.dataset, children = props.children;
-        var zAxis = React90.useMemo(function() {
+        var zAxis = React91.useMemo(function() {
             return inZAxis === null || inZAxis === void 0 ? void 0 : inZAxis.map(function(axisConfig) {
                 var dataKey = axisConfig.dataKey;
                 if (dataKey === void 0 || axisConfig.data !== void 0) {
@@ -10324,7 +10478,7 @@ var agent = function() {
             inZAxis,
             dataset
         ]);
-        var value = React90.useMemo(function() {
+        var value = React91.useMemo(function() {
             var _zAxis_map;
             var allZAxis = (_zAxis_map = zAxis === null || zAxis === void 0 ? void 0 : zAxis.map(function(axis, index) {
                 return _extends1({
@@ -10352,7 +10506,7 @@ var agent = function() {
         }, [
             zAxis
         ]);
-        return /* @__PURE__ */ (0, import_jsx_runtime49.jsx)(ZAxisContext.Provider, {
+        return /* @__PURE__ */ (0, import_jsx_runtime50.jsx)(ZAxisContext.Provider, {
             value: value,
             children: children
         });
@@ -10361,7 +10515,7 @@ var agent = function() {
         return generateUtilityClass2("MuiBarElement", slot);
     };
     var BarElement = function BarElement(props) {
-        var id = props.id, dataIndex = props.dataIndex, innerClasses = props.classes, color3 = props.color, slots = props.slots, slotProps = props.slotProps, style3 = props.style, onClick = props.onClick, other = _objectWithoutPropertiesLoose(props, _excluded2);
+        var id = props.id, dataIndex = props.dataIndex, innerClasses = props.classes, color3 = props.color, slots = props.slots, slotProps = props.slotProps, style4 = props.style, onClick = props.onClick, other = _objectWithoutPropertiesLoose(props, _excluded2);
         var getInteractionItemProps = useInteractionItemProps();
         var _useItemHighlighted = useItemHighlighted({
             seriesId: id,
@@ -10387,18 +10541,18 @@ var agent = function() {
                 seriesId: id,
                 dataIndex: dataIndex
             }), {
-                style: style3,
+                style: style4,
                 onClick: onClick,
                 cursor: onClick ? "pointer" : "unset"
             }),
             className: classes.root,
             ownerState: ownerState
         });
-        return /* @__PURE__ */ (0, import_jsx_runtime50.jsx)(Bar, _extends1({}, barProps));
+        return /* @__PURE__ */ (0, import_jsx_runtime51.jsx)(Bar, _extends1({}, barProps));
     };
     var useChartId = function useChartId() {
-        var chartId = React93.useContext(DrawingContext).chartId;
-        return React93.useMemo(function() {
+        var chartId = React94.useContext(DrawingContext).chartId;
+        return React94.useMemo(function() {
             return chartId;
         }, [
             chartId
@@ -10417,7 +10571,7 @@ var agent = function() {
         };
     };
     var useSvgRef = function useSvgRef() {
-        var _React94_useContext = React94.useContext(SvgContext), isInitialized = _React94_useContext.isInitialized, data = _React94_useContext.data;
+        var _React95_useContext = React95.useContext(SvgContext), isInitialized = _React95_useContext.isInitialized, data = _React95_useContext.data;
         if (!isInitialized) {
             throw new Error([
                 "MUI X: Could not find the svg ref context.",
@@ -10429,7 +10583,7 @@ var agent = function() {
     var BarClipRect = function BarClipRect(props) {
         var _props_style, _props_style1;
         var radiusData = props.ownerState;
-        return /* @__PURE__ */ (0, import_jsx_runtime51.jsx)(animated.rect, {
+        return /* @__PURE__ */ (0, import_jsx_runtime52.jsx)(animated.rect, {
             style: _extends1({}, props.style, {
                 clipPath: (props.ownerState.layout === "vertical" ? (_props_style = props.style) === null || _props_style === void 0 ? void 0 : _props_style.height : (_props_style1 = props.style) === null || _props_style1 === void 0 ? void 0 : _props_style1.width).to(function(value) {
                     return buildInset({
@@ -10443,15 +10597,15 @@ var agent = function() {
         });
     };
     var BarClipPath = function BarClipPath(props) {
-        var style3 = props.style, maskId = props.maskId, rest = _objectWithoutPropertiesLoose(props, _excluded3);
+        var style4 = props.style, maskId = props.maskId, rest = _objectWithoutPropertiesLoose(props, _excluded3);
         if (!props.borderRadius || props.borderRadius <= 0) {
             return null;
         }
-        return /* @__PURE__ */ (0, import_jsx_runtime51.jsx)("clipPath", {
+        return /* @__PURE__ */ (0, import_jsx_runtime52.jsx)("clipPath", {
             id: maskId,
-            children: /* @__PURE__ */ (0, import_jsx_runtime51.jsx)(BarClipRect, {
+            children: /* @__PURE__ */ (0, import_jsx_runtime52.jsx)(BarClipRect, {
                 ownerState: rest,
-                style: style3
+                style: style4
             })
         });
     };
@@ -10465,10 +10619,10 @@ var agent = function() {
             name: "MuiBarLabel"
         });
         var otherProps = _objectWithoutPropertiesLoose(props, _excluded4);
-        return /* @__PURE__ */ (0, import_jsx_runtime52.jsx)(BarLabelComponent, _extends1({}, otherProps));
+        return /* @__PURE__ */ (0, import_jsx_runtime53.jsx)(BarLabelComponent, _extends1({}, otherProps));
     };
     var BarLabelItem = function BarLabelItem(props) {
-        var seriesId = props.seriesId, innerClasses = props.classes, color3 = props.color, style3 = props.style, dataIndex = props.dataIndex, barLabel = props.barLabel, slots = props.slots, slotProps = props.slotProps, height2 = props.height, width2 = props.width, value = props.value, other = _objectWithoutPropertiesLoose(props, _excluded5);
+        var seriesId = props.seriesId, innerClasses = props.classes, color3 = props.color, style4 = props.style, dataIndex = props.dataIndex, barLabel = props.barLabel, slots = props.slots, slotProps = props.slotProps, height2 = props.height, width2 = props.width, value = props.value, other = _objectWithoutPropertiesLoose(props, _excluded5);
         var _useItemHighlighted = useItemHighlighted({
             seriesId: seriesId,
             dataIndex: dataIndex
@@ -10488,7 +10642,7 @@ var agent = function() {
             elementType: Component,
             externalSlotProps: slotProps === null || slotProps === void 0 ? void 0 : slotProps.barLabel,
             additionalProps: _extends1({}, other, {
-                style: style3,
+                style: style4,
                 className: classes.root
             }),
             ownerState: ownerState
@@ -10507,7 +10661,7 @@ var agent = function() {
         if (!formattedLabelText) {
             return null;
         }
-        return /* @__PURE__ */ (0, import_jsx_runtime53.jsx)(Component, _extends1({}, barLabelProps, barLabelOwnerState, {
+        return /* @__PURE__ */ (0, import_jsx_runtime54.jsx)(Component, _extends1({}, barLabelProps, barLabelOwnerState, {
             children: formattedLabelText
         }));
     };
@@ -10523,10 +10677,10 @@ var agent = function() {
             update: enterStyle,
             immediate: skipAnimation2
         });
-        return /* @__PURE__ */ (0, import_jsx_runtime54.jsx)(React98.Fragment, {
-            children: barLabelTransition(function(style3, param) {
+        return /* @__PURE__ */ (0, import_jsx_runtime55.jsx)(React99.Fragment, {
+            children: barLabelTransition(function(style4, param) {
                 var seriesId = param.seriesId, dataIndex = param.dataIndex, color3 = param.color, value = param.value, width2 = param.width, height2 = param.height;
-                return /* @__PURE__ */ (0, import_jsx_runtime54.jsx)(BarLabelItem, _extends1({
+                return /* @__PURE__ */ (0, import_jsx_runtime55.jsx)(BarLabelItem, _extends1({
                     seriesId: seriesId,
                     dataIndex: dataIndex,
                     value: value,
@@ -10534,7 +10688,7 @@ var agent = function() {
                     width: width2,
                     height: height2
                 }, other, {
-                    style: style3
+                    style: style4
                 }));
             })
         });
@@ -10562,7 +10716,7 @@ var agent = function() {
         var _window;
         var children = props.children, inSkipAnimation = props.skipAnimation;
         var isAnimationDisabledEnvironment = typeof window === "undefined" || !((_window = window) === null || _window === void 0 ? void 0 : _window.matchMedia);
-        var _React100_useState = _sliced_to_array(React100.useState(isAnimationDisabledEnvironment || void 0), 2), skipAnimation2 = _React100_useState[0], setSkipAnimation = _React100_useState[1];
+        var _React101_useState = _sliced_to_array(React101.useState(isAnimationDisabledEnvironment || void 0), 2), skipAnimation2 = _React101_useState[0], setSkipAnimation = _React101_useState[1];
         useIsomorphicLayoutEffect(function() {
             var _mql_addEventListener;
             if (isAnimationDisabledEnvironment) {
@@ -10583,7 +10737,7 @@ var agent = function() {
                 mql === null || mql === void 0 ? void 0 : (_mql_removeEventListener = mql.removeEventListener) === null || _mql_removeEventListener === void 0 ? void 0 : _mql_removeEventListener.call(mql, "change", handleMediaChange);
             };
         }, []);
-        var value = React100.useMemo(function() {
+        var value = React101.useMemo(function() {
             return {
                 isInitialized: true,
                 data: {
@@ -10596,13 +10750,13 @@ var agent = function() {
             skipAnimation2,
             inSkipAnimation
         ]);
-        return /* @__PURE__ */ (0, import_jsx_runtime55.jsx)(AnimationContext.Provider, {
+        return /* @__PURE__ */ (0, import_jsx_runtime56.jsx)(AnimationContext.Provider, {
             value: value,
             children: children
         });
     };
     var useSkipAnimation = function useSkipAnimation(skipAnimation2) {
-        var _React101_useContext = React101.useContext(AnimationContext), isInitialized = _React101_useContext.isInitialized, data = _React101_useContext.data;
+        var _React102_useContext = React102.useContext(AnimationContext), isInitialized = _React102_useContext.isInitialized, data = _React102_useContext.data;
         if (!isInitialized) {
             throw new Error([
                 "MUI X: Could not find the animation ref context.",
@@ -10651,22 +10805,22 @@ var agent = function() {
             update: enterStyle2,
             immediate: skipAnimation2
         });
-        return /* @__PURE__ */ (0, import_jsx_runtime56.jsxs)(React102.Fragment, {
+        return /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(React103.Fragment, {
             children: [
-                !withoutBorderRadius && maskTransition(function(style3, param) {
+                !withoutBorderRadius && maskTransition(function(style4, param) {
                     var id = param.id, hasPositive = param.hasPositive, hasNegative = param.hasNegative, layout = param.layout;
-                    return /* @__PURE__ */ (0, import_jsx_runtime56.jsx)(BarClipPath, {
+                    return /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(BarClipPath, {
                         maskId: id,
                         borderRadius: borderRadius2,
                         hasNegative: hasNegative,
                         hasPositive: hasPositive,
                         layout: layout,
-                        style: style3
+                        style: style4
                     });
                 }),
-                transition(function(style3, param) {
+                transition(function(style4, param) {
                     var seriesId = param.seriesId, dataIndex = param.dataIndex, color3 = param.color, maskId = param.maskId;
-                    var barElement = /* @__PURE__ */ (0, import_jsx_runtime56.jsx)(BarElement, _extends1({
+                    var barElement = /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(BarElement, _extends1({
                         id: seriesId,
                         dataIndex: dataIndex,
                         color: color3
@@ -10678,17 +10832,17 @@ var agent = function() {
                                 dataIndex: dataIndex
                             });
                         },
-                        style: style3
+                        style: style4
                     }));
                     if (withoutBorderRadius) {
                         return barElement;
                     }
-                    return /* @__PURE__ */ (0, import_jsx_runtime56.jsx)("g", {
+                    return /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("g", {
                         clipPath: "url(#".concat(maskId, ")"),
                         children: barElement
                     });
                 }),
-                barLabel && /* @__PURE__ */ (0, import_jsx_runtime56.jsx)(BarLabelPlot, _extends1({
+                barLabel && /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(BarLabelPlot, _extends1({
                     bars: completedData,
                     skipAnimation: skipAnimation2,
                     barLabel: barLabel
@@ -10713,7 +10867,7 @@ var agent = function() {
             return null;
         }
         var _obj;
-        return /* @__PURE__ */ (0, import_jsx_runtime58.jsx)("linearGradient", (_obj = {
+        return /* @__PURE__ */ (0, import_jsx_runtime59.jsx)("linearGradient", (_obj = {
             id: gradientId,
             x1: "0",
             x2: "0",
@@ -10725,14 +10879,14 @@ var agent = function() {
                 return null;
             }
             var offset2 = isReversed ? 1 - x / size : x / size;
-            return /* @__PURE__ */ (0, import_jsx_runtime58.jsxs)(React105.Fragment, {
+            return /* @__PURE__ */ (0, import_jsx_runtime59.jsxs)(React106.Fragment, {
                 children: [
-                    /* @__PURE__ */ (0, import_jsx_runtime58.jsx)("stop", {
+                    /* @__PURE__ */ (0, import_jsx_runtime59.jsx)("stop", {
                         offset: offset2,
                         stopColor: colorMap.colors[index],
                         stopOpacity: 1
                     }),
-                    /* @__PURE__ */ (0, import_jsx_runtime58.jsx)("stop", {
+                    /* @__PURE__ */ (0, import_jsx_runtime59.jsx)("stop", {
                         offset: offset2,
                         stopColor: colorMap.colors[index + 1],
                         stopOpacity: 1
@@ -10759,7 +10913,7 @@ var agent = function() {
         var numberOfPoints = Math.round(((_Math = Math).max.apply(_Math, _to_consumable_array(extremPositions)) - (_Math1 = Math).min.apply(_Math1, _to_consumable_array(extremPositions))) / PX_PRECISION);
         var keyPrefix = "".concat(extremValues[0], "-").concat(extremValues[1], "-");
         var _obj;
-        return /* @__PURE__ */ (0, import_jsx_runtime59.jsx)("linearGradient", (_obj = {
+        return /* @__PURE__ */ (0, import_jsx_runtime60.jsx)("linearGradient", (_obj = {
             id: gradientId,
             x1: "0",
             x2: "0",
@@ -10781,7 +10935,7 @@ var agent = function() {
             if (color3 === null) {
                 return null;
             }
-            return /* @__PURE__ */ (0, import_jsx_runtime59.jsx)("stop", {
+            return /* @__PURE__ */ (0, import_jsx_runtime60.jsx)("stop", {
                 offset: offset2,
                 stopColor: color3,
                 stopOpacity: 1
@@ -10789,8 +10943,8 @@ var agent = function() {
         })), _obj));
     };
     var useChartGradient = function useChartGradient() {
-        var chartId = React107.useContext(DrawingContext).chartId;
-        return React107.useCallback(function(axisId, direction) {
+        var chartId = React108.useContext(DrawingContext).chartId;
+        return React108.useCallback(function(axisId, direction) {
             return "".concat(chartId, "-gradient-").concat(direction, "-").concat(axisId);
         }, [
             chartId
@@ -10802,7 +10956,7 @@ var agent = function() {
         var svgWidth = left2 + width2 + right2;
         var getGradientId = useChartGradient();
         var _useCartesianContext = useCartesianContext(), xAxisIds = _useCartesianContext.xAxisIds, xAxis = _useCartesianContext.xAxis, yAxisIds = _useCartesianContext.yAxisIds, yAxis = _useCartesianContext.yAxis;
-        return /* @__PURE__ */ (0, import_jsx_runtime60.jsxs)("defs", {
+        return /* @__PURE__ */ (0, import_jsx_runtime61.jsxs)("defs", {
             children: [
                 yAxisIds.filter(function(axisId) {
                     return yAxis[axisId].colorMap !== void 0;
@@ -10810,7 +10964,7 @@ var agent = function() {
                     var gradientId = getGradientId(axisId, "y");
                     var _yAxis_axisId = yAxis[axisId], colorMap = _yAxis_axisId.colorMap, scale = _yAxis_axisId.scale, colorScale = _yAxis_axisId.colorScale, reverse = _yAxis_axisId.reverse;
                     if ((colorMap === null || colorMap === void 0 ? void 0 : colorMap.type) === "piecewise") {
-                        return /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(ChartsPiecewiseGradient, {
+                        return /* @__PURE__ */ (0, import_jsx_runtime61.jsx)(ChartsPiecewiseGradient, {
                             isReversed: !reverse,
                             scale: scale,
                             colorMap: colorMap,
@@ -10820,7 +10974,7 @@ var agent = function() {
                         }, gradientId);
                     }
                     if ((colorMap === null || colorMap === void 0 ? void 0 : colorMap.type) === "continuous") {
-                        return /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(ChartsContinuousGradient, {
+                        return /* @__PURE__ */ (0, import_jsx_runtime61.jsx)(ChartsContinuousGradient, {
                             isReversed: !reverse,
                             scale: scale,
                             colorScale: colorScale,
@@ -10838,7 +10992,7 @@ var agent = function() {
                     var gradientId = getGradientId(axisId, "x");
                     var _xAxis_axisId = xAxis[axisId], colorMap = _xAxis_axisId.colorMap, scale = _xAxis_axisId.scale, reverse = _xAxis_axisId.reverse, colorScale = _xAxis_axisId.colorScale;
                     if ((colorMap === null || colorMap === void 0 ? void 0 : colorMap.type) === "piecewise") {
-                        return /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(ChartsPiecewiseGradient, {
+                        return /* @__PURE__ */ (0, import_jsx_runtime61.jsx)(ChartsPiecewiseGradient, {
                             isReversed: reverse,
                             scale: scale,
                             colorMap: colorMap,
@@ -10848,7 +11002,7 @@ var agent = function() {
                         }, gradientId);
                     }
                     if ((colorMap === null || colorMap === void 0 ? void 0 : colorMap.type) === "continuous") {
-                        return /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(ChartsContinuousGradient, {
+                        return /* @__PURE__ */ (0, import_jsx_runtime61.jsx)(ChartsContinuousGradient, {
                             isReversed: reverse,
                             scale: scale,
                             colorScale: colorScale,
@@ -10903,11 +11057,11 @@ var agent = function() {
     };
     var getWordsByLines = // node_modules/@mui/x-charts/internals/getWordsByLines.js
     function getWordsByLines(param) {
-        var style3 = param.style, needsComputation = param.needsComputation, text = param.text;
+        var style4 = param.style, needsComputation = param.needsComputation, text = param.text;
         return text.split("\n").map(function(subText) {
             return _extends1({
                 text: subText
-            }, needsComputation ? getStringSize(subText, style3) : {
+            }, needsComputation ? getStringSize(subText, style4) : {
                 width: 0,
                 height: 0
             });
@@ -10915,15 +11069,15 @@ var agent = function() {
     };
     var ChartsText = function ChartsText(props) {
         var x = props.x, y = props.y, styleProps = props.style, text = props.text, textProps = _objectWithoutPropertiesLoose(props, _excluded11);
-        var _ref = styleProps !== null && styleProps !== void 0 ? styleProps : {}, angle = _ref.angle, textAnchor = _ref.textAnchor, dominantBaseline = _ref.dominantBaseline, style3 = _objectWithoutPropertiesLoose(_ref, _excluded23);
-        var wordsByLines = React114.useMemo(function() {
+        var _ref = styleProps !== null && styleProps !== void 0 ? styleProps : {}, angle = _ref.angle, textAnchor = _ref.textAnchor, dominantBaseline = _ref.dominantBaseline, style4 = _objectWithoutPropertiesLoose(_ref, _excluded23);
+        var wordsByLines = React115.useMemo(function() {
             return getWordsByLines({
-                style: style3,
+                style: style4,
                 needsComputation: text.includes("\n"),
                 text: text
             });
         }, [
-            style3,
+            style4,
             text
         ]);
         var startDy;
@@ -10942,15 +11096,15 @@ var agent = function() {
         if (angle) {
             transforms.push("rotate(".concat(angle, ", ").concat(x, ", ").concat(y, ")"));
         }
-        return /* @__PURE__ */ (0, import_jsx_runtime63.jsx)("text", _extends1({}, textProps, {
+        return /* @__PURE__ */ (0, import_jsx_runtime64.jsx)("text", _extends1({}, textProps, {
             transform: transforms.length > 0 ? transforms.join(" ") : void 0,
             x: x,
             y: y,
             textAnchor: textAnchor,
             dominantBaseline: dominantBaseline,
-            style: style3,
+            style: style4,
             children: wordsByLines.map(function(line2, index) {
-                return /* @__PURE__ */ (0, import_jsx_runtime63.jsx)("tspan", {
+                return /* @__PURE__ */ (0, import_jsx_runtime64.jsx)("tspan", {
                     x: x,
                     dy: "".concat(index === 0 ? startDy : wordsByLines[0].height, "px"),
                     dominantBaseline: dominantBaseline,
@@ -10986,7 +11140,7 @@ var agent = function() {
     };
     var useMounted = function useMounted() {
         var defer = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : false;
-        var _React115_useState = _sliced_to_array(React115.useState(false), 2), mountedState = _React115_useState[0], setMountedState = _React115_useState[1];
+        var _React116_useState = _sliced_to_array(React116.useState(false), 2), mountedState = _React116_useState[0], setMountedState = _React116_useState[1];
         useEnhancedEffect_default2(function() {
             if (!defer) {
                 setMountedState(true);
@@ -10994,7 +11148,7 @@ var agent = function() {
         }, [
             defer
         ]);
-        React115.useEffect(function() {
+        React116.useEffect(function() {
             if (defer) {
                 setMountedState(true);
             }
@@ -11004,7 +11158,7 @@ var agent = function() {
         return mountedState;
     };
     var addLabelDimension = function addLabelDimension(xTicks, param) {
-        var style3 = param.tickLabelStyle, tickLabelInterval = param.tickLabelInterval, reverse = param.reverse, isMounted = param.isMounted;
+        var style4 = param.tickLabelStyle, tickLabelInterval = param.tickLabelInterval, reverse = param.reverse, isMounted = param.isMounted;
         var withDimension = xTicks.map(function(tick) {
             var _Math;
             if (!isMounted || tick.formattedValue === void 0) {
@@ -11014,7 +11168,7 @@ var agent = function() {
                 });
             }
             var tickSizes = getWordsByLines({
-                style: style3,
+                style: style4,
                 needsComputation: true,
                 text: tick.formattedValue
             });
@@ -11037,7 +11191,7 @@ var agent = function() {
         var direction = reverse ? -1 : 1;
         return withDimension.map(function(item, labelIndex) {
             var width2 = item.width, offset2 = item.offset, labelOffset = item.labelOffset, height2 = item.height;
-            var distance = getMinXTranslation(width2, height2, style3 === null || style3 === void 0 ? void 0 : style3.angle);
+            var distance = getMinXTranslation(width2, height2, style4 === null || style4 === void 0 ? void 0 : style4.angle);
             var textPosition = offset2 + labelOffset;
             var gapRatio = 1.2;
             currentTextLimit = textPosition - direction * (gapRatio * distance) / 2;
@@ -11124,12 +11278,12 @@ var agent = function() {
         if (ordinalAxis && domain.length === 0 || !ordinalAxis && domain.some(isInfinity)) {
             return null;
         }
-        return /* @__PURE__ */ (0, import_jsx_runtime64.jsxs)(XAxisRoot, {
+        return /* @__PURE__ */ (0, import_jsx_runtime65.jsxs)(XAxisRoot, {
             transform: "translate(0, ".concat(position2 === "bottom" ? top2 + height2 : top2, ")"),
             className: classes.root,
             sx: sx,
             children: [
-                !disableLine && /* @__PURE__ */ (0, import_jsx_runtime64.jsx)(Line, _extends1({
+                !disableLine && /* @__PURE__ */ (0, import_jsx_runtime65.jsx)(Line, _extends1({
                     x1: left2,
                     x2: left2 + width2,
                     className: classes.line
@@ -11150,15 +11304,15 @@ var agent = function() {
                     }, {
                         direction: "x"
                     });
-                    return /* @__PURE__ */ (0, import_jsx_runtime64.jsxs)("g", {
+                    return /* @__PURE__ */ (0, import_jsx_runtime65.jsxs)("g", {
                         transform: "translate(".concat(offset2, ", 0)"),
                         className: classes.tickContainer,
                         children: [
-                            !disableTicks && showTick && /* @__PURE__ */ (0, import_jsx_runtime64.jsx)(Tick, _extends1({
+                            !disableTicks && showTick && /* @__PURE__ */ (0, import_jsx_runtime65.jsx)(Tick, _extends1({
                                 y2: positionSign * tickSize,
                                 className: classes.tick
                             }, slotProps === null || slotProps === void 0 ? void 0 : slotProps.axisTick)),
-                            formattedValue !== void 0 && !skipLabel && showTickLabel && /* @__PURE__ */ (0, import_jsx_runtime64.jsx)(TickLabel, _extends1({
+                            formattedValue !== void 0 && !skipLabel && showTickLabel && /* @__PURE__ */ (0, import_jsx_runtime65.jsx)(TickLabel, _extends1({
                                 x: xTickLabel,
                                 y: yTickLabel
                             }, axisTickLabelProps, {
@@ -11167,9 +11321,9 @@ var agent = function() {
                         ]
                     }, index);
                 }),
-                label && /* @__PURE__ */ (0, import_jsx_runtime64.jsx)("g", {
+                label && /* @__PURE__ */ (0, import_jsx_runtime65.jsx)("g", {
                     className: classes.label,
-                    children: /* @__PURE__ */ (0, import_jsx_runtime64.jsx)(Label, _extends1({}, labelRefPoint, axisLabelProps, {
+                    children: /* @__PURE__ */ (0, import_jsx_runtime65.jsx)(Label, _extends1({}, labelRefPoint, axisLabelProps, {
                         text: label
                     }))
                 })
@@ -11254,12 +11408,12 @@ var agent = function() {
         if (ordinalAxis && domain.length === 0 || !ordinalAxis && domain.some(isInfinity)) {
             return null;
         }
-        return /* @__PURE__ */ (0, import_jsx_runtime65.jsxs)(YAxisRoot, {
+        return /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)(YAxisRoot, {
             transform: "translate(".concat(position2 === "right" ? left2 + width2 : left2, ", 0)"),
             className: classes.root,
             sx: sx,
             children: [
-                !disableLine && /* @__PURE__ */ (0, import_jsx_runtime65.jsx)(Line, _extends1({
+                !disableLine && /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(Line, _extends1({
                     y1: top2,
                     y2: top2 + height2,
                     className: classes.line
@@ -11278,15 +11432,15 @@ var agent = function() {
                     if (!showLabel) {
                         return null;
                     }
-                    return /* @__PURE__ */ (0, import_jsx_runtime65.jsxs)("g", {
+                    return /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)("g", {
                         transform: "translate(0, ".concat(offset2, ")"),
                         className: classes.tickContainer,
                         children: [
-                            !disableTicks && /* @__PURE__ */ (0, import_jsx_runtime65.jsx)(Tick, _extends1({
+                            !disableTicks && /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(Tick, _extends1({
                                 x2: positionSign * tickSize,
                                 className: classes.tick
                             }, slotProps === null || slotProps === void 0 ? void 0 : slotProps.axisTick)),
-                            formattedValue !== void 0 && !skipLabel && /* @__PURE__ */ (0, import_jsx_runtime65.jsx)(TickLabel, _extends1({
+                            formattedValue !== void 0 && !skipLabel && /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(TickLabel, _extends1({
                                 x: xTickLabel,
                                 y: yTickLabel,
                                 text: formattedValue.toString()
@@ -11294,9 +11448,9 @@ var agent = function() {
                         ]
                     }, index);
                 }),
-                label && /* @__PURE__ */ (0, import_jsx_runtime65.jsx)("g", {
+                label && /* @__PURE__ */ (0, import_jsx_runtime66.jsx)("g", {
                     className: classes.label,
-                    children: /* @__PURE__ */ (0, import_jsx_runtime65.jsx)(Label, _extends1({}, labelRefPoint, axisLabelProps, {
+                    children: /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(Label, _extends1({}, labelRefPoint, axisLabelProps, {
                         text: label
                     }))
                 })
@@ -11346,8 +11500,8 @@ var agent = function() {
     };
     var useMouseTracker = function useMouseTracker() {
         var svgRef = useSvgRef();
-        var _React118_useState = _sliced_to_array(React118.useState(null), 2), mousePosition = _React118_useState[0], setMousePosition = _React118_useState[1];
-        React118.useEffect(function() {
+        var _React119_useState = _sliced_to_array(React119.useState(null), 2), mousePosition = _React119_useState[0], setMousePosition = _React119_useState[1];
+        React119.useEffect(function() {
             var element = svgRef.current;
             if (element === null) {
                 return function() {};
@@ -11415,27 +11569,27 @@ var agent = function() {
         var formattedValue = (_series_valueFormatter = series.valueFormatter) === null || _series_valueFormatter === void 0 ? void 0 : _series_valueFormatter.call(series, value, {
             dataIndex: itemData.dataIndex
         });
-        return /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(ChartsTooltipPaper, {
+        return /* @__PURE__ */ (0, import_jsx_runtime67.jsx)(ChartsTooltipPaper, {
             sx: sx,
             className: classes.paper,
-            children: /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(ChartsTooltipTable, {
+            children: /* @__PURE__ */ (0, import_jsx_runtime67.jsx)(ChartsTooltipTable, {
                 className: classes.table,
-                children: /* @__PURE__ */ (0, import_jsx_runtime66.jsx)("tbody", {
-                    children: /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)(ChartsTooltipRow, {
+                children: /* @__PURE__ */ (0, import_jsx_runtime67.jsx)("tbody", {
+                    children: /* @__PURE__ */ (0, import_jsx_runtime67.jsxs)(ChartsTooltipRow, {
                         className: classes.row,
                         children: [
-                            /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(ChartsTooltipCell, {
+                            /* @__PURE__ */ (0, import_jsx_runtime67.jsx)(ChartsTooltipCell, {
                                 className: clsx_default(classes.markCell, classes.cell),
-                                children: /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(ChartsTooltipMark, {
+                                children: /* @__PURE__ */ (0, import_jsx_runtime67.jsx)(ChartsTooltipMark, {
                                     color: color3,
                                     className: classes.mark
                                 })
                             }),
-                            /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(ChartsTooltipCell, {
+                            /* @__PURE__ */ (0, import_jsx_runtime67.jsx)(ChartsTooltipCell, {
                                 className: clsx_default(classes.labelCell, classes.cell),
                                 children: displayedLabel
                             }),
-                            /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(ChartsTooltipCell, {
+                            /* @__PURE__ */ (0, import_jsx_runtime67.jsx)(ChartsTooltipCell, {
                                 className: clsx_default(classes.valueCell, classes.cell),
                                 children: formattedValue
                             })
@@ -11450,7 +11604,7 @@ var agent = function() {
         var content = props.content, itemData = props.itemData, sx = props.sx, classes = props.classes, contentProps = props.contentProps;
         var series = useSeries()[itemData.type].series[itemData.seriesId];
         var _useCartesianContext = useCartesianContext(), xAxis = _useCartesianContext.xAxis, yAxis = _useCartesianContext.yAxis, xAxisIds = _useCartesianContext.xAxisIds, yAxisIds = _useCartesianContext.yAxisIds;
-        var _React120_useContext = React120.useContext(ZAxisContext), zAxis = _React120_useContext.zAxis, zAxisIds = _React120_useContext.zAxisIds;
+        var _React121_useContext = React121.useContext(ZAxisContext), zAxis = _React121_useContext.zAxis, zAxisIds = _React121_useContext.zAxisIds;
         var colorProcessors = useColorProcessor();
         var _series_xAxisId, _ref;
         var xAxisId = (_ref = (_series_xAxisId = series.xAxisId) !== null && _series_xAxisId !== void 0 ? _series_xAxisId : series.xAxisKey) !== null && _ref !== void 0 ? _ref : xAxisIds[0];
@@ -11475,7 +11629,7 @@ var agent = function() {
             },
             ownerState: {}
         });
-        return /* @__PURE__ */ (0, import_jsx_runtime67.jsx)(Content, _extends1({}, chartTooltipContentProps));
+        return /* @__PURE__ */ (0, import_jsx_runtime68.jsx)(Content, _extends1({}, chartTooltipContentProps));
     };
     var isCartesianSeriesType = // node_modules/@mui/x-charts/internals/isCartesian.js
     function isCartesianSeriesType(seriesType) {
@@ -11493,17 +11647,17 @@ var agent = function() {
         var axisFormatter = (_axis_valueFormatter = axis.valueFormatter) !== null && _axis_valueFormatter !== void 0 ? _axis_valueFormatter : function(v) {
             return axis.scaleType === "utc" ? utcFormatter(v) : v.toLocaleString();
         };
-        return /* @__PURE__ */ (0, import_jsx_runtime68.jsx)(ChartsTooltipPaper, {
+        return /* @__PURE__ */ (0, import_jsx_runtime69.jsx)(ChartsTooltipPaper, {
             sx: sx,
             className: classes.paper,
-            children: /* @__PURE__ */ (0, import_jsx_runtime68.jsxs)(ChartsTooltipTable, {
+            children: /* @__PURE__ */ (0, import_jsx_runtime69.jsxs)(ChartsTooltipTable, {
                 className: classes.table,
                 children: [
-                    axisValue != null && !axis.hideTooltip && /* @__PURE__ */ (0, import_jsx_runtime68.jsx)("thead", {
-                        children: /* @__PURE__ */ (0, import_jsx_runtime68.jsx)(ChartsTooltipRow, {
-                            children: /* @__PURE__ */ (0, import_jsx_runtime68.jsx)(ChartsTooltipCell, {
+                    axisValue != null && !axis.hideTooltip && /* @__PURE__ */ (0, import_jsx_runtime69.jsx)("thead", {
+                        children: /* @__PURE__ */ (0, import_jsx_runtime69.jsx)(ChartsTooltipRow, {
+                            children: /* @__PURE__ */ (0, import_jsx_runtime69.jsx)(ChartsTooltipCell, {
                                 colSpan: 3,
-                                children: /* @__PURE__ */ (0, import_jsx_runtime68.jsx)(Typography_default, {
+                                children: /* @__PURE__ */ (0, import_jsx_runtime69.jsx)(Typography_default, {
                                     children: axisFormatter(axisValue, {
                                         location: "tooltip"
                                     })
@@ -11511,7 +11665,7 @@ var agent = function() {
                             })
                         })
                     }),
-                    /* @__PURE__ */ (0, import_jsx_runtime68.jsx)("tbody", {
+                    /* @__PURE__ */ (0, import_jsx_runtime69.jsx)("tbody", {
                         children: series.filter(isCartesianSeries).map(function(param) {
                             var id = param.id, label = param.label, valueFormatter = param.valueFormatter, data = param.data, getColor5 = param.getColor;
                             var _data_dataIndex;
@@ -11523,25 +11677,25 @@ var agent = function() {
                             }
                             var formattedLabel = getLabel(label, "tooltip");
                             var color3 = getColor5(dataIndex);
-                            return /* @__PURE__ */ (0, import_jsx_runtime68.jsxs)(ChartsTooltipRow, {
+                            return /* @__PURE__ */ (0, import_jsx_runtime69.jsxs)(ChartsTooltipRow, {
                                 className: classes.row,
                                 children: [
-                                    /* @__PURE__ */ (0, import_jsx_runtime68.jsx)(ChartsTooltipCell, {
+                                    /* @__PURE__ */ (0, import_jsx_runtime69.jsx)(ChartsTooltipCell, {
                                         className: clsx_default(classes.markCell, classes.cell),
-                                        children: color3 && /* @__PURE__ */ (0, import_jsx_runtime68.jsx)(ChartsTooltipMark, {
+                                        children: color3 && /* @__PURE__ */ (0, import_jsx_runtime69.jsx)(ChartsTooltipMark, {
                                             color: color3,
                                             className: classes.mark
                                         })
                                     }),
-                                    /* @__PURE__ */ (0, import_jsx_runtime68.jsx)(ChartsTooltipCell, {
+                                    /* @__PURE__ */ (0, import_jsx_runtime69.jsx)(ChartsTooltipCell, {
                                         className: clsx_default(classes.labelCell, classes.cell),
-                                        children: formattedLabel ? /* @__PURE__ */ (0, import_jsx_runtime68.jsx)(Typography_default, {
+                                        children: formattedLabel ? /* @__PURE__ */ (0, import_jsx_runtime69.jsx)(Typography_default, {
                                             children: formattedLabel
                                         }) : null
                                     }),
-                                    /* @__PURE__ */ (0, import_jsx_runtime68.jsx)(ChartsTooltipCell, {
+                                    /* @__PURE__ */ (0, import_jsx_runtime69.jsx)(ChartsTooltipCell, {
                                         className: clsx_default(classes.valueCell, classes.cell),
-                                        children: /* @__PURE__ */ (0, import_jsx_runtime68.jsx)(Typography_default, {
+                                        children: /* @__PURE__ */ (0, import_jsx_runtime69.jsx)(Typography_default, {
                                             children: formattedValue
                                         })
                                     })
@@ -11559,11 +11713,11 @@ var agent = function() {
         var dataIndex = isXaxis ? axisData.x && axisData.x.index : axisData.y && axisData.y.index;
         var axisValue = isXaxis ? axisData.x && axisData.x.value : axisData.y && axisData.y.value;
         var _useCartesianContext = useCartesianContext(), xAxisIds = _useCartesianContext.xAxisIds, xAxis = _useCartesianContext.xAxis, yAxisIds = _useCartesianContext.yAxisIds, yAxis = _useCartesianContext.yAxis;
-        var _React122_useContext = React122.useContext(ZAxisContext), zAxisIds = _React122_useContext.zAxisIds, zAxis = _React122_useContext.zAxis;
+        var _React123_useContext = React123.useContext(ZAxisContext), zAxisIds = _React123_useContext.zAxisIds, zAxis = _React123_useContext.zAxis;
         var series = useSeries();
         var colorProcessors = useColorProcessor();
         var USED_AXIS_ID = isXaxis ? xAxisIds[0] : yAxisIds[0];
-        var relevantSeries = React122.useMemo(function() {
+        var relevantSeries = React123.useMemo(function() {
             var rep = [];
             Object.keys(series).filter(isCartesianSeriesType).forEach(function(seriesType) {
                 series[seriesType].seriesOrder.forEach(function(seriesId) {
@@ -11603,7 +11757,7 @@ var agent = function() {
             zAxis,
             zAxisIds
         ]);
-        var relevantAxis = React122.useMemo(function() {
+        var relevantAxis = React123.useMemo(function() {
             return isXaxis ? xAxis[USED_AXIS_ID] : yAxis[USED_AXIS_ID];
         }, [
             USED_AXIS_ID,
@@ -11626,7 +11780,7 @@ var agent = function() {
             },
             ownerState: {}
         });
-        return /* @__PURE__ */ (0, import_jsx_runtime69.jsx)(Content, _extends1({}, chartTooltipContentProps));
+        return /* @__PURE__ */ (0, import_jsx_runtime70.jsx)(Content, _extends1({}, chartTooltipContentProps));
     };
     var ChartsTooltip = function ChartsTooltip(inProps) {
         var props = useThemeProps2({
@@ -11635,7 +11789,7 @@ var agent = function() {
         });
         var _props_trigger = props.trigger, trigger = _props_trigger === void 0 ? "axis" : _props_trigger, itemContent = props.itemContent, axisContent = props.axisContent, slots = props.slots, slotProps = props.slotProps;
         var mousePosition = useMouseTracker();
-        var _React123_useContext = React123.useContext(InteractionContext), item = _React123_useContext.item, axis = _React123_useContext.axis;
+        var _React124_useContext = React124.useContext(InteractionContext), item = _React124_useContext.item, axis = _React124_useContext.axis;
         var displayedData = trigger === "item" ? item : axis;
         var tooltipHasData = getTooltipHasData(trigger, displayedData);
         var popperOpen = mousePosition !== null && tooltipHasData;
@@ -11669,10 +11823,10 @@ var agent = function() {
             return null;
         }
         var _slots_itemContent, _slots_axisContent;
-        return /* @__PURE__ */ (0, import_jsx_runtime70.jsx)(NoSsr_default, {
-            children: popperOpen && /* @__PURE__ */ (0, import_jsx_runtime70.jsx)(PopperComponent, _extends1({}, popperProps, {
+        return /* @__PURE__ */ (0, import_jsx_runtime71.jsx)(NoSsr_default, {
+            children: popperOpen && /* @__PURE__ */ (0, import_jsx_runtime71.jsx)(PopperComponent, _extends1({}, popperProps, {
                 className: classes.root,
-                children: trigger === "item" ? /* @__PURE__ */ (0, import_jsx_runtime70.jsx)(ChartsItemTooltipContent, {
+                children: trigger === "item" ? /* @__PURE__ */ (0, import_jsx_runtime71.jsx)(ChartsItemTooltipContent, {
                     itemData: displayedData,
                     content: (_slots_itemContent = slots === null || slots === void 0 ? void 0 : slots.itemContent) !== null && _slots_itemContent !== void 0 ? _slots_itemContent : itemContent,
                     contentProps: slotProps === null || slotProps === void 0 ? void 0 : slotProps.itemContent,
@@ -11680,7 +11834,7 @@ var agent = function() {
                         mx: 2
                     },
                     classes: classes
-                }) : /* @__PURE__ */ (0, import_jsx_runtime70.jsx)(ChartsAxisTooltipContent, {
+                }) : /* @__PURE__ */ (0, import_jsx_runtime71.jsx)(ChartsAxisTooltipContent, {
                     axisData: displayedData,
                     content: (_slots_axisContent = slots === null || slots === void 0 ? void 0 : slots.axisContent) !== null && _slots_axisContent !== void 0 ? _slots_axisContent : axisContent,
                     contentProps: slotProps === null || slotProps === void 0 ? void 0 : slotProps.axisContent,
@@ -11692,302 +11846,18 @@ var agent = function() {
             }))
         });
     };
-    var getSeriesToDisplay = function getSeriesToDisplay(series) {
-        return Object.keys(series).flatMap(function(seriesType) {
-            var getter = legendGetter5[seriesType];
-            return getter === void 0 ? [] : getter(series[seriesType]);
-        });
-    };
-    var getLegendUtilityClass = // node_modules/@mui/x-charts/ChartsLegend/chartsLegendClasses.js
-    function getLegendUtilityClass(slot) {
-        return generateUtilityClass2("MuiChartsLegend", slot);
-    };
-    var legendItemPlacements = function legendItemPlacements(itemsToDisplay, getItemSpace, labelStyle, direction, availableWidth, availableHeight, itemGap) {
-        var x = 0;
-        var y = 0;
-        var totalWidthUsed = 0;
-        var totalHeightUsed = 0;
-        var rowIndex = 0;
-        var rowMaxHeight = [
-            0
-        ];
-        var seriesWithRawPosition = itemsToDisplay.map(function(_ref) {
-            var label = _ref.label, other = _objectWithoutPropertiesLoose(_ref, _excluded14);
-            var itemSpace = getItemSpace(label, labelStyle);
-            var rep = _extends1({}, other, {
-                label: label,
-                positionX: x,
-                positionY: y,
-                innerHeight: itemSpace.innerHeight,
-                innerWidth: itemSpace.innerWidth,
-                outerHeight: itemSpace.outerHeight,
-                outerWidth: itemSpace.outerWidth,
-                rowIndex: rowIndex
-            });
-            if (direction === "row") {
-                if (x + itemSpace.innerWidth > availableWidth) {
-                    x = 0;
-                    y += rowMaxHeight[rowIndex];
-                    rowIndex += 1;
-                    if (rowMaxHeight.length <= rowIndex) {
-                        rowMaxHeight.push(0);
-                    }
-                    rep.positionX = x;
-                    rep.positionY = y;
-                    rep.rowIndex = rowIndex;
-                }
-                totalWidthUsed = Math.max(totalWidthUsed, x + itemSpace.outerWidth);
-                totalHeightUsed = Math.max(totalHeightUsed, y + itemSpace.outerHeight);
-                rowMaxHeight[rowIndex] = Math.max(rowMaxHeight[rowIndex], itemSpace.outerHeight);
-                x += itemSpace.outerWidth;
-            }
-            if (direction === "column") {
-                if (y + itemSpace.innerHeight > availableHeight) {
-                    x = totalWidthUsed + itemGap;
-                    y = 0;
-                    rowIndex = 0;
-                    rep.positionX = x;
-                    rep.positionY = y;
-                    rep.rowIndex = rowIndex;
-                }
-                if (rowMaxHeight.length <= rowIndex) {
-                    rowMaxHeight.push(0);
-                }
-                totalWidthUsed = Math.max(totalWidthUsed, x + itemSpace.outerWidth);
-                totalHeightUsed = Math.max(totalHeightUsed, y + itemSpace.outerHeight);
-                rowIndex += 1;
-                y += itemSpace.outerHeight;
-            }
-            return rep;
-        });
-        return [
-            seriesWithRawPosition.map(function(item) {
-                return _extends1({}, item, {
-                    positionY: item.positionY + (direction === "row" ? rowMaxHeight[item.rowIndex] / 2 : item.outerHeight / 2)
-                });
-            }),
-            totalWidthUsed,
-            totalHeightUsed
-        ];
-    };
-    var ChartsLegendItem = function ChartsLegendItem(props) {
-        var isRTL = useRtl();
-        var id = props.id, positionY = props.positionY, label = props.label, positionX = props.positionX, innerHeight = props.innerHeight, innerWidth = props.innerWidth, legendWidth = props.legendWidth, color3 = props.color, gapX = props.gapX, gapY = props.gapY, itemMarkHeight = props.itemMarkHeight, itemMarkWidth = props.itemMarkWidth, markGap = props.markGap, labelStyle = props.labelStyle, classes = props.classes, onClick = props.onClick;
-        return /* @__PURE__ */ (0, import_jsx_runtime71.jsxs)("g", {
-            className: clsx_default(classes === null || classes === void 0 ? void 0 : classes.series, "".concat(classes === null || classes === void 0 ? void 0 : classes.series, "-").concat(id)),
-            transform: "translate(".concat(gapX + (isRTL ? legendWidth - positionX : positionX), " ").concat(gapY + positionY, ")"),
-            children: [
-                /* @__PURE__ */ (0, import_jsx_runtime71.jsx)("rect", {
-                    x: isRTL ? -(innerWidth + 2) : -2,
-                    y: -itemMarkHeight / 2 - 2,
-                    width: innerWidth + 4,
-                    height: innerHeight + 4,
-                    fill: "transparent",
-                    className: classes === null || classes === void 0 ? void 0 : classes.itemBackground,
-                    onClick: onClick,
-                    style: {
-                        pointerEvents: onClick ? "all" : "none",
-                        cursor: onClick ? "pointer" : "unset"
-                    }
-                }),
-                /* @__PURE__ */ (0, import_jsx_runtime71.jsx)("rect", {
-                    className: classes === null || classes === void 0 ? void 0 : classes.mark,
-                    x: isRTL ? -itemMarkWidth : 0,
-                    y: -itemMarkHeight / 2,
-                    width: itemMarkWidth,
-                    height: itemMarkHeight,
-                    fill: color3,
-                    style: {
-                        pointerEvents: "none"
-                    }
-                }),
-                /* @__PURE__ */ (0, import_jsx_runtime71.jsx)(ChartsText, {
-                    style: _extends1({
-                        pointerEvents: "none"
-                    }, labelStyle),
-                    text: label,
-                    x: (isRTL ? -1 : 1) * (itemMarkWidth + markGap),
-                    y: 0
-                })
-            ]
-        });
-    };
-    var LegendPerItem = function LegendPerItem(props) {
-        var position2 = props.position, direction = props.direction, itemsToDisplay = props.itemsToDisplay, classes = props.classes, _props_itemMarkWidth = props.itemMarkWidth, itemMarkWidth = _props_itemMarkWidth === void 0 ? 20 : _props_itemMarkWidth, _props_itemMarkHeight = props.itemMarkHeight, itemMarkHeight = _props_itemMarkHeight === void 0 ? 20 : _props_itemMarkHeight, _props_markGap = props.markGap, markGap = _props_markGap === void 0 ? 5 : _props_markGap, _props_itemGap = props.itemGap, itemGap = _props_itemGap === void 0 ? 10 : _props_itemGap, tmp = props.padding, paddingProps = tmp === void 0 ? 10 : tmp, inLabelStyle = props.labelStyle, onItemClick = props.onItemClick;
-        var theme = useTheme4();
-        var drawingArea = useDrawingArea();
-        var labelStyle = React125.useMemo(function() {
-            return _extends1({}, theme.typography.subtitle1, {
-                color: "inherit",
-                dominantBaseline: "central",
-                textAnchor: "start",
-                fill: (theme.vars || theme).palette.text.primary,
-                lineHeight: 1
-            }, inLabelStyle);
-        }, // To say to TS that the dominantBaseline and textAnchor are correct
-        [
-            inLabelStyle,
-            theme
-        ]);
-        var padding2 = React125.useMemo(function() {
-            return getStandardizedPadding(paddingProps);
-        }, [
-            paddingProps
-        ]);
-        var getItemSpace = React125.useCallback(function(label) {
-            var inStyle = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {};
-            var _Math;
-            var style3 = _objectWithoutPropertiesLoose(inStyle, _excluded15);
-            var linesSize = getWordsByLines({
-                style: style3,
-                needsComputation: true,
-                text: label
-            });
-            var innerSize = {
-                innerWidth: itemMarkWidth + markGap + (_Math = Math).max.apply(_Math, _to_consumable_array(linesSize.map(function(size) {
-                    return size.width;
-                }))),
-                innerHeight: Math.max(itemMarkHeight, linesSize.length * linesSize[0].height)
-            };
-            return _extends1({}, innerSize, {
-                outerWidth: innerSize.innerWidth + itemGap,
-                outerHeight: innerSize.innerHeight + itemGap
-            });
-        }, [
-            itemGap,
-            itemMarkHeight,
-            itemMarkWidth,
-            markGap
-        ]);
-        var totalWidth = drawingArea.left + drawingArea.width + drawingArea.right;
-        var totalHeight = drawingArea.top + drawingArea.height + drawingArea.bottom;
-        var availableWidth = totalWidth - padding2.left - padding2.right;
-        var availableHeight = totalHeight - padding2.top - padding2.bottom;
-        var _React125_useMemo = _sliced_to_array(React125.useMemo(function() {
-            return legendItemPlacements(itemsToDisplay, getItemSpace, labelStyle, direction, availableWidth, availableHeight, itemGap);
-        }, [
-            itemsToDisplay,
-            getItemSpace,
-            labelStyle,
-            direction,
-            availableWidth,
-            availableHeight,
-            itemGap
-        ]), 3), itemsWithPosition = _React125_useMemo[0], legendWidth = _React125_useMemo[1], legendHeight = _React125_useMemo[2];
-        var gapX = React125.useMemo(function() {
-            switch(position2.horizontal){
-                case "left":
-                    return padding2.left;
-                case "right":
-                    return totalWidth - padding2.right - legendWidth;
-                default:
-                    return (totalWidth - legendWidth) / 2;
-            }
-        }, [
-            position2.horizontal,
-            padding2.left,
-            padding2.right,
-            totalWidth,
-            legendWidth
-        ]);
-        var gapY = React125.useMemo(function() {
-            switch(position2.vertical){
-                case "top":
-                    return padding2.top;
-                case "bottom":
-                    return totalHeight - padding2.bottom - legendHeight;
-                default:
-                    return (totalHeight - legendHeight) / 2;
-            }
-        }, [
-            position2.vertical,
-            padding2.top,
-            padding2.bottom,
-            totalHeight,
-            legendHeight
-        ]);
-        return /* @__PURE__ */ (0, import_jsx_runtime72.jsx)(NoSsr_default, {
-            children: /* @__PURE__ */ (0, import_jsx_runtime72.jsx)(ChartsLegendRoot, {
-                className: classes === null || classes === void 0 ? void 0 : classes.root,
-                children: itemsWithPosition.map(function(item, i) {
-                    return /* @__PURE__ */ (0, import_react27.createElement)(ChartsLegendItem, _extends1({}, item, {
-                        key: item.id,
-                        gapX: gapX,
-                        gapY: gapY,
-                        legendWidth: legendWidth,
-                        itemMarkHeight: itemMarkHeight,
-                        itemMarkWidth: itemMarkWidth,
-                        markGap: markGap,
-                        labelStyle: labelStyle,
-                        classes: classes,
-                        onClick: onItemClick ? function(event) {
-                            return onItemClick(event, i);
-                        } : void 0
-                    }));
-                })
-            })
-        });
-    };
-    var DefaultChartsLegend = function DefaultChartsLegend(props) {
-        var seriesToDisplay = props.seriesToDisplay, hidden = props.hidden, onItemClick = props.onItemClick, other = _objectWithoutPropertiesLoose(props, _excluded16);
-        if (hidden) {
-            return null;
-        }
-        return /* @__PURE__ */ (0, import_jsx_runtime73.jsx)(LegendPerItem, _extends1({}, other, {
-            itemsToDisplay: seriesToDisplay,
-            onItemClick: onItemClick ? function(event, i) {
-                return onItemClick(event, seriesContextBuilder(seriesToDisplay[i]), i);
-            } : void 0
-        }));
-    };
-    var ChartsLegend = function ChartsLegend(inProps) {
-        var props = useThemeProps2({
-            props: inProps,
-            name: "MuiChartsLegend"
-        });
-        var defaultizedProps = _extends1({
-            direction: "row"
-        }, props, {
-            position: _extends1({
-                horizontal: "middle",
-                vertical: "top"
-            }, props.position)
-        });
-        var slots = defaultizedProps.slots, slotProps = defaultizedProps.slotProps, other = _objectWithoutPropertiesLoose(defaultizedProps, _excluded17);
-        var theme = useTheme4();
-        var classes = useUtilityClasses28(_extends1({}, defaultizedProps, {
-            theme: theme
-        }));
-        var drawingArea = useDrawingArea();
-        var series = useSeries();
-        var seriesToDisplay = getSeriesToDisplay(series);
-        var _slots_legend;
-        var ChartLegendRender = (_slots_legend = slots === null || slots === void 0 ? void 0 : slots.legend) !== null && _slots_legend !== void 0 ? _slots_legend : DefaultChartsLegend;
-        var chartLegendRenderProps = useSlotProps_default2({
-            elementType: ChartLegendRender,
-            externalSlotProps: slotProps === null || slotProps === void 0 ? void 0 : slotProps.legend,
-            additionalProps: _extends1({}, other, {
-                classes: classes,
-                drawingArea: drawingArea,
-                series: series,
-                seriesToDisplay: seriesToDisplay
-            }),
-            ownerState: {}
-        });
-        return /* @__PURE__ */ (0, import_jsx_runtime74.jsx)(ChartLegendRender, _extends1({}, chartLegendRenderProps));
-    };
     var getAxisHighlightUtilityClass = function getAxisHighlightUtilityClass(slot) {
         return generateUtilityClass2("MuiChartsAxisHighlight", slot);
     };
     var ChartsAxisHighlight = function ChartsAxisHighlight(props) {
         var xAxisHighlight = props.x, yAxisHighlight = props.y;
         var _useCartesianContext = useCartesianContext(), xAxisIds = _useCartesianContext.xAxisIds, xAxis = _useCartesianContext.xAxis, yAxisIds = _useCartesianContext.yAxisIds, yAxis = _useCartesianContext.yAxis;
-        var classes = useUtilityClasses29();
+        var classes = useUtilityClasses28();
         var USED_X_AXIS_ID = xAxisIds[0];
         var USED_Y_AXIS_ID = yAxisIds[0];
         var xScale = xAxis[USED_X_AXIS_ID].scale;
         var yScale = yAxis[USED_Y_AXIS_ID].scale;
-        var axis = React128.useContext(InteractionContext).axis;
+        var axis = React125.useContext(InteractionContext).axis;
         var getXPosition = getValueToPositionMapper(xScale);
         var getYPosition = getValueToPositionMapper(yScale);
         var axisX = axis.x;
@@ -12005,30 +11875,30 @@ var agent = function() {
                 ].join("\n"));
             }
         }
-        return /* @__PURE__ */ (0, import_jsx_runtime75.jsxs)(React128.Fragment, {
+        return /* @__PURE__ */ (0, import_jsx_runtime72.jsxs)(React125.Fragment, {
             children: [
-                isBandScaleX && xScale(axisX.value) !== void 0 && /* @__PURE__ */ (0, import_jsx_runtime75.jsx)(ChartsAxisHighlightPath, {
+                isBandScaleX && xScale(axisX.value) !== void 0 && /* @__PURE__ */ (0, import_jsx_runtime72.jsx)(ChartsAxisHighlightPath, {
                     d: "M ".concat(xScale(axisX.value) - (xScale.step() - xScale.bandwidth()) / 2, " ").concat(yScale.range()[0], " l ").concat(xScale.step(), " 0 l 0 ").concat(yScale.range()[1] - yScale.range()[0], " l ").concat(-xScale.step(), " 0 Z"),
                     className: classes.root,
                     ownerState: {
                         axisHighlight: "band"
                     }
                 }),
-                isBandScaleY && yScale(axisY.value) !== void 0 && /* @__PURE__ */ (0, import_jsx_runtime75.jsx)(ChartsAxisHighlightPath, {
+                isBandScaleY && yScale(axisY.value) !== void 0 && /* @__PURE__ */ (0, import_jsx_runtime72.jsx)(ChartsAxisHighlightPath, {
                     d: "M ".concat(xScale.range()[0], " ").concat(yScale(axisY.value) - (yScale.step() - yScale.bandwidth()) / 2, " l 0 ").concat(yScale.step(), " l ").concat(xScale.range()[1] - xScale.range()[0], " 0 l 0 ").concat(-yScale.step(), " Z"),
                     className: classes.root,
                     ownerState: {
                         axisHighlight: "band"
                     }
                 }),
-                xAxisHighlight === "line" && axis.x !== null && /* @__PURE__ */ (0, import_jsx_runtime75.jsx)(ChartsAxisHighlightPath, {
+                xAxisHighlight === "line" && axis.x !== null && /* @__PURE__ */ (0, import_jsx_runtime72.jsx)(ChartsAxisHighlightPath, {
                     d: "M ".concat(getXPosition(axis.x.value), " ").concat(yScale.range()[0], " L ").concat(getXPosition(axis.x.value), " ").concat(yScale.range()[1]),
                     className: classes.root,
                     ownerState: {
                         axisHighlight: "line"
                     }
                 }),
-                yAxisHighlight === "line" && axis.y !== null && /* @__PURE__ */ (0, import_jsx_runtime75.jsx)(ChartsAxisHighlightPath, {
+                yAxisHighlight === "line" && axis.y !== null && /* @__PURE__ */ (0, import_jsx_runtime72.jsx)(ChartsAxisHighlightPath, {
                     d: "M ".concat(xScale.range()[0], " ").concat(getYPosition(axis.y.value), " L ").concat(xScale.range()[1], " ").concat(getYPosition(axis.y.value)),
                     className: classes.root,
                     ownerState: {
@@ -12050,10 +11920,10 @@ var agent = function() {
             tickNumber: tickNumber,
             tickInterval: tickInterval
         });
-        return /* @__PURE__ */ (0, import_jsx_runtime76.jsx)(React129.Fragment, {
+        return /* @__PURE__ */ (0, import_jsx_runtime73.jsx)(React126.Fragment, {
             children: xTicks.map(function(param) {
                 var value = param.value, offset2 = param.offset;
-                return /* @__PURE__ */ (0, import_jsx_runtime76.jsx)(GridLine, {
+                return /* @__PURE__ */ (0, import_jsx_runtime73.jsx)(GridLine, {
                     y1: drawingArea.top,
                     y2: drawingArea.top + drawingArea.height,
                     x1: offset2,
@@ -12071,10 +11941,10 @@ var agent = function() {
             tickNumber: tickNumber,
             tickInterval: tickInterval
         });
-        return /* @__PURE__ */ (0, import_jsx_runtime77.jsx)(React130.Fragment, {
+        return /* @__PURE__ */ (0, import_jsx_runtime74.jsx)(React127.Fragment, {
             children: yTicks.map(function(param) {
                 var value = param.value, offset2 = param.offset;
-                return /* @__PURE__ */ (0, import_jsx_runtime77.jsx)(GridLine, {
+                return /* @__PURE__ */ (0, import_jsx_runtime74.jsx)(GridLine, {
                     y1: offset2,
                     y2: offset2,
                     x1: drawingArea.left,
@@ -12090,20 +11960,20 @@ var agent = function() {
             name: "MuiChartsGrid"
         });
         var drawingArea = useDrawingArea();
-        var vertical = props.vertical, horizontal = props.horizontal, other = _objectWithoutPropertiesLoose(props, _excluded18);
+        var vertical = props.vertical, horizontal = props.horizontal, other = _objectWithoutPropertiesLoose(props, _excluded14);
         var _useCartesianContext = useCartesianContext(), xAxis = _useCartesianContext.xAxis, xAxisIds = _useCartesianContext.xAxisIds, yAxis = _useCartesianContext.yAxis, yAxisIds = _useCartesianContext.yAxisIds;
-        var classes = useUtilityClasses30(props);
+        var classes = useUtilityClasses29(props);
         var horizontalAxis = yAxis[yAxisIds[0]];
         var verticalAxis = xAxis[xAxisIds[0]];
-        return /* @__PURE__ */ (0, import_jsx_runtime78.jsxs)(GridRoot, _extends1({}, other, {
+        return /* @__PURE__ */ (0, import_jsx_runtime75.jsxs)(GridRoot, _extends1({}, other, {
             className: classes.root,
             children: [
-                vertical && /* @__PURE__ */ (0, import_jsx_runtime78.jsx)(ChartsGridVertical, {
+                vertical && /* @__PURE__ */ (0, import_jsx_runtime75.jsx)(ChartsGridVertical, {
                     axis: verticalAxis,
                     drawingArea: drawingArea,
                     classes: classes
                 }),
-                horizontal && /* @__PURE__ */ (0, import_jsx_runtime78.jsx)(ChartsGridHorizontal, {
+                horizontal && /* @__PURE__ */ (0, import_jsx_runtime75.jsx)(ChartsGridHorizontal, {
                     axis: horizontalAxis,
                     drawingArea: drawingArea,
                     classes: classes
@@ -12846,7 +12716,7 @@ var agent = function() {
     var require_react_dom_production = __commonJS({
         "node_modules/react-dom/cjs/react-dom.production.js": function(exports) {
             "use strict";
-            var React133 = require_react();
+            var React130 = require_react();
             function formatProdErrorMessage(code) {
                 var url = "https://react.dev/errors/" + code;
                 if (1 < arguments.length) {
@@ -12884,7 +12754,7 @@ var agent = function() {
                     implementation: implementation
                 };
             }
-            var ReactSharedInternals = React133.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE;
+            var ReactSharedInternals = React130.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE;
             function getCrossOriginStringAs(as, input) {
                 if ("font" === as) return "";
                 if ("string" === typeof input) return "use-credentials" === input ? input : "";
@@ -13007,7 +12877,7 @@ var agent = function() {
         "node_modules/react-dom/cjs/react-dom-client.production.js": function(exports) {
             "use strict";
             var Scheduler = require_scheduler();
-            var React133 = require_react();
+            var React130 = require_react();
             var ReactDOM3 = require_react_dom();
             function formatProdErrorMessage(code) {
                 var url = "https://react.dev/errors/" + code;
@@ -13189,7 +13059,7 @@ var agent = function() {
                 return null;
             }
             var isArrayImpl = Array.isArray;
-            var ReactSharedInternals = React133.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE;
+            var ReactSharedInternals = React130.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE;
             var ReactDOMSharedInternals = ReactDOM3.__DOM_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE;
             var sharedNotPendingObject = {
                 pending: false,
@@ -13926,9 +13796,9 @@ var agent = function() {
                 node2.textContent = text;
             }
             var unitlessNumbers = new Set("animationIterationCount aspectRatio borderImageOutset borderImageSlice borderImageWidth boxFlex boxFlexGroup boxOrdinalGroup columnCount columns flex flexGrow flexPositive flexShrink flexNegative flexOrder gridArea gridRow gridRowEnd gridRowSpan gridRowStart gridColumn gridColumnEnd gridColumnSpan gridColumnStart fontWeight lineClamp lineHeight opacity order orphans scale tabSize widows zIndex zoom fillOpacity floodOpacity stopOpacity strokeDasharray strokeDashoffset strokeMiterlimit strokeOpacity strokeWidth MozAnimationIterationCount MozBoxFlex MozBoxFlexGroup MozLineClamp msAnimationIterationCount msFlex msZoom msFlexGrow msFlexNegative msFlexOrder msFlexPositive msFlexShrink msGridColumn msGridColumnSpan msGridRow msGridRowSpan WebkitAnimationIterationCount WebkitBoxFlex WebKitBoxFlexGroup WebkitBoxOrdinalGroup WebkitColumnCount WebkitColumns WebkitFlex WebkitFlexGrow WebkitFlexPositive WebkitFlexShrink WebkitLineClamp".split(" "));
-            function setValueForStyle(style4, styleName, value) {
+            function setValueForStyle(style5, styleName, value) {
                 var isCustomProperty3 = 0 === styleName.indexOf("--");
-                null == value || "boolean" === typeof value || "" === value ? isCustomProperty3 ? style4.setProperty(styleName, "") : "float" === styleName ? style4.cssFloat = "" : style4[styleName] = "" : isCustomProperty3 ? style4.setProperty(styleName, value) : "number" !== typeof value || 0 === value || unitlessNumbers.has(styleName) ? "float" === styleName ? style4.cssFloat = value : style4[styleName] = ("" + value).trim() : style4[styleName] = value + "px";
+                null == value || "boolean" === typeof value || "" === value ? isCustomProperty3 ? style5.setProperty(styleName, "") : "float" === styleName ? style5.cssFloat = "" : style5[styleName] = "" : isCustomProperty3 ? style5.setProperty(styleName, value) : "number" !== typeof value || 0 === value || unitlessNumbers.has(styleName) ? "float" === styleName ? style5.cssFloat = value : style5[styleName] = ("" + value).trim() : style5[styleName] = value + "px";
             }
             function setValueForStyles(node2, styles2, prevStyles) {
                 if (null != styles2 && "object" !== (typeof styles2 === "undefined" ? "undefined" : _type_of(styles2))) throw Error(formatProdErrorMessage(62));
@@ -14872,13 +14742,13 @@ var agent = function() {
                 transitionend: makePrefixMap("Transition", "TransitionEnd")
             };
             var prefixedEventNames = {};
-            var style3 = {};
-            canUseDOM && (style3 = document.createElement("div").style, "AnimationEvent" in window || (delete vendorPrefixes.animationend.animation, delete vendorPrefixes.animationiteration.animation, delete vendorPrefixes.animationstart.animation), "TransitionEvent" in window || delete vendorPrefixes.transitionend.transition);
+            var style4 = {};
+            canUseDOM && (style4 = document.createElement("div").style, "AnimationEvent" in window || (delete vendorPrefixes.animationend.animation, delete vendorPrefixes.animationiteration.animation, delete vendorPrefixes.animationstart.animation), "TransitionEvent" in window || delete vendorPrefixes.transitionend.transition);
             function getVendorPrefixedEventName(eventName) {
                 if (prefixedEventNames[eventName]) return prefixedEventNames[eventName];
                 if (!vendorPrefixes[eventName]) return eventName;
                 var prefixMap = vendorPrefixes[eventName], styleProp;
-                for(styleProp in prefixMap)if (prefixMap.hasOwnProperty(styleProp) && styleProp in style3) return prefixedEventNames[eventName] = prefixMap[styleProp];
+                for(styleProp in prefixMap)if (prefixMap.hasOwnProperty(styleProp) && styleProp in style4) return prefixedEventNames[eventName] = prefixMap[styleProp];
                 return eventName;
             }
             var ANIMATION_END = getVendorPrefixedEventName("animationend");
@@ -22576,7 +22446,7 @@ var agent = function() {
                     0 === i && attemptExplicitHydrationTarget(target);
                 }
             };
-            var isomorphicReactPackageVersion$jscomp$inline_1785 = React133.version;
+            var isomorphicReactPackageVersion$jscomp$inline_1785 = React130.version;
             if ("19.1.0" !== isomorphicReactPackageVersion$jscomp$inline_1785) throw Error(formatProdErrorMessage(527, isomorphicReactPackageVersion$jscomp$inline_1785, "19.1.0"));
             ReactDOMSharedInternals.findDOMNode = function(componentOrElement) {
                 var fiber = componentOrElement._reactInternals;
@@ -24450,7 +24320,7 @@ var agent = function() {
                     }
                     SetCache.prototype.add = SetCache.prototype.push = setCacheAdd;
                     SetCache.prototype.has = setCacheHas;
-                    function Stack(entries) {
+                    function Stack2(entries) {
                         var data = this.__data__ = new ListCache(entries);
                         this.size = data.size;
                     }
@@ -24487,11 +24357,11 @@ var agent = function() {
                         this.size = data.size;
                         return this;
                     }
-                    Stack.prototype.clear = stackClear;
-                    Stack.prototype["delete"] = stackDelete;
-                    Stack.prototype.get = stackGet;
-                    Stack.prototype.has = stackHas;
-                    Stack.prototype.set = stackSet;
+                    Stack2.prototype.clear = stackClear;
+                    Stack2.prototype["delete"] = stackDelete;
+                    Stack2.prototype.get = stackGet;
+                    Stack2.prototype.has = stackHas;
+                    Stack2.prototype.set = stackSet;
                     function arrayLikeKeys(value, inherited) {
                         var isArr = isArray(value), isArg = !isArr && isArguments(value), isBuff = !isArr && !isArg && isBuffer(value), isType = !isArr && !isArg && !isBuff && isTypedArray(value), skipIndexes = isArr || isArg || isBuff || isType, result2 = skipIndexes ? baseTimes(value.length, String2) : [], length2 = result2.length;
                         for(var key in value){
@@ -24611,7 +24481,7 @@ var agent = function() {
                                 result2 = initCloneByTag(value, tag, isDeep);
                             }
                         }
-                        stack || (stack = new Stack());
+                        stack || (stack = new Stack2());
                         var stacked = stack.get(value);
                         if (stacked) {
                             return stacked;
@@ -24878,21 +24748,21 @@ var agent = function() {
                             objIsObj = false;
                         }
                         if (isSameTag && !objIsObj) {
-                            stack || (stack = new Stack());
+                            stack || (stack = new Stack2());
                             return objIsArr || isTypedArray(object) ? equalArrays(object, other, bitmask, customizer, equalFunc, stack) : equalByTag(object, other, objTag, bitmask, customizer, equalFunc, stack);
                         }
                         if (!(bitmask & COMPARE_PARTIAL_FLAG)) {
                             var objIsWrapped = objIsObj && hasOwnProperty.call(object, "__wrapped__"), othIsWrapped = othIsObj && hasOwnProperty.call(other, "__wrapped__");
                             if (objIsWrapped || othIsWrapped) {
                                 var objUnwrapped = objIsWrapped ? object.value() : object, othUnwrapped = othIsWrapped ? other.value() : other;
-                                stack || (stack = new Stack());
+                                stack || (stack = new Stack2());
                                 return equalFunc(objUnwrapped, othUnwrapped, bitmask, customizer, stack);
                             }
                         }
                         if (!isSameTag) {
                             return false;
                         }
-                        stack || (stack = new Stack());
+                        stack || (stack = new Stack2());
                         return equalObjects(object, other, bitmask, customizer, equalFunc, stack);
                     }
                     function baseIsMap(value) {
@@ -24918,7 +24788,7 @@ var agent = function() {
                                     return false;
                                 }
                             } else {
-                                var stack = new Stack();
+                                var stack = new Stack2();
                                 if (customizer) {
                                     var result2 = customizer(objValue, srcValue, key, object, source, stack);
                                 }
@@ -25014,7 +24884,7 @@ var agent = function() {
                             return;
                         }
                         baseFor(source, function(srcValue, key) {
-                            stack || (stack = new Stack());
+                            stack || (stack = new Stack2());
                             if (isObject(srcValue)) {
                                 baseMergeDeep(object, source, key, srcIndex, baseMerge, customizer, stack);
                             } else {
@@ -30184,9 +30054,9 @@ var agent = function() {
         }
         return React4.createElement.apply(null, createElementArgArray);
     };
-    (function(_jsx78) {
+    (function(_jsx79) {
         var JSX;
-        /* @__PURE__ */ (function(_JSX) {})(JSX || (JSX = _jsx78.JSX || (_jsx78.JSX = {})));
+        /* @__PURE__ */ (function(_JSX) {})(JSX || (JSX = _jsx79.JSX || (_jsx79.JSX = {})));
     })(jsx2 || (jsx2 = {}));
     // node_modules/@emotion/styled/base/dist/emotion-styled-base.esm.js
     var React5 = __toESM(require_react());
@@ -31243,8 +31113,8 @@ var agent = function() {
     };
     // node_modules/@mui/system/esm/createStyled/createStyled.js
     var systemDefaultTheme2 = createTheme_default();
-    function processStyle(props, style3) {
-        var resolvedStyle = typeof style3 === "function" ? style3(props) : style3;
+    function processStyle(props, style4) {
+        var resolvedStyle = typeof style4 === "function" ? style4(props) : style4;
         if (Array.isArray(resolvedStyle)) {
             return resolvedStyle.flatMap(function(subStyle) {
                 return processStyle(props, subStyle);
@@ -31558,12 +31428,12 @@ var agent = function() {
         var smallestBreakpoint = breakpoints.keys[0];
         if (Array.isArray(responsive)) {
             responsive.forEach(function(breakpointValue, index) {
-                iterator(function(responsiveStyles, style3) {
+                iterator(function(responsiveStyles, style4) {
                     if (index <= breakpoints.keys.length - 1) {
                         if (index === 0) {
-                            Object.assign(responsiveStyles, style3);
+                            Object.assign(responsiveStyles, style4);
                         } else {
-                            responsiveStyles[breakpoints.up(breakpoints.keys[index])] = style3;
+                            responsiveStyles[breakpoints.up(breakpoints.keys[index])] = style4;
                         }
                     }
                 }, breakpointValue);
@@ -31574,19 +31444,19 @@ var agent = function() {
                 if (breakpoints.keys.includes(key)) {
                     var breakpointValue = responsive[key];
                     if (breakpointValue !== void 0) {
-                        iterator(function(responsiveStyles, style3) {
+                        iterator(function(responsiveStyles, style4) {
                             if (smallestBreakpoint === key) {
-                                Object.assign(responsiveStyles, style3);
+                                Object.assign(responsiveStyles, style4);
                             } else {
-                                responsiveStyles[breakpoints.up(key)] = style3;
+                                responsiveStyles[breakpoints.up(key)] = style4;
                             }
                         }, breakpointValue);
                     }
                 }
             });
         } else if (typeof responsive === "number" || typeof responsive === "string") {
-            iterator(function(responsiveStyles, style3) {
-                Object.assign(responsiveStyles, style3);
+            iterator(function(responsiveStyles, style4) {
+                Object.assign(responsiveStyles, style4);
             }, responsive);
         }
     };
@@ -31596,16 +31466,16 @@ var agent = function() {
         var theme = param.theme, ownerState = param.ownerState;
         var styles2 = {};
         traverseBreakpoints(theme.breakpoints, ownerState.size, function(appendStyle, value) {
-            var style3 = {};
+            var style4 = {};
             if (value === "grow") {
-                style3 = {
+                style4 = {
                     flexBasis: 0,
                     flexGrow: 1,
                     maxWidth: "100%"
                 };
             }
             if (value === "auto") {
-                style3 = {
+                style4 = {
                     flexBasis: "auto",
                     flexGrow: 0,
                     flexShrink: 0,
@@ -31614,13 +31484,13 @@ var agent = function() {
                 };
             }
             if (typeof value === "number") {
-                style3 = {
+                style4 = {
                     flexGrow: 0,
                     flexBasis: "auto",
                     width: "calc(100% * ".concat(value, " / var(").concat(parentColumnsVar, ") - (var(").concat(parentColumnsVar, ") - ").concat(value, ") * (var(").concat(getParentSpacingVar("column"), ") / var(").concat(parentColumnsVar, ")))")
                 };
             }
-            appendStyle(styles2, style3);
+            appendStyle(styles2, style4);
         });
         return styles2;
     };
@@ -31628,18 +31498,18 @@ var agent = function() {
         var theme = param.theme, ownerState = param.ownerState;
         var styles2 = {};
         traverseBreakpoints(theme.breakpoints, ownerState.offset, function(appendStyle, value) {
-            var style3 = {};
+            var style4 = {};
             if (value === "auto") {
-                style3 = {
+                style4 = {
                     marginLeft: "auto"
                 };
             }
             if (typeof value === "number") {
-                style3 = {
+                style4 = {
                     marginLeft: value === 0 ? "0px" : "calc(100% * ".concat(value, " / var(").concat(parentColumnsVar, ") + var(").concat(getParentSpacingVar("column"), ") * ").concat(value, " / var(").concat(parentColumnsVar, "))")
                 };
             }
-            appendStyle(styles2, style3);
+            appendStyle(styles2, style4);
         });
         return styles2;
     };
@@ -31770,6 +31640,87 @@ var agent = function() {
             return styles2.root;
         }
     });
+    // node_modules/@mui/system/esm/Stack/createStack.js
+    var React21 = __toESM(require_react());
+    var import_jsx_runtime6 = __toESM(require_jsx_runtime());
+    var defaultTheme2 = createTheme_default();
+    var defaultCreateStyledComponent2 = styled_default("div", {
+        name: "MuiStack",
+        slot: "Root",
+        overridesResolver: function(props, styles2) {
+            return styles2.root;
+        }
+    });
+    var getSideFromDirection = function(direction) {
+        return ({
+            row: "Left",
+            "row-reverse": "Right",
+            column: "Top",
+            "column-reverse": "Bottom"
+        })[direction];
+    };
+    var style3 = function(param) {
+        var ownerState = param.ownerState, theme = param.theme;
+        var styles2 = _object_spread({
+            display: "flex",
+            flexDirection: "column"
+        }, handleBreakpoints({
+            theme: theme
+        }, resolveBreakpointValues({
+            values: ownerState.direction,
+            breakpoints: theme.breakpoints.values
+        }), function(propValue) {
+            return {
+                flexDirection: propValue
+            };
+        }));
+        if (ownerState.spacing) {
+            var transformer3 = createUnarySpacing(theme);
+            var base = Object.keys(theme.breakpoints.values).reduce(function(acc, breakpoint) {
+                if (_type_of(ownerState.spacing) === "object" && ownerState.spacing[breakpoint] != null || _type_of(ownerState.direction) === "object" && ownerState.direction[breakpoint] != null) {
+                    acc[breakpoint] = true;
+                }
+                return acc;
+            }, {});
+            var directionValues = resolveBreakpointValues({
+                values: ownerState.direction,
+                base: base
+            });
+            var spacingValues = resolveBreakpointValues({
+                values: ownerState.spacing,
+                base: base
+            });
+            if ((typeof directionValues === "undefined" ? "undefined" : _type_of(directionValues)) === "object") {
+                Object.keys(directionValues).forEach(function(breakpoint, index, breakpoints) {
+                    var directionValue = directionValues[breakpoint];
+                    if (!directionValue) {
+                        var previousDirectionValue = index > 0 ? directionValues[breakpoints[index - 1]] : "column";
+                        directionValues[breakpoint] = previousDirectionValue;
+                    }
+                });
+            }
+            var styleFromPropValue = function(propValue, breakpoint) {
+                if (ownerState.useFlexGap) {
+                    return {
+                        gap: getValue(transformer3, propValue)
+                    };
+                }
+                return {
+                    // The useFlexGap={false} implement relies on each child to give up control of the margin.
+                    // We need to reset the margin to avoid double spacing.
+                    "& > :not(style):not(style)": {
+                        margin: 0
+                    },
+                    "& > :not(style) ~ :not(style)": _define_property({}, "margin".concat(getSideFromDirection(breakpoint ? directionValues[breakpoint] : ownerState.direction)), getValue(transformer3, propValue))
+                };
+            };
+            styles2 = deepmerge(styles2, handleBreakpoints({
+                theme: theme
+            }, spacingValues, styleFromPropValue));
+        }
+        styles2 = mergeBreakpointsInOrder(theme.breakpoints, styles2);
+        return styles2;
+    };
     var light = getLight();
     var dark = getDark();
     var caseAllCaps = {
@@ -31921,10 +31872,10 @@ var agent = function() {
         return createGetCssVar(cssVarPrefix);
     };
     // node_modules/@mui/material/styles/useTheme.js
-    var React21 = __toESM(require_react());
+    var React22 = __toESM(require_react());
     // node_modules/@mui/material/styles/defaultTheme.js
-    var defaultTheme2 = createTheme2();
-    var defaultTheme_default = defaultTheme2;
+    var defaultTheme3 = createTheme2();
+    var defaultTheme_default = defaultTheme3;
     var slotShouldForwardProp_default = slotShouldForwardProp;
     // node_modules/@mui/material/styles/rootShouldForwardProp.js
     var rootShouldForwardProp = function(prop) {
@@ -31941,18 +31892,18 @@ var agent = function() {
     // node_modules/@mui/material/utils/capitalize.js
     var capitalize_default = capitalize;
     // node_modules/@mui/material/utils/createSvgIcon.js
-    var React25 = __toESM(require_react());
+    var React26 = __toESM(require_react());
     // node_modules/@mui/material/SvgIcon/SvgIcon.js
-    var React24 = __toESM(require_react());
+    var React25 = __toESM(require_react());
     // node_modules/@mui/material/zero-styled/index.js
-    var React22 = __toESM(require_react());
-    var import_jsx_runtime6 = __toESM(require_jsx_runtime());
+    var React23 = __toESM(require_react());
+    var import_jsx_runtime7 = __toESM(require_jsx_runtime());
     // node_modules/@mui/material/utils/memoTheme.js
     var memoTheme = unstable_memoTheme;
     var memoTheme_default = memoTheme;
     // node_modules/@mui/material/DefaultPropsProvider/DefaultPropsProvider.js
-    var React23 = __toESM(require_react());
-    var import_jsx_runtime7 = __toESM(require_jsx_runtime());
+    var React24 = __toESM(require_react());
+    var import_jsx_runtime8 = __toESM(require_jsx_runtime());
     false ? DefaultPropsProvider.propTypes = {
         // ┌────────────────────────────── Warning ──────────────────────────────┐
         // │ These PropTypes are generated from the TypeScript type definitions. │
@@ -31978,7 +31929,7 @@ var agent = function() {
         "fontSizeLarge"
     ]);
     // node_modules/@mui/material/SvgIcon/SvgIcon.js
-    var import_jsx_runtime8 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime9 = __toESM(require_jsx_runtime());
     var useUtilityClasses = function(ownerState) {
         var color3 = ownerState.color, fontSize = ownerState.fontSize, classes = ownerState.classes;
         var slots = {
@@ -32101,7 +32052,7 @@ var agent = function() {
             ])
         };
     }));
-    var SvgIcon = /* @__PURE__ */ React24.forwardRef(function SvgIcon2(inProps, ref) {
+    var SvgIcon = /* @__PURE__ */ React25.forwardRef(function SvgIcon2(inProps, ref) {
         var props = useDefaultProps2({
             props: inProps,
             name: "MuiSvgIcon"
@@ -32117,7 +32068,7 @@ var agent = function() {
             "titleAccess",
             "viewBox"
         ]);
-        var hasSvgAsChild = /* @__PURE__ */ React24.isValidElement(children) && children.type === "svg";
+        var hasSvgAsChild = /* @__PURE__ */ React25.isValidElement(children) && children.type === "svg";
         var ownerState = _object_spread_props(_object_spread({}, props), {
             color: color3,
             component: component,
@@ -32132,7 +32083,7 @@ var agent = function() {
             more.viewBox = viewBox;
         }
         var classes = useUtilityClasses(ownerState);
-        return /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(SvgIconRoot, _object_spread_props(_object_spread({
+        return /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)(SvgIconRoot, _object_spread_props(_object_spread({
             as: component,
             className: clsx_default(classes.root, className),
             focusable: "false",
@@ -32144,7 +32095,7 @@ var agent = function() {
             ownerState: ownerState,
             children: [
                 hasSvgAsChild ? children.props.children : children,
-                titleAccess ? /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("title", {
+                titleAccess ? /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("title", {
                     children: titleAccess
                 }) : null
             ]
@@ -32242,7 +32193,7 @@ var agent = function() {
     SvgIcon.muiName = "SvgIcon";
     var SvgIcon_default = SvgIcon;
     // node_modules/@mui/material/utils/createSvgIcon.js
-    var import_jsx_runtime9 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime10 = __toESM(require_jsx_runtime());
     // node_modules/@mui/material/utils/useId.js
     var useId_default = useId;
     // node_modules/@mui/material/utils/useEventCallback.js
@@ -32830,7 +32781,7 @@ var agent = function() {
         return node2.scrollTop;
     };
     // node_modules/@mui/material/Paper/Paper.js
-    var React29 = __toESM(require_react());
+    var React30 = __toESM(require_react());
     var paperClasses = generateUtilityClasses("MuiPaper", [
         "root",
         "rounded",
@@ -32863,7 +32814,7 @@ var agent = function() {
         "elevation24"
     ]);
     // node_modules/@mui/material/Paper/Paper.js
-    var import_jsx_runtime10 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime11 = __toESM(require_jsx_runtime());
     var useUtilityClasses2 = function(ownerState) {
         var square = ownerState.square, elevation = ownerState.elevation, variant = ownerState.variant, classes = ownerState.classes;
         var slots = {
@@ -32924,7 +32875,7 @@ var agent = function() {
             ]
         };
     }));
-    var Paper = /* @__PURE__ */ React29.forwardRef(function Paper2(inProps, ref) {
+    var Paper = /* @__PURE__ */ React30.forwardRef(function Paper2(inProps, ref) {
         var _theme_vars_overlays;
         var props = useDefaultProps2({
             props: inProps,
@@ -32953,7 +32904,7 @@ var agent = function() {
                 ].join("\n"));
             }
         }
-        return /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(PaperRoot, _object_spread_props(_object_spread({
+        return /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(PaperRoot, _object_spread_props(_object_spread({
             as: component,
             ownerState: ownerState,
             className: clsx_default(classes.root, className),
@@ -33028,9 +32979,9 @@ var agent = function() {
     } : void 0;
     var Paper_default = Paper;
     // node_modules/@mui/material/ButtonBase/ButtonBase.js
-    var React33 = __toESM(require_react());
+    var React34 = __toESM(require_react());
     // node_modules/@mui/material/useLazyRipple/useLazyRipple.js
-    var React30 = __toESM(require_react());
+    var React31 = __toESM(require_react());
     var LazyRipple = /*#__PURE__*/ function() {
         function _LazyRipple() {
             var _this = this;
@@ -33116,10 +33067,10 @@ var agent = function() {
                 key: "use",
                 value: function use() {
                     var ripple = useLazyRef(_LazyRipple.create).current;
-                    var _React30_useState = _sliced_to_array(React30.useState(false), 2), shouldMount = _React30_useState[0], setShouldMount = _React30_useState[1];
+                    var _React31_useState = _sliced_to_array(React31.useState(false), 2), shouldMount = _React31_useState[0], setShouldMount = _React31_useState[1];
                     ripple.shouldMount = shouldMount;
                     ripple.setShouldMount = setShouldMount;
-                    React30.useEffect(ripple.mountEffect, [
+                    React31.useEffect(ripple.mountEffect, [
                         shouldMount
                     ]);
                     return ripple;
@@ -33129,10 +33080,10 @@ var agent = function() {
         return _LazyRipple;
     }();
     // node_modules/@mui/material/ButtonBase/TouchRipple.js
-    var React32 = __toESM(require_react());
+    var React33 = __toESM(require_react());
     // node_modules/@mui/material/ButtonBase/Ripple.js
-    var React31 = __toESM(require_react());
-    var import_jsx_runtime11 = __toESM(require_jsx_runtime());
+    var React32 = __toESM(require_react());
+    var import_jsx_runtime12 = __toESM(require_jsx_runtime());
     false ? Ripple.propTypes = {
         /**
      * Override or extend the styles applied to the component.
@@ -33173,7 +33124,7 @@ var agent = function() {
     ]);
     var touchRippleClasses_default = touchRippleClasses;
     // node_modules/@mui/material/ButtonBase/TouchRipple.js
-    var import_jsx_runtime12 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime13 = __toESM(require_jsx_runtime());
     var DURATION = 550;
     var DELAY_RIPPLE = 80;
     var enterKeyframe = keyframes(_templateObject());
@@ -33209,7 +33160,7 @@ var agent = function() {
         var theme = param.theme;
         return theme.transitions.easing.easeInOut;
     });
-    var TouchRipple = /* @__PURE__ */ React32.forwardRef(function TouchRipple2(inProps, ref) {
+    var TouchRipple = /* @__PURE__ */ React33.forwardRef(function TouchRipple2(inProps, ref) {
         var props = useDefaultProps2({
             props: inProps,
             name: "MuiTouchRipple"
@@ -33219,10 +33170,10 @@ var agent = function() {
             "classes",
             "className"
         ]);
-        var _React32_useState = _sliced_to_array(React32.useState([]), 2), ripples = _React32_useState[0], setRipples = _React32_useState[1];
-        var nextKey2 = React32.useRef(0);
-        var rippleCallback = React32.useRef(null);
-        React32.useEffect(function() {
+        var _React33_useState = _sliced_to_array(React33.useState([]), 2), ripples = _React33_useState[0], setRipples = _React33_useState[1];
+        var nextKey2 = React33.useRef(0);
+        var rippleCallback = React33.useRef(null);
+        React33.useEffect(function() {
             if (rippleCallback.current) {
                 rippleCallback.current();
                 rippleCallback.current = null;
@@ -33230,15 +33181,15 @@ var agent = function() {
         }, [
             ripples
         ]);
-        var ignoringMouseDown = React32.useRef(false);
+        var ignoringMouseDown = React33.useRef(false);
         var startTimer = useTimeout();
-        var startTimerCommit = React32.useRef(null);
-        var container2 = React32.useRef(null);
-        var startCommit = React32.useCallback(function(params) {
+        var startTimerCommit = React33.useRef(null);
+        var container2 = React33.useRef(null);
+        var startCommit = React33.useCallback(function(params) {
             var pulsate2 = params.pulsate, rippleX = params.rippleX, rippleY = params.rippleY, rippleSize = params.rippleSize, cb = params.cb;
             setRipples(function(oldRipples) {
                 return _to_consumable_array(oldRipples).concat([
-                    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(TouchRippleRipple, {
+                    /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(TouchRippleRipple, {
                         classes: {
                             ripple: clsx_default(classes.ripple, touchRippleClasses_default.ripple),
                             rippleVisible: clsx_default(classes.rippleVisible, touchRippleClasses_default.rippleVisible),
@@ -33260,7 +33211,7 @@ var agent = function() {
         }, [
             classes
         ]);
-        var start3 = React32.useCallback(function() {
+        var start3 = React33.useCallback(function() {
             var event = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {}, options = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {}, cb = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : function() {};
             var tmp = options.pulsate, pulsate2 = tmp === void 0 ? false : tmp, _options_center = options.center, center = _options_center === void 0 ? centerProp || options.pulsate : _options_center, _options_fakeElement = options.fakeElement, fakeElement = _options_fakeElement === void 0 ? false : _options_fakeElement;
             if ((event === null || event === void 0 ? void 0 : event.type) === "mousedown" && ignoringMouseDown.current) {
@@ -33330,14 +33281,14 @@ var agent = function() {
             startCommit,
             startTimer
         ]);
-        var pulsate = React32.useCallback(function() {
+        var pulsate = React33.useCallback(function() {
             start3({}, {
                 pulsate: true
             });
         }, [
             start3
         ]);
-        var stop2 = React32.useCallback(function(event, cb) {
+        var stop2 = React33.useCallback(function(event, cb) {
             startTimer.clear();
             if ((event === null || event === void 0 ? void 0 : event.type) === "touchend" && startTimerCommit.current) {
                 startTimerCommit.current();
@@ -33358,7 +33309,7 @@ var agent = function() {
         }, [
             startTimer
         ]);
-        React32.useImperativeHandle(ref, function() {
+        React33.useImperativeHandle(ref, function() {
             return {
                 pulsate: pulsate,
                 start: start3,
@@ -33369,11 +33320,11 @@ var agent = function() {
             start3,
             stop2
         ]);
-        return /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(TouchRippleRoot, _object_spread_props(_object_spread({
+        return /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(TouchRippleRoot, _object_spread_props(_object_spread({
             className: clsx_default(touchRippleClasses_default.root, classes.root, className),
             ref: container2
         }, other), {
-            children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(TransitionGroup_default, {
+            children: /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(TransitionGroup_default, {
                 component: null,
                 exit: true,
                 children: ripples
@@ -33400,7 +33351,7 @@ var agent = function() {
     ]);
     var buttonBaseClasses_default = buttonBaseClasses;
     // node_modules/@mui/material/ButtonBase/ButtonBase.js
-    var import_jsx_runtime13 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime14 = __toESM(require_jsx_runtime());
     var useUtilityClasses3 = function(ownerState) {
         var disabled = ownerState.disabled, focusVisible = ownerState.focusVisible, focusVisibleClassName = ownerState.focusVisibleClassName, classes = ownerState.classes;
         var slots = {
@@ -33460,7 +33411,7 @@ var agent = function() {
     }), _define_property(_obj, "@media print", {
         colorAdjust: "exact"
     }), _obj));
-    var ButtonBase = /* @__PURE__ */ React33.forwardRef(function ButtonBase2(inProps, ref) {
+    var ButtonBase = /* @__PURE__ */ React34.forwardRef(function ButtonBase2(inProps, ref) {
         var props = useDefaultProps2({
             props: inProps,
             name: "MuiButtonBase"
@@ -33496,14 +33447,14 @@ var agent = function() {
             "touchRippleRef",
             "type"
         ]);
-        var buttonRef = React33.useRef(null);
+        var buttonRef = React34.useRef(null);
         var ripple = useLazyRipple();
         var handleRippleRef = useForkRef_default(ripple.ref, touchRippleRef);
-        var _React33_useState = _sliced_to_array(React33.useState(false), 2), focusVisible = _React33_useState[0], setFocusVisible = _React33_useState[1];
+        var _React34_useState = _sliced_to_array(React34.useState(false), 2), focusVisible = _React34_useState[0], setFocusVisible = _React34_useState[1];
         if (disabled && focusVisible) {
             setFocusVisible(false);
         }
-        React33.useImperativeHandle(action, function() {
+        React34.useImperativeHandle(action, function() {
             return {
                 focusVisible: function() {
                     setFocusVisible(true);
@@ -33512,7 +33463,7 @@ var agent = function() {
             };
         }, []);
         var enableTouchRipple = ripple.shouldMount && !disableRipple && !disabled;
-        React33.useEffect(function() {
+        React34.useEffect(function() {
             if (focusVisible && focusRipple && !disableRipple) {
                 ripple.pulsate();
             }
@@ -33623,7 +33574,7 @@ var agent = function() {
             focusVisible: focusVisible
         });
         var classes = useUtilityClasses3(ownerState);
-        return /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(ButtonBaseRoot, _object_spread_props(_object_spread({
+        return /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(ButtonBaseRoot, _object_spread_props(_object_spread({
             as: ComponentProp,
             className: clsx_default(classes.root, className),
             ownerState: ownerState,
@@ -33646,7 +33597,7 @@ var agent = function() {
         }, buttonProps, other), {
             children: [
                 children,
-                enableTouchRipple ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(TouchRipple_default, _object_spread({
+                enableTouchRipple ? /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(TouchRipple_default, _object_spread({
                     ref: handleRippleRef,
                     center: centerRipple
                 }, TouchRippleProps)) : null
@@ -33799,9 +33750,9 @@ var agent = function() {
     } : void 0;
     var ButtonBase_default = ButtonBase;
     // node_modules/@mui/material/IconButton/IconButton.js
-    var React35 = __toESM(require_react());
+    var React36 = __toESM(require_react());
     // node_modules/@mui/material/CircularProgress/CircularProgress.js
-    var React34 = __toESM(require_react());
+    var React35 = __toESM(require_react());
     var circularProgressClasses = generateUtilityClasses("MuiCircularProgress", [
         "root",
         "determinate",
@@ -33815,7 +33766,7 @@ var agent = function() {
         "circleDisableShrink"
     ]);
     // node_modules/@mui/material/CircularProgress/CircularProgress.js
-    var import_jsx_runtime14 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime15 = __toESM(require_jsx_runtime());
     var SIZE = 44;
     var circularRotateKeyframe = keyframes(_templateObject4());
     var circularDashKeyframe = keyframes(_templateObject5());
@@ -33941,12 +33892,12 @@ var agent = function() {
             ]
         };
     }));
-    var CircularProgress = /* @__PURE__ */ React34.forwardRef(function CircularProgress2(inProps, ref) {
+    var CircularProgress = /* @__PURE__ */ React35.forwardRef(function CircularProgress2(inProps, ref) {
         var props = useDefaultProps2({
             props: inProps,
             name: "MuiCircularProgress"
         });
-        var className = props.className, tmp = props.color, color3 = tmp === void 0 ? "primary" : tmp, _props_disableShrink = props.disableShrink, disableShrink = _props_disableShrink === void 0 ? false : _props_disableShrink, _props_size = props.size, size = _props_size === void 0 ? 40 : _props_size, style3 = props.style, _props_thickness = props.thickness, thickness = _props_thickness === void 0 ? 3.6 : _props_thickness, _props_value = props.value, value = _props_value === void 0 ? 0 : _props_value, _props_variant = props.variant, variant = _props_variant === void 0 ? "indeterminate" : _props_variant, other = _object_without_properties(props, [
+        var className = props.className, tmp = props.color, color3 = tmp === void 0 ? "primary" : tmp, _props_disableShrink = props.disableShrink, disableShrink = _props_disableShrink === void 0 ? false : _props_disableShrink, _props_size = props.size, size = _props_size === void 0 ? 40 : _props_size, style4 = props.style, _props_thickness = props.thickness, thickness = _props_thickness === void 0 ? 3.6 : _props_thickness, _props_value = props.value, value = _props_value === void 0 ? 0 : _props_value, _props_variant = props.variant, variant = _props_variant === void 0 ? "indeterminate" : _props_variant, other = _object_without_properties(props, [
             "className",
             "color",
             "disableShrink",
@@ -33975,21 +33926,21 @@ var agent = function() {
             circleStyle.strokeDashoffset = "".concat(((100 - value) / 100 * circumference).toFixed(3), "px");
             rootStyle.transform = "rotate(-90deg)";
         }
-        return /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(CircularProgressRoot, _object_spread_props(_object_spread({
+        return /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(CircularProgressRoot, _object_spread_props(_object_spread({
             className: clsx_default(classes.root, className),
             style: _object_spread({
                 width: size,
                 height: size
-            }, rootStyle, style3),
+            }, rootStyle, style4),
             ownerState: ownerState,
             ref: ref,
             role: "progressbar"
         }, rootProps, other), {
-            children: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(CircularProgressSVG, {
+            children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(CircularProgressSVG, {
                 className: classes.svg,
                 ownerState: ownerState,
                 viewBox: "".concat(SIZE / 2, " ").concat(SIZE / 2, " ").concat(SIZE, " ").concat(SIZE),
-                children: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(CircularProgressCircle, {
+                children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(CircularProgressCircle, {
                     className: classes.circle,
                     style: circleStyle,
                     ownerState: ownerState,
@@ -34103,7 +34054,7 @@ var agent = function() {
     ]);
     var iconButtonClasses_default = iconButtonClasses;
     // node_modules/@mui/material/IconButton/IconButton.js
-    var import_jsx_runtime15 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime16 = __toESM(require_jsx_runtime());
     var useUtilityClasses5 = function(ownerState) {
         var classes = ownerState.classes, disabled = ownerState.disabled, color3 = ownerState.color, edge = ownerState.edge, size = ownerState.size, loading = ownerState.loading;
         var slots = {
@@ -34289,7 +34240,7 @@ var agent = function() {
             ]
         };
     });
-    var IconButton = /* @__PURE__ */ React35.forwardRef(function IconButton2(inProps, ref) {
+    var IconButton = /* @__PURE__ */ React36.forwardRef(function IconButton2(inProps, ref) {
         var props = useDefaultProps2({
             props: inProps,
             name: "MuiIconButton"
@@ -34307,7 +34258,7 @@ var agent = function() {
             "loadingIndicator"
         ]);
         var loadingId = useId_default(idProp);
-        var loadingIndicator = loadingIndicatorProp !== null && loadingIndicatorProp !== void 0 ? loadingIndicatorProp : /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(CircularProgress_default, {
+        var loadingIndicator = loadingIndicatorProp !== null && loadingIndicatorProp !== void 0 ? loadingIndicatorProp : /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(CircularProgress_default, {
             "aria-labelledby": loadingId,
             color: "inherit",
             size: 16
@@ -34322,7 +34273,7 @@ var agent = function() {
             size: size
         });
         var classes = useUtilityClasses5(ownerState);
-        return /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(IconButtonRoot, _object_spread_props(_object_spread({
+        return /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(IconButtonRoot, _object_spread_props(_object_spread({
             id: loading ? loadingId : idProp,
             className: clsx_default(classes.root, className),
             centerRipple: true,
@@ -34333,12 +34284,12 @@ var agent = function() {
             ownerState: ownerState,
             children: [
                 typeof loading === "boolean" && // use plain HTML span to minimize the runtime overhead
-                /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("span", {
+                /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("span", {
                     className: classes.loadingWrapper,
                     style: {
                         display: "contents"
                     },
-                    children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(IconButtonLoadingIndicator, {
+                    children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(IconButtonLoadingIndicator, {
                         className: classes.loadingIndicator,
                         ownerState: ownerState,
                         children: loading && loadingIndicator
@@ -34356,8 +34307,8 @@ var agent = function() {
         /**
      * The icon to display.
      */ children: chainPropTypes(import_prop_types.default.node, function(props) {
-            var found = React35.Children.toArray(props.children).some(function(child) {
-                return /* @__PURE__ */ React35.isValidElement(child) && child.props.onClick;
+            var found = React36.Children.toArray(props.children).some(function(child) {
+                return /* @__PURE__ */ React36.isValidElement(child) && child.props.onClick;
             });
             if (found) {
                 return new Error([
@@ -34458,7 +34409,7 @@ var agent = function() {
     } : void 0;
     var IconButton_default = IconButton;
     // node_modules/@mui/material/Typography/Typography.js
-    var React36 = __toESM(require_react());
+    var React37 = __toESM(require_react());
     var typographyClasses = generateUtilityClasses("MuiTypography", [
         "root",
         "h1",
@@ -34484,7 +34435,7 @@ var agent = function() {
         "paragraph"
     ]);
     // node_modules/@mui/material/Typography/Typography.js
-    var import_jsx_runtime16 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime17 = __toESM(require_jsx_runtime());
     var v6Colors = {
         primary: true,
         secondary: true,
@@ -34631,7 +34582,7 @@ var agent = function() {
         body2: "p",
         inherit: "p"
     };
-    var Typography = /* @__PURE__ */ React36.forwardRef(function Typography2(inProps, ref) {
+    var Typography = /* @__PURE__ */ React37.forwardRef(function Typography2(inProps, ref) {
         var _useDefaultProps2 = useDefaultProps2({
             props: inProps,
             name: "MuiTypography"
@@ -34665,7 +34616,7 @@ var agent = function() {
         });
         var Component = component || (paragraph ? "p" : variantMapping[variant] || defaultVariantMapping[variant]) || "span";
         var classes = useUtilityClasses6(ownerState);
-        return /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(TypographyRoot, _object_spread_props(_object_spread({
+        return /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(TypographyRoot, _object_spread_props(_object_spread({
             as: Component,
             ref: ref,
             className: clsx_default(classes.root, className)
@@ -34796,9 +34747,9 @@ var agent = function() {
     } : void 0;
     var Typography_default = Typography;
     // node_modules/@mui/material/Popper/Popper.js
-    var React39 = __toESM(require_react());
+    var React40 = __toESM(require_react());
     // node_modules/@mui/material/Popper/BasePopper.js
-    var React38 = __toESM(require_react());
+    var React39 = __toESM(require_react());
     // node_modules/@popperjs/core/lib/enums.js
     var top = "top";
     var bottom = "bottom";
@@ -35022,12 +34973,12 @@ var agent = function() {
         defaultModifiers: defaultModifiers
     });
     // node_modules/@mui/material/Portal/Portal.js
-    var React37 = __toESM(require_react());
+    var React38 = __toESM(require_react());
     var ReactDOM2 = __toESM(require_react_dom());
-    var Portal = /* @__PURE__ */ React37.forwardRef(function Portal2(props, forwardedRef) {
+    var Portal = /* @__PURE__ */ React38.forwardRef(function Portal2(props, forwardedRef) {
         var children = props.children, container2 = props.container, _props_disablePortal = props.disablePortal, disablePortal = _props_disablePortal === void 0 ? false : _props_disablePortal;
-        var _React37_useState = _sliced_to_array(React37.useState(null), 2), mountNode = _React37_useState[0], setMountNode = _React37_useState[1];
-        var handleRef = useForkRef(/* @__PURE__ */ React37.isValidElement(children) ? getReactElementRef(children) : null, forwardedRef);
+        var _React38_useState = _sliced_to_array(React38.useState(null), 2), mountNode = _React38_useState[0], setMountNode = _React38_useState[1];
+        var handleRef = useForkRef(/* @__PURE__ */ React38.isValidElement(children) ? getReactElementRef(children) : null, forwardedRef);
         useEnhancedEffect_default(function() {
             if (!disablePortal) {
                 setMountNode(getContainer(container2) || document.body);
@@ -35050,11 +35001,11 @@ var agent = function() {
             disablePortal
         ]);
         if (disablePortal) {
-            if (/* @__PURE__ */ React37.isValidElement(children)) {
+            if (/* @__PURE__ */ React38.isValidElement(children)) {
                 var newProps = {
                     ref: handleRef
                 };
-                return /* @__PURE__ */ React37.cloneElement(children, newProps);
+                return /* @__PURE__ */ React38.cloneElement(children, newProps);
             }
             return children;
         }
@@ -35094,7 +35045,7 @@ var agent = function() {
         "root"
     ]);
     // node_modules/@mui/material/Popper/BasePopper.js
-    var import_jsx_runtime17 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime18 = __toESM(require_jsx_runtime());
     var useUtilityClasses7 = function(ownerState) {
         var classes = ownerState.classes;
         var slots = {
@@ -35105,7 +35056,7 @@ var agent = function() {
         return composeClasses(slots, getPopperUtilityClass, classes);
     };
     var defaultPopperOptions = {};
-    var PopperTooltip = /* @__PURE__ */ React38.forwardRef(function PopperTooltip2(props, forwardedRef) {
+    var PopperTooltip = /* @__PURE__ */ React39.forwardRef(function PopperTooltip2(props, forwardedRef) {
         var anchorEl = props.anchorEl, children = props.children, direction = props.direction, disablePortal = props.disablePortal, modifiers = props.modifiers, open = props.open, initialPlacement = props.placement, popperOptions = props.popperOptions, popperRefProp = props.popperRef, _props_slotProps = props.slotProps, slotProps = _props_slotProps === void 0 ? {} : _props_slotProps, _props_slots = props.slots, slots = _props_slots === void 0 ? {} : _props_slots, TransitionProps = props.TransitionProps, // @ts-ignore internal logic
         ownerStateProp = props.ownerState, other = _object_without_properties(props, [
             "anchorEl",
@@ -35122,28 +35073,28 @@ var agent = function() {
             "TransitionProps",
             "ownerState"
         ]);
-        var tooltipRef = React38.useRef(null);
+        var tooltipRef = React39.useRef(null);
         var ownRef = useForkRef(tooltipRef, forwardedRef);
-        var popperRef = React38.useRef(null);
+        var popperRef = React39.useRef(null);
         var handlePopperRef = useForkRef(popperRef, popperRefProp);
-        var handlePopperRefRef = React38.useRef(handlePopperRef);
+        var handlePopperRefRef = React39.useRef(handlePopperRef);
         useEnhancedEffect_default(function() {
             handlePopperRefRef.current = handlePopperRef;
         }, [
             handlePopperRef
         ]);
-        React38.useImperativeHandle(popperRefProp, function() {
+        React39.useImperativeHandle(popperRefProp, function() {
             return popperRef.current;
         }, []);
         var rtlPlacement = flipPlacement(initialPlacement, direction);
-        var _React38_useState = _sliced_to_array(React38.useState(rtlPlacement), 2), placement = _React38_useState[0], setPlacement = _React38_useState[1];
-        var _React38_useState1 = _sliced_to_array(React38.useState(resolveAnchorEl(anchorEl)), 2), resolvedAnchorElement = _React38_useState1[0], setResolvedAnchorElement = _React38_useState1[1];
-        React38.useEffect(function() {
+        var _React39_useState = _sliced_to_array(React39.useState(rtlPlacement), 2), placement = _React39_useState[0], setPlacement = _React39_useState[1];
+        var _React39_useState1 = _sliced_to_array(React39.useState(resolveAnchorEl(anchorEl)), 2), resolvedAnchorElement = _React39_useState1[0], setResolvedAnchorElement = _React39_useState1[1];
+        React39.useEffect(function() {
             if (popperRef.current) {
                 popperRef.current.forceUpdate();
             }
         });
-        React38.useEffect(function() {
+        React39.useEffect(function() {
             if (anchorEl) {
                 setResolvedAnchorElement(resolveAnchorEl(anchorEl));
             }
@@ -35236,12 +35187,12 @@ var agent = function() {
             ownerState: props,
             className: classes.root
         });
-        return /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Root2, _object_spread_props(_object_spread({}, rootProps), {
+        return /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Root2, _object_spread_props(_object_spread({}, rootProps), {
             children: typeof children === "function" ? children(childProps) : children
         }));
     });
-    var Popper = /* @__PURE__ */ React38.forwardRef(function Popper2(props, forwardedRef) {
-        var anchorEl = props.anchorEl, children = props.children, containerProp = props.container, _props_direction = props.direction, direction = _props_direction === void 0 ? "ltr" : _props_direction, _props_disablePortal = props.disablePortal, disablePortal = _props_disablePortal === void 0 ? false : _props_disablePortal, _props_keepMounted = props.keepMounted, keepMounted = _props_keepMounted === void 0 ? false : _props_keepMounted, modifiers = props.modifiers, open = props.open, _props_placement = props.placement, placement = _props_placement === void 0 ? "bottom" : _props_placement, _props_popperOptions = props.popperOptions, popperOptions = _props_popperOptions === void 0 ? defaultPopperOptions : _props_popperOptions, popperRef = props.popperRef, style3 = props.style, _props_transition = props.transition, transition = _props_transition === void 0 ? false : _props_transition, _props_slotProps = props.slotProps, slotProps = _props_slotProps === void 0 ? {} : _props_slotProps, _props_slots = props.slots, slots = _props_slots === void 0 ? {} : _props_slots, other = _object_without_properties(props, [
+    var Popper = /* @__PURE__ */ React39.forwardRef(function Popper2(props, forwardedRef) {
+        var anchorEl = props.anchorEl, children = props.children, containerProp = props.container, _props_direction = props.direction, direction = _props_direction === void 0 ? "ltr" : _props_direction, _props_disablePortal = props.disablePortal, disablePortal = _props_disablePortal === void 0 ? false : _props_disablePortal, _props_keepMounted = props.keepMounted, keepMounted = _props_keepMounted === void 0 ? false : _props_keepMounted, modifiers = props.modifiers, open = props.open, _props_placement = props.placement, placement = _props_placement === void 0 ? "bottom" : _props_placement, _props_popperOptions = props.popperOptions, popperOptions = _props_popperOptions === void 0 ? defaultPopperOptions : _props_popperOptions, popperRef = props.popperRef, style4 = props.style, _props_transition = props.transition, transition = _props_transition === void 0 ? false : _props_transition, _props_slotProps = props.slotProps, slotProps = _props_slotProps === void 0 ? {} : _props_slotProps, _props_slots = props.slots, slots = _props_slots === void 0 ? {} : _props_slots, other = _object_without_properties(props, [
             "anchorEl",
             "children",
             "container",
@@ -35258,7 +35209,7 @@ var agent = function() {
             "slotProps",
             "slots"
         ]);
-        var _React38_useState = _sliced_to_array(React38.useState(true), 2), exited = _React38_useState[0], setExited = _React38_useState[1];
+        var _React39_useState = _sliced_to_array(React39.useState(true), 2), exited = _React39_useState[0], setExited = _React39_useState[1];
         var handleEnter = function() {
             setExited(false);
         };
@@ -35281,10 +35232,10 @@ var agent = function() {
             onEnter: handleEnter,
             onExited: handleExited
         } : void 0;
-        return /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Portal_default, {
+        return /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Portal_default, {
             disablePortal: disablePortal,
             container: container2,
-            children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(PopperTooltip, _object_spread_props(_object_spread({
+            children: /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(PopperTooltip, _object_spread_props(_object_spread({
                 anchorEl: anchorEl,
                 direction: direction,
                 disablePortal: disablePortal,
@@ -35304,7 +35255,7 @@ var agent = function() {
                     top: 0,
                     left: 0,
                     display: display
-                }, style3),
+                }, style4),
                 TransitionProps: transitionProps,
                 children: children
             }))
@@ -35488,7 +35439,7 @@ var agent = function() {
     } : void 0;
     var BasePopper_default = Popper;
     // node_modules/@mui/material/Popper/Popper.js
-    var import_jsx_runtime18 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime19 = __toESM(require_jsx_runtime());
     var PopperRoot = styled_default2(BasePopper_default, {
         name: "MuiPopper",
         slot: "Root",
@@ -35496,7 +35447,7 @@ var agent = function() {
             return styles2.root;
         }
     })({});
-    var Popper3 = /* @__PURE__ */ React39.forwardRef(function Popper4(inProps, ref) {
+    var Popper3 = /* @__PURE__ */ React40.forwardRef(function Popper4(inProps, ref) {
         var isRtl = useRtl();
         var props = useDefaultProps2({
             props: inProps,
@@ -35533,7 +35484,7 @@ var agent = function() {
             popperRef: popperRef,
             transition: transition
         }, other);
-        return /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(PopperRoot, _object_spread_props(_object_spread({
+        return /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(PopperRoot, _object_spread_props(_object_spread({
             as: component,
             direction: isRtl ? "rtl" : "ltr",
             slots: {
@@ -35729,10 +35680,10 @@ var agent = function() {
     } : void 0;
     var Popper_default = Popper3;
     // node_modules/@mui/material/Backdrop/Backdrop.js
-    var React41 = __toESM(require_react());
+    var React42 = __toESM(require_react());
     // node_modules/@mui/material/Fade/Fade.js
-    var React40 = __toESM(require_react());
-    var import_jsx_runtime19 = __toESM(require_jsx_runtime());
+    var React41 = __toESM(require_react());
+    var import_jsx_runtime20 = __toESM(require_jsx_runtime());
     var styles = {
         entering: {
             opacity: 1
@@ -35741,13 +35692,13 @@ var agent = function() {
             opacity: 1
         }
     };
-    var Fade = /* @__PURE__ */ React40.forwardRef(function Fade2(props, ref) {
+    var Fade = /* @__PURE__ */ React41.forwardRef(function Fade2(props, ref) {
         var theme = useTheme4();
         var defaultTimeout = {
             enter: theme.transitions.duration.enteringScreen,
             exit: theme.transitions.duration.leavingScreen
         };
-        var addEndListener = props.addEndListener, _props_appear = props.appear, appear = _props_appear === void 0 ? true : _props_appear, children = props.children, easing2 = props.easing, inProp = props.in, onEnter = props.onEnter, onEntered = props.onEntered, onEntering = props.onEntering, onExit = props.onExit, onExited = props.onExited, onExiting = props.onExiting, style3 = props.style, tmp = props.timeout, timeout2 = tmp === void 0 ? defaultTimeout : tmp, _props_TransitionComponent = props.// eslint-disable-next-line react/prop-types
+        var addEndListener = props.addEndListener, _props_appear = props.appear, appear = _props_appear === void 0 ? true : _props_appear, children = props.children, easing2 = props.easing, inProp = props.in, onEnter = props.onEnter, onEntered = props.onEntered, onEntering = props.onEntering, onExit = props.onExit, onExited = props.onExited, onExiting = props.onExiting, style4 = props.style, tmp = props.timeout, timeout2 = tmp === void 0 ? defaultTimeout : tmp, _props_TransitionComponent = props.// eslint-disable-next-line react/prop-types
         TransitionComponent, TransitionComponent = _props_TransitionComponent === void 0 ? Transition_default : _props_TransitionComponent, other = _object_without_properties(props, [
             "addEndListener",
             "appear",
@@ -35765,7 +35716,7 @@ var agent = function() {
             "TransitionComponent"
         ]);
         var enableStrictModeCompat = true;
-        var nodeRef = React40.useRef(null);
+        var nodeRef = React41.useRef(null);
         var handleRef = useForkRef_default(nodeRef, getReactElementRef(children), ref);
         var normalizedTransitionCallback = function(callback) {
             return function(maybeIsAppearing) {
@@ -35783,7 +35734,7 @@ var agent = function() {
         var handleEnter = normalizedTransitionCallback(function(node2, isAppearing) {
             reflow(node2);
             var transitionProps = getTransitionProps({
-                style: style3,
+                style: style4,
                 timeout: timeout2,
                 easing: easing2
             }, {
@@ -35799,7 +35750,7 @@ var agent = function() {
         var handleExiting = normalizedTransitionCallback(onExiting);
         var handleExit = normalizedTransitionCallback(function(node2) {
             var transitionProps = getTransitionProps({
-                style: style3,
+                style: style4,
                 timeout: timeout2,
                 easing: easing2
             }, {
@@ -35817,7 +35768,7 @@ var agent = function() {
                 addEndListener(nodeRef.current, next2);
             }
         };
-        return /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(TransitionComponent, _object_spread_props(_object_spread({
+        return /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(TransitionComponent, _object_spread_props(_object_spread({
             appear: appear,
             in: inProp,
             nodeRef: enableStrictModeCompat ? nodeRef : void 0,
@@ -35834,11 +35785,11 @@ var agent = function() {
                 var ownerState = _param.ownerState, restChildProps = _object_without_properties(_param, [
                     "ownerState"
                 ]);
-                return /* @__PURE__ */ React40.cloneElement(children, _object_spread({
+                return /* @__PURE__ */ React41.cloneElement(children, _object_spread({
                     style: _object_spread({
                         opacity: 0,
                         visibility: state === "exited" && !inProp ? "hidden" : void 0
-                    }, styles[state], style3, children.props.style),
+                    }, styles[state], style4, children.props.style),
                     ref: handleRef
                 }, restChildProps));
             }
@@ -35918,7 +35869,7 @@ var agent = function() {
         "invisible"
     ]);
     // node_modules/@mui/material/Backdrop/Backdrop.js
-    var import_jsx_runtime20 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime21 = __toESM(require_jsx_runtime());
     var useUtilityClasses8 = function(ownerState) {
         var classes = ownerState.classes, invisible = ownerState.invisible;
         var slots = {
@@ -35961,7 +35912,7 @@ var agent = function() {
             }
         ]
     });
-    var Backdrop = /* @__PURE__ */ React41.forwardRef(function Backdrop2(inProps, ref) {
+    var Backdrop = /* @__PURE__ */ React42.forwardRef(function Backdrop2(inProps, ref) {
         var props = useDefaultProps2({
             props: inProps,
             name: "MuiBackdrop"
@@ -36004,11 +35955,11 @@ var agent = function() {
             externalForwardedProps: externalForwardedProps,
             ownerState: ownerState
         }), 2), TransitionSlot = _useSlot1[0], transitionProps = _useSlot1[1];
-        return /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(TransitionSlot, _object_spread_props(_object_spread({
+        return /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(TransitionSlot, _object_spread_props(_object_spread({
             in: open,
             timeout: transitionDuration
         }, other, transitionProps), {
-            children: /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(RootSlot, _object_spread_props(_object_spread({
+            children: /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(RootSlot, _object_spread_props(_object_spread({
                 "aria-hidden": true
             }, rootProps), {
                 classes: classes,
@@ -36113,7 +36064,7 @@ var agent = function() {
     } : void 0;
     var Backdrop_default = Backdrop;
     // node_modules/@mui/material/Badge/Badge.js
-    var React42 = __toESM(require_react());
+    var React43 = __toESM(require_react());
     var useBadge_default = useBadge;
     var badgeClasses = generateUtilityClasses("MuiBadge", [
         "root",
@@ -36145,7 +36096,7 @@ var agent = function() {
     ]);
     var badgeClasses_default = badgeClasses;
     // node_modules/@mui/material/Badge/Badge.js
-    var import_jsx_runtime21 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime22 = __toESM(require_jsx_runtime());
     var RADIUS_STANDARD = 10;
     var RADIUS_DOT = 4;
     var useUtilityClasses9 = function(ownerState) {
@@ -36368,7 +36319,7 @@ var agent = function() {
             ])
         };
     }));
-    var Badge = /* @__PURE__ */ React42.forwardRef(function Badge2(inProps, ref) {
+    var Badge = /* @__PURE__ */ React43.forwardRef(function Badge2(inProps, ref) {
         var props = useDefaultProps2({
             props: inProps,
             name: "MuiBadge"
@@ -36445,10 +36396,10 @@ var agent = function() {
             ownerState: ownerState,
             className: clsx_default(classes.badge, badgeSlotProps === null || badgeSlotProps === void 0 ? void 0 : badgeSlotProps.className)
         });
-        return /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)(RootSlot, _object_spread_props(_object_spread({}, rootProps), {
+        return /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)(RootSlot, _object_spread_props(_object_spread({}, rootProps), {
             children: [
                 children,
-                /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(BadgeSlot, _object_spread_props(_object_spread({}, badgeProps), {
+                /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(BadgeSlot, _object_spread_props(_object_spread({}, badgeProps), {
                     children: displayValue
                 }))
             ]
@@ -36604,10 +36555,10 @@ var agent = function() {
     ]);
     var boxClasses_default = boxClasses;
     // node_modules/@mui/material/Box/Box.js
-    var defaultTheme3 = createTheme2();
+    var defaultTheme4 = createTheme2();
     var Box = createBox({
         themeId: identifier_default,
-        defaultTheme: defaultTheme3,
+        defaultTheme: defaultTheme4,
         defaultClassName: boxClasses_default.root,
         generateClassName: ClassNameGenerator_default.generate
     });
@@ -36637,7 +36588,7 @@ var agent = function() {
     } : void 0;
     var Box_default = Box;
     // node_modules/@mui/material/Button/Button.js
-    var React45 = __toESM(require_react());
+    var React46 = __toESM(require_react());
     var buttonClasses = generateUtilityClasses("MuiButton", [
         "root",
         "text",
@@ -36703,21 +36654,21 @@ var agent = function() {
     ]);
     var buttonClasses_default = buttonClasses;
     // node_modules/@mui/material/ButtonGroup/ButtonGroupContext.js
-    var React43 = __toESM(require_react());
-    var ButtonGroupContext = /* @__PURE__ */ React43.createContext({});
+    var React44 = __toESM(require_react());
+    var ButtonGroupContext = /* @__PURE__ */ React44.createContext({});
     if (false) {
         ButtonGroupContext.displayName = "ButtonGroupContext";
     }
     var ButtonGroupContext_default = ButtonGroupContext;
     // node_modules/@mui/material/ButtonGroup/ButtonGroupButtonContext.js
-    var React44 = __toESM(require_react());
-    var ButtonGroupButtonContext = /* @__PURE__ */ React44.createContext(void 0);
+    var React45 = __toESM(require_react());
+    var ButtonGroupButtonContext = /* @__PURE__ */ React45.createContext(void 0);
     if (false) {
         ButtonGroupButtonContext.displayName = "ButtonGroupButtonContext";
     }
     var ButtonGroupButtonContext_default = ButtonGroupButtonContext;
     // node_modules/@mui/material/Button/Button.js
-    var import_jsx_runtime22 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime23 = __toESM(require_jsx_runtime());
     var useUtilityClasses10 = function(ownerState) {
         var color3 = ownerState.color, disableElevation = ownerState.disableElevation, fullWidth = ownerState.fullWidth, size = ownerState.size, variant = ownerState.variant, loading = ownerState.loading, loadingPosition = ownerState.loadingPosition, classes = ownerState.classes;
         var slots = {
@@ -37245,9 +37196,9 @@ var agent = function() {
         width: "1em",
         height: "1em"
     });
-    var Button = /* @__PURE__ */ React45.forwardRef(function Button2(inProps, ref) {
-        var contextProps = React45.useContext(ButtonGroupContext_default);
-        var buttonGroupButtonContextPositionClassName = React45.useContext(ButtonGroupButtonContext_default);
+    var Button = /* @__PURE__ */ React46.forwardRef(function Button2(inProps, ref) {
+        var contextProps = React46.useContext(ButtonGroupContext_default);
+        var buttonGroupButtonContextPositionClassName = React46.useContext(ButtonGroupButtonContext_default);
         var resolvedProps = resolveProps(contextProps, inProps);
         var props = useDefaultProps2({
             props: resolvedProps,
@@ -37274,7 +37225,7 @@ var agent = function() {
             "variant"
         ]);
         var loadingId = useId_default(idProp);
-        var loadingIndicator = loadingIndicatorProp !== null && loadingIndicatorProp !== void 0 ? loadingIndicatorProp : /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(CircularProgress_default, {
+        var loadingIndicator = loadingIndicatorProp !== null && loadingIndicatorProp !== void 0 ? loadingIndicatorProp : /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(CircularProgress_default, {
             "aria-labelledby": loadingId,
             color: "inherit",
             size: 16
@@ -37294,36 +37245,36 @@ var agent = function() {
             variant: variant
         });
         var classes = useUtilityClasses10(ownerState);
-        var startIcon = (startIconProp || loading && loadingPosition === "start") && /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(ButtonStartIcon, {
+        var startIcon = (startIconProp || loading && loadingPosition === "start") && /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(ButtonStartIcon, {
             className: classes.startIcon,
             ownerState: ownerState,
-            children: startIconProp || /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(ButtonLoadingIconPlaceholder, {
+            children: startIconProp || /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(ButtonLoadingIconPlaceholder, {
                 className: classes.loadingIconPlaceholder,
                 ownerState: ownerState
             })
         });
-        var endIcon = (endIconProp || loading && loadingPosition === "end") && /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(ButtonEndIcon, {
+        var endIcon = (endIconProp || loading && loadingPosition === "end") && /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(ButtonEndIcon, {
             className: classes.endIcon,
             ownerState: ownerState,
-            children: endIconProp || /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(ButtonLoadingIconPlaceholder, {
+            children: endIconProp || /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(ButtonLoadingIconPlaceholder, {
                 className: classes.loadingIconPlaceholder,
                 ownerState: ownerState
             })
         });
         var positionClassName = buttonGroupButtonContextPositionClassName || "";
         var loader = typeof loading === "boolean" ? // use plain HTML span to minimize the runtime overhead
-        /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("span", {
+        /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("span", {
             className: classes.loadingWrapper,
             style: {
                 display: "contents"
             },
-            children: loading && /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(ButtonLoadingIndicator, {
+            children: loading && /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(ButtonLoadingIndicator, {
                 className: classes.loadingIndicator,
                 ownerState: ownerState,
                 children: loadingIndicator
             })
         }) : null;
-        return /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)(ButtonRoot, _object_spread_props(_object_spread({
+        return /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)(ButtonRoot, _object_spread_props(_object_spread({
             ownerState: ownerState,
             className: clsx_default(contextProps.className, classes.root, className, positionClassName),
             component: component,
@@ -37484,7 +37435,7 @@ var agent = function() {
     } : void 0;
     var Button_default = Button;
     // node_modules/@mui/material/Dialog/Dialog.js
-    var React50 = __toESM(require_react());
+    var React51 = __toESM(require_react());
     var ModalManager = /*#__PURE__*/ function() {
         function ModalManager() {
             _class_call_check(this, ModalManager);
@@ -37578,10 +37529,10 @@ var agent = function() {
         return ModalManager;
     }();
     // node_modules/@mui/material/Modal/Modal.js
-    var React48 = __toESM(require_react());
+    var React49 = __toESM(require_react());
     // node_modules/@mui/material/Unstable_TrapFocus/FocusTrap.js
-    var React46 = __toESM(require_react());
-    var import_jsx_runtime23 = __toESM(require_jsx_runtime());
+    var React47 = __toESM(require_react());
+    var import_jsx_runtime24 = __toESM(require_jsx_runtime());
     var candidatesSelector = [
         "input",
         "select",
@@ -37645,7 +37596,7 @@ var agent = function() {
     }
     var FocusTrap_default = FocusTrap;
     // node_modules/@mui/material/Modal/useModal.js
-    var React47 = __toESM(require_react());
+    var React48 = __toESM(require_react());
     var noop2 = function() {};
     var manager = new ModalManager();
     var useModal_default = useModal;
@@ -37655,7 +37606,7 @@ var agent = function() {
         "backdrop"
     ]);
     // node_modules/@mui/material/Modal/Modal.js
-    var import_jsx_runtime24 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime25 = __toESM(require_jsx_runtime());
     var useUtilityClasses11 = function(ownerState) {
         var open = ownerState.open, exited = ownerState.exited, classes = ownerState.classes;
         var slots = {
@@ -37710,7 +37661,7 @@ var agent = function() {
     })({
         zIndex: -1
     });
-    var Modal = /* @__PURE__ */ React48.forwardRef(function Modal2(inProps, ref) {
+    var Modal = /* @__PURE__ */ React49.forwardRef(function Modal2(inProps, ref) {
         var props = useDefaultProps2({
             name: "MuiModal",
             props: inProps
@@ -37812,20 +37763,20 @@ var agent = function() {
         if (!keepMounted && !open && (!hasTransition || exited)) {
             return null;
         }
-        return /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(Portal_default, {
+        return /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(Portal_default, {
             ref: portalRef,
             container: container2,
             disablePortal: disablePortal,
-            children: /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)(RootSlot, _object_spread_props(_object_spread({}, rootProps), {
+            children: /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)(RootSlot, _object_spread_props(_object_spread({}, rootProps), {
                 children: [
-                    !hideBackdrop && BackdropComponent ? /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(BackdropSlot, _object_spread({}, backdropProps)) : null,
-                    /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(FocusTrap_default, {
+                    !hideBackdrop && BackdropComponent ? /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(BackdropSlot, _object_spread({}, backdropProps)) : null,
+                    /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(FocusTrap_default, {
                         disableEnforceFocus: disableEnforceFocus,
                         disableAutoFocus: disableAutoFocus,
                         disableRestoreFocus: disableRestoreFocus,
                         isEnabled: isTopModal,
                         open: open,
-                        children: /* @__PURE__ */ React48.cloneElement(children, childProps)
+                        children: /* @__PURE__ */ React49.cloneElement(children, childProps)
                     })
                 ]
             }))
@@ -38027,14 +37978,14 @@ var agent = function() {
     ]);
     var dialogClasses_default = dialogClasses;
     // node_modules/@mui/material/Dialog/DialogContext.js
-    var React49 = __toESM(require_react());
-    var DialogContext = /* @__PURE__ */ React49.createContext({});
+    var React50 = __toESM(require_react());
+    var DialogContext = /* @__PURE__ */ React50.createContext({});
     if (false) {
         DialogContext.displayName = "DialogContext";
     }
     var DialogContext_default = DialogContext;
     // node_modules/@mui/material/Dialog/Dialog.js
-    var import_jsx_runtime25 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime26 = __toESM(require_jsx_runtime());
     var DialogBackdrop = styled_default2(Backdrop_default, {
         name: "MuiDialog",
         slot: "Backdrop",
@@ -38230,7 +38181,7 @@ var agent = function() {
             ])
         };
     }));
-    var Dialog = /* @__PURE__ */ React50.forwardRef(function Dialog2(inProps, ref) {
+    var Dialog = /* @__PURE__ */ React51.forwardRef(function Dialog2(inProps, ref) {
         var props = useDefaultProps2({
             props: inProps,
             name: "MuiDialog"
@@ -38273,7 +38224,7 @@ var agent = function() {
             scroll: scroll
         });
         var classes = useUtilityClasses12(ownerState);
-        var backdropClick = React50.useRef();
+        var backdropClick = React51.useRef();
         var handleMouseDown = function(event) {
             backdropClick.current = event.target === event.currentTarget;
         };
@@ -38293,7 +38244,7 @@ var agent = function() {
             }
         };
         var ariaLabelledby = useId(ariaLabelledbyProp);
-        var dialogContextValue = React50.useMemo(function() {
+        var dialogContextValue = React51.useMemo(function() {
             return {
                 titleId: ariaLabelledby
             };
@@ -38350,7 +38301,7 @@ var agent = function() {
                 role: "presentation"
             }
         }), 2), TransitionSlot = _useSlot4[0], transitionSlotProps = _useSlot4[1];
-        return /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(RootSlot, _object_spread_props(_object_spread({
+        return /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(RootSlot, _object_spread_props(_object_spread({
             closeAfterTransition: true,
             slots: {
                 backdrop: BackdropSlot
@@ -38366,11 +38317,11 @@ var agent = function() {
             open: open,
             onClick: handleBackdropClick
         }, rootSlotProps, other), {
-            children: /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(TransitionSlot, _object_spread_props(_object_spread({}, transitionSlotProps), {
-                children: /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(ContainerSlot, _object_spread_props(_object_spread({
+            children: /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(TransitionSlot, _object_spread_props(_object_spread({}, transitionSlotProps), {
+                children: /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(ContainerSlot, _object_spread_props(_object_spread({
                     onMouseDown: handleMouseDown
                 }, containerSlotProps), {
-                    children: /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(PaperSlot, _object_spread_props(_object_spread({
+                    children: /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(PaperSlot, _object_spread_props(_object_spread({
                         as: PaperComponent,
                         elevation: 24,
                         role: "dialog",
@@ -38378,7 +38329,7 @@ var agent = function() {
                         "aria-labelledby": ariaLabelledby,
                         "aria-modal": ariaModal
                     }, paperSlotProps), {
-                        children: /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(DialogContext_default.Provider, {
+                        children: /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(DialogContext_default.Provider, {
                             value: dialogContextValue,
                             children: children
                         })
@@ -38572,13 +38523,13 @@ var agent = function() {
     } : void 0;
     var Dialog_default = Dialog;
     // node_modules/@mui/material/DialogActions/DialogActions.js
-    var React51 = __toESM(require_react());
+    var React52 = __toESM(require_react());
     var dialogActionsClasses = generateUtilityClasses("MuiDialogActions", [
         "root",
         "spacing"
     ]);
     // node_modules/@mui/material/DialogActions/DialogActions.js
-    var import_jsx_runtime26 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime27 = __toESM(require_jsx_runtime());
     var useUtilityClasses13 = function(ownerState) {
         var classes = ownerState.classes, disableSpacing = ownerState.disableSpacing;
         var slots = {
@@ -38619,7 +38570,7 @@ var agent = function() {
             }
         ]
     });
-    var DialogActions = /* @__PURE__ */ React51.forwardRef(function DialogActions2(inProps, ref) {
+    var DialogActions = /* @__PURE__ */ React52.forwardRef(function DialogActions2(inProps, ref) {
         var props = useDefaultProps2({
             props: inProps,
             name: "MuiDialogActions"
@@ -38632,7 +38583,7 @@ var agent = function() {
             disableSpacing: disableSpacing
         });
         var classes = useUtilityClasses13(ownerState);
-        return /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(DialogActionsRoot, _object_spread({
+        return /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(DialogActionsRoot, _object_spread({
             className: clsx_default(classes.root, className),
             ownerState: ownerState,
             ref: ref
@@ -38670,7 +38621,7 @@ var agent = function() {
     } : void 0;
     var DialogActions_default = DialogActions;
     // node_modules/@mui/material/DialogContent/DialogContent.js
-    var React52 = __toESM(require_react());
+    var React53 = __toESM(require_react());
     var dialogContentClasses = generateUtilityClasses("MuiDialogContent", [
         "root",
         "dividers"
@@ -38680,7 +38631,7 @@ var agent = function() {
     ]);
     var dialogTitleClasses_default = dialogTitleClasses;
     // node_modules/@mui/material/DialogContent/DialogContent.js
-    var import_jsx_runtime27 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime28 = __toESM(require_jsx_runtime());
     var useUtilityClasses14 = function(ownerState) {
         var classes = ownerState.classes, dividers = ownerState.dividers;
         var slots = {
@@ -38733,7 +38684,7 @@ var agent = function() {
             ]
         };
     }));
-    var DialogContent = /* @__PURE__ */ React52.forwardRef(function DialogContent2(inProps, ref) {
+    var DialogContent = /* @__PURE__ */ React53.forwardRef(function DialogContent2(inProps, ref) {
         var props = useDefaultProps2({
             props: inProps,
             name: "MuiDialogContent"
@@ -38746,7 +38697,7 @@ var agent = function() {
             dividers: dividers
         });
         var classes = useUtilityClasses14(ownerState);
-        return /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(DialogContentRoot, _object_spread({
+        return /* @__PURE__ */ (0, import_jsx_runtime28.jsx)(DialogContentRoot, _object_spread({
             className: clsx_default(classes.root, className),
             ownerState: ownerState,
             ref: ref
@@ -38784,8 +38735,8 @@ var agent = function() {
     } : void 0;
     var DialogContent_default = DialogContent;
     // node_modules/@mui/material/DialogTitle/DialogTitle.js
-    var React53 = __toESM(require_react());
-    var import_jsx_runtime28 = __toESM(require_jsx_runtime());
+    var React54 = __toESM(require_react());
+    var import_jsx_runtime29 = __toESM(require_jsx_runtime());
     var useUtilityClasses15 = function(ownerState) {
         var classes = ownerState.classes;
         var slots = {
@@ -38805,7 +38756,7 @@ var agent = function() {
         padding: "16px 24px",
         flex: "0 0 auto"
     });
-    var DialogTitle = /* @__PURE__ */ React53.forwardRef(function DialogTitle2(inProps, ref) {
+    var DialogTitle = /* @__PURE__ */ React54.forwardRef(function DialogTitle2(inProps, ref) {
         var props = useDefaultProps2({
             props: inProps,
             name: "MuiDialogTitle"
@@ -38816,8 +38767,8 @@ var agent = function() {
         ]);
         var ownerState = props;
         var classes = useUtilityClasses15(ownerState);
-        var _React53_useContext = React53.useContext(DialogContext_default), _React53_useContext_titleId = _React53_useContext.titleId, titleId = _React53_useContext_titleId === void 0 ? idProp : _React53_useContext_titleId;
-        return /* @__PURE__ */ (0, import_jsx_runtime28.jsx)(DialogTitleRoot, _object_spread({
+        var _React54_useContext = React54.useContext(DialogContext_default), _React54_useContext_titleId = _React54_useContext.titleId, titleId = _React54_useContext_titleId === void 0 ? idProp : _React54_useContext_titleId;
+        return /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(DialogTitleRoot, _object_spread({
             component: "h2",
             className: clsx_default(classes.root, className),
             ownerState: ownerState,
@@ -39038,7 +38989,7 @@ var agent = function() {
     }
     var Grid2_default = Grid2;
     // node_modules/@mui/material/NoSsr/NoSsr.js
-    var React54 = __toESM(require_react());
+    var React55 = __toESM(require_react());
     false ? NoSsr.propTypes = {
         // ┌────────────────────────────── Warning ──────────────────────────────┐
         // │ These PropTypes are generated from the TypeScript type definitions. │
@@ -39061,11 +39012,95 @@ var agent = function() {
         NoSsr["propTypes"] = exactProp(NoSsr.propTypes);
     }
     var NoSsr_default = NoSsr;
+    // node_modules/@mui/material/Stack/Stack.js
+    var Stack = createStack({
+        createStyledComponent: styled_default2("div", {
+            name: "MuiStack",
+            slot: "Root",
+            overridesResolver: function(props, styles2) {
+                return styles2.root;
+            }
+        }),
+        useThemeProps: function(inProps) {
+            return useDefaultProps2({
+                props: inProps,
+                name: "MuiStack"
+            });
+        }
+    });
+    false ? Stack.propTypes = {
+        // ┌────────────────────────────── Warning ──────────────────────────────┐
+        // │ These PropTypes are generated from the TypeScript type definitions. │
+        // │    To update them, edit the d.ts file and run `pnpm proptypes`.     │
+        // └─────────────────────────────────────────────────────────────────────┘
+        /**
+     * The content of the component.
+     */ children: import_prop_types.default.node,
+        /**
+     * The component used for the root node.
+     * Either a string to use a HTML element or a component.
+     */ component: import_prop_types.default.elementType,
+        /**
+     * Defines the `flex-direction` style property.
+     * It is applied for all screen sizes.
+     * @default 'column'
+     */ direction: import_prop_types.default.oneOfType([
+            import_prop_types.default.oneOf([
+                "column-reverse",
+                "column",
+                "row-reverse",
+                "row"
+            ]),
+            import_prop_types.default.arrayOf(import_prop_types.default.oneOf([
+                "column-reverse",
+                "column",
+                "row-reverse",
+                "row"
+            ])),
+            import_prop_types.default.object
+        ]),
+        /**
+     * Add an element between each child.
+     */ divider: import_prop_types.default.node,
+        /**
+     * Defines the space between immediate children.
+     * @default 0
+     */ spacing: import_prop_types.default.oneOfType([
+            import_prop_types.default.arrayOf(import_prop_types.default.oneOfType([
+                import_prop_types.default.number,
+                import_prop_types.default.string
+            ])),
+            import_prop_types.default.number,
+            import_prop_types.default.object,
+            import_prop_types.default.string
+        ]),
+        /**
+     * The system prop, which allows defining system overrides as well as additional CSS styles.
+     */ sx: import_prop_types.default.oneOfType([
+            import_prop_types.default.arrayOf(import_prop_types.default.oneOfType([
+                import_prop_types.default.func,
+                import_prop_types.default.object,
+                import_prop_types.default.bool
+            ])),
+            import_prop_types.default.func,
+            import_prop_types.default.object
+        ]),
+        /**
+     * If `true`, the CSS flexbox `gap` is used instead of applying `margin` to children.
+     *
+     * While CSS `gap` removes the [known limitations](https://mui.com/joy-ui/react-stack/#limitations),
+     * it is not fully supported in some browsers. We recommend checking https://caniuse.com/?search=flex%20gap before using this flag.
+     *
+     * To enable this flag globally, follow the [theme's default props](https://mui.com/material-ui/customization/theme-components/#default-props) configuration.
+     * @default false
+     */ useFlexGap: import_prop_types.default.bool
+    } : void 0;
+    var Stack_default = Stack;
     // node_modules/@mui/material/Table/Table.js
-    var React56 = __toESM(require_react());
+    var React57 = __toESM(require_react());
     // node_modules/@mui/material/Table/TableContext.js
-    var React55 = __toESM(require_react());
-    var TableContext = /* @__PURE__ */ React55.createContext();
+    var React56 = __toESM(require_react());
+    var TableContext = /* @__PURE__ */ React56.createContext();
     if (false) {
         TableContext.displayName = "TableContext";
     }
@@ -39075,7 +39110,7 @@ var agent = function() {
         "stickyHeader"
     ]);
     // node_modules/@mui/material/Table/Table.js
-    var import_jsx_runtime29 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime30 = __toESM(require_jsx_runtime());
     var useUtilityClasses16 = function(ownerState) {
         var classes = ownerState.classes, stickyHeader = ownerState.stickyHeader;
         var slots = {
@@ -39123,7 +39158,7 @@ var agent = function() {
         };
     }));
     var defaultComponent = "table";
-    var Table = /* @__PURE__ */ React56.forwardRef(function Table2(inProps, ref) {
+    var Table = /* @__PURE__ */ React57.forwardRef(function Table2(inProps, ref) {
         var props = useDefaultProps2({
             props: inProps,
             name: "MuiTable"
@@ -39142,7 +39177,7 @@ var agent = function() {
             stickyHeader: stickyHeader
         });
         var classes = useUtilityClasses16(ownerState);
-        var table = React56.useMemo(function() {
+        var table = React57.useMemo(function() {
             return {
                 padding: padding2,
                 size: size,
@@ -39153,9 +39188,9 @@ var agent = function() {
             size,
             stickyHeader
         ]);
-        return /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(TableContext_default.Provider, {
+        return /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(TableContext_default.Provider, {
             value: table,
-            children: /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(TableRoot, _object_spread({
+            children: /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(TableRoot, _object_spread({
                 as: component,
                 role: component === defaultComponent ? null : "table",
                 ref: ref,
@@ -39218,10 +39253,10 @@ var agent = function() {
     } : void 0;
     var Table_default = Table;
     // node_modules/@mui/material/TableBody/TableBody.js
-    var React58 = __toESM(require_react());
+    var React59 = __toESM(require_react());
     // node_modules/@mui/material/Table/Tablelvl2Context.js
-    var React57 = __toESM(require_react());
-    var Tablelvl2Context = /* @__PURE__ */ React57.createContext();
+    var React58 = __toESM(require_react());
+    var Tablelvl2Context = /* @__PURE__ */ React58.createContext();
     if (false) {
         Tablelvl2Context.displayName = "Tablelvl2Context";
     }
@@ -39230,7 +39265,7 @@ var agent = function() {
         "root"
     ]);
     // node_modules/@mui/material/TableBody/TableBody.js
-    var import_jsx_runtime30 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime31 = __toESM(require_jsx_runtime());
     var useUtilityClasses17 = function(ownerState) {
         var classes = ownerState.classes;
         var slots = {
@@ -39253,7 +39288,7 @@ var agent = function() {
         variant: "body"
     };
     var defaultComponent2 = "tbody";
-    var TableBody = /* @__PURE__ */ React58.forwardRef(function TableBody2(inProps, ref) {
+    var TableBody = /* @__PURE__ */ React59.forwardRef(function TableBody2(inProps, ref) {
         var props = useDefaultProps2({
             props: inProps,
             name: "MuiTableBody"
@@ -39266,9 +39301,9 @@ var agent = function() {
             component: component
         });
         var classes = useUtilityClasses17(ownerState);
-        return /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(Tablelvl2Context_default.Provider, {
+        return /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(Tablelvl2Context_default.Provider, {
             value: tablelvl2,
-            children: /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(TableBodyRoot, _object_spread({
+            children: /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(TableBodyRoot, _object_spread({
                 className: clsx_default(classes.root, className),
                 as: component,
                 ref: ref,
@@ -39309,7 +39344,7 @@ var agent = function() {
     } : void 0;
     var TableBody_default = TableBody;
     // node_modules/@mui/material/TableCell/TableCell.js
-    var React59 = __toESM(require_react());
+    var React60 = __toESM(require_react());
     var tableCellClasses = generateUtilityClasses("MuiTableCell", [
         "root",
         "head",
@@ -39327,7 +39362,7 @@ var agent = function() {
     ]);
     var tableCellClasses_default = tableCellClasses;
     // node_modules/@mui/material/TableCell/TableCell.js
-    var import_jsx_runtime31 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime32 = __toESM(require_jsx_runtime());
     var useUtilityClasses18 = function(ownerState) {
         var classes = ownerState.classes, variant = ownerState.variant, align = ownerState.align, padding2 = ownerState.padding, size = ownerState.size, stickyHeader = ownerState.stickyHeader;
         var slots = {
@@ -39476,7 +39511,7 @@ var agent = function() {
             ]
         });
     }));
-    var TableCell = /* @__PURE__ */ React59.forwardRef(function TableCell2(inProps, ref) {
+    var TableCell = /* @__PURE__ */ React60.forwardRef(function TableCell2(inProps, ref) {
         var props = useDefaultProps2({
             props: inProps,
             name: "MuiTableCell"
@@ -39491,8 +39526,8 @@ var agent = function() {
             "sortDirection",
             "variant"
         ]);
-        var table = React59.useContext(TableContext_default);
-        var tablelvl23 = React59.useContext(Tablelvl2Context_default);
+        var table = React60.useContext(TableContext_default);
+        var tablelvl23 = React60.useContext(Tablelvl2Context_default);
         var isHeadCell = tablelvl23 && tablelvl23.variant === "head";
         var component;
         if (componentProp) {
@@ -39521,7 +39556,7 @@ var agent = function() {
         if (sortDirection) {
             ariaSort = sortDirection === "asc" ? "ascending" : "descending";
         }
-        return /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(TableCellRoot, _object_spread({
+        return /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(TableCellRoot, _object_spread({
             as: component,
             ref: ref,
             className: clsx_default(classes.root, className),
@@ -39614,12 +39649,12 @@ var agent = function() {
     } : void 0;
     var TableCell_default = TableCell;
     // node_modules/@mui/material/TableContainer/TableContainer.js
-    var React60 = __toESM(require_react());
+    var React61 = __toESM(require_react());
     var tableContainerClasses = generateUtilityClasses("MuiTableContainer", [
         "root"
     ]);
     // node_modules/@mui/material/TableContainer/TableContainer.js
-    var import_jsx_runtime32 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime33 = __toESM(require_jsx_runtime());
     var useUtilityClasses19 = function(ownerState) {
         var classes = ownerState.classes;
         var slots = {
@@ -39639,7 +39674,7 @@ var agent = function() {
         width: "100%",
         overflowX: "auto"
     });
-    var TableContainer = /* @__PURE__ */ React60.forwardRef(function TableContainer2(inProps, ref) {
+    var TableContainer = /* @__PURE__ */ React61.forwardRef(function TableContainer2(inProps, ref) {
         var props = useDefaultProps2({
             props: inProps,
             name: "MuiTableContainer"
@@ -39652,7 +39687,7 @@ var agent = function() {
             component: component
         });
         var classes = useUtilityClasses19(ownerState);
-        return /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(TableContainerRoot, _object_spread({
+        return /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(TableContainerRoot, _object_spread({
             ref: ref,
             as: component,
             className: clsx_default(classes.root, className),
@@ -39691,12 +39726,12 @@ var agent = function() {
     } : void 0;
     var TableContainer_default = TableContainer;
     // node_modules/@mui/material/TableHead/TableHead.js
-    var React61 = __toESM(require_react());
+    var React62 = __toESM(require_react());
     var tableHeadClasses = generateUtilityClasses("MuiTableHead", [
         "root"
     ]);
     // node_modules/@mui/material/TableHead/TableHead.js
-    var import_jsx_runtime33 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime34 = __toESM(require_jsx_runtime());
     var useUtilityClasses20 = function(ownerState) {
         var classes = ownerState.classes;
         var slots = {
@@ -39719,7 +39754,7 @@ var agent = function() {
         variant: "head"
     };
     var defaultComponent3 = "thead";
-    var TableHead = /* @__PURE__ */ React61.forwardRef(function TableHead2(inProps, ref) {
+    var TableHead = /* @__PURE__ */ React62.forwardRef(function TableHead2(inProps, ref) {
         var props = useDefaultProps2({
             props: inProps,
             name: "MuiTableHead"
@@ -39732,9 +39767,9 @@ var agent = function() {
             component: component
         });
         var classes = useUtilityClasses20(ownerState);
-        return /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(Tablelvl2Context_default.Provider, {
+        return /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(Tablelvl2Context_default.Provider, {
             value: tablelvl22,
-            children: /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(TableHeadRoot, _object_spread({
+            children: /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(TableHeadRoot, _object_spread({
                 as: component,
                 className: clsx_default(classes.root, className),
                 ref: ref,
@@ -39775,7 +39810,7 @@ var agent = function() {
     } : void 0;
     var TableHead_default = TableHead;
     // node_modules/@mui/material/TableRow/TableRow.js
-    var React62 = __toESM(require_react());
+    var React63 = __toESM(require_react());
     var tableRowClasses = generateUtilityClasses("MuiTableRow", [
         "root",
         "selected",
@@ -39785,7 +39820,7 @@ var agent = function() {
     ]);
     var tableRowClasses_default = tableRowClasses;
     // node_modules/@mui/material/TableRow/TableRow.js
-    var import_jsx_runtime34 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime35 = __toESM(require_jsx_runtime());
     var useUtilityClasses21 = function(ownerState) {
         var classes = ownerState.classes, selected = ownerState.selected, hover = ownerState.hover, head = ownerState.head, footer = ownerState.footer;
         var slots = {
@@ -39829,7 +39864,7 @@ var agent = function() {
         }), _obj;
     }));
     var defaultComponent4 = "tr";
-    var TableRow = /* @__PURE__ */ React62.forwardRef(function TableRow2(inProps, ref) {
+    var TableRow = /* @__PURE__ */ React63.forwardRef(function TableRow2(inProps, ref) {
         var props = useDefaultProps2({
             props: inProps,
             name: "MuiTableRow"
@@ -39840,7 +39875,7 @@ var agent = function() {
             "hover",
             "selected"
         ]);
-        var tablelvl23 = React62.useContext(Tablelvl2Context_default);
+        var tablelvl23 = React63.useContext(Tablelvl2Context_default);
         var ownerState = _object_spread_props(_object_spread({}, props), {
             component: component,
             hover: hover,
@@ -39849,7 +39884,7 @@ var agent = function() {
             footer: tablelvl23 && tablelvl23.variant === "footer"
         });
         var classes = useUtilityClasses21(ownerState);
-        return /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(TableRowRoot, _object_spread({
+        return /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(TableRowRoot, _object_spread({
             as: component,
             ref: ref,
             className: clsx_default(classes.root, className),
@@ -39897,11 +39932,11 @@ var agent = function() {
     } : void 0;
     var TableRow_default = TableRow;
     // node_modules/@mui/material/TableSortLabel/TableSortLabel.js
-    var React64 = __toESM(require_react());
+    var React65 = __toESM(require_react());
     // node_modules/@mui/material/internal/svg-icons/ArrowDownward.js
-    var React63 = __toESM(require_react());
-    var import_jsx_runtime35 = __toESM(require_jsx_runtime());
-    var ArrowDownward_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime35.jsx)("path", {
+    var React64 = __toESM(require_react());
+    var import_jsx_runtime36 = __toESM(require_jsx_runtime());
+    var ArrowDownward_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime36.jsx)("path", {
         d: "M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
     }), "ArrowDownward");
     var tableSortLabelClasses = generateUtilityClasses("MuiTableSortLabel", [
@@ -39915,7 +39950,7 @@ var agent = function() {
     ]);
     var tableSortLabelClasses_default = tableSortLabelClasses;
     // node_modules/@mui/material/TableSortLabel/TableSortLabel.js
-    var import_jsx_runtime36 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime37 = __toESM(require_jsx_runtime());
     var useUtilityClasses22 = function(ownerState) {
         var classes = ownerState.classes, direction = ownerState.direction, active = ownerState.active;
         var slots = {
@@ -40008,7 +40043,7 @@ var agent = function() {
             ]
         };
     }));
-    var TableSortLabel = /* @__PURE__ */ React64.forwardRef(function TableSortLabel2(inProps, ref) {
+    var TableSortLabel = /* @__PURE__ */ React65.forwardRef(function TableSortLabel2(inProps, ref) {
         var props = useDefaultProps2({
             props: inProps,
             name: "MuiTableSortLabel"
@@ -40047,13 +40082,13 @@ var agent = function() {
             ownerState: ownerState,
             className: classes.icon
         }), 2), IconSlot = _useSlot1[0], iconProps = _useSlot1[1];
-        return /* @__PURE__ */ (0, import_jsx_runtime36.jsxs)(RootSlot, _object_spread_props(_object_spread({
+        return /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)(RootSlot, _object_spread_props(_object_spread({
             disableRipple: true,
             component: "span"
         }, rootProps, other), {
             children: [
                 children,
-                hideSortIcon && !active ? null : /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(IconSlot, _object_spread({
+                hideSortIcon && !active ? null : /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(IconSlot, _object_spread({
                     as: IconComponent
                 }, iconProps))
             ]
@@ -40189,14 +40224,12 @@ var agent = function() {
         };
     };
     // src/Components/Poppers/BasePopper.tsx
-    var import_jsx_runtime37 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime38 = __toESM(require_jsx_runtime());
     var BasePopper = function(param) {
         var anchor = param.anchor, children = param.children;
-        return /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(Popper_default, {
+        return /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(Popper_default, {
             sx: {
-                zIndex: function(theme) {
-                    return theme.zIndex.drawer + 1;
-                }
+                zIndex: 1700
             },
             open: true,
             anchorEl: anchor,
@@ -40218,54 +40251,57 @@ var agent = function() {
         });
     };
     // node_modules/@mui/icons-material/esm/Close.js
-    var import_jsx_runtime38 = __toESM(require_jsx_runtime());
-    var Close_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime38.jsx)("path", {
+    var import_jsx_runtime39 = __toESM(require_jsx_runtime());
+    var Close_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime39.jsx)("path", {
         d: "M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
     }), "Close");
     // src/Components/Modals/BaseModal.tsx
-    var import_jsx_runtime39 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime40 = __toESM(require_jsx_runtime());
     var BaseModal = function(props) {
         var children = props.children, title = props.title, modal = props.modal, setModal = props.setModal, maxWidth2 = props.maxWidth, onCancel = props.onCancel, contentSx = props.contentSx;
         var onClose = function() {
             return onCancel ? onCancel() : setModal(false);
         };
-        return /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)(Dialog_default, {
+        return /* @__PURE__ */ (0, import_jsx_runtime40.jsxs)(Dialog_default, {
+            sx: {
+                zIndex: 1900
+            },
             open: modal,
             onClose: onClose,
             scroll: "paper",
             fullWidth: true,
             maxWidth: maxWidth2,
             children: [
-                /* @__PURE__ */ (0, import_jsx_runtime39.jsxs)(Box_default, {
+                /* @__PURE__ */ (0, import_jsx_runtime40.jsxs)(Box_default, {
                     sx: {
                         display: "flex",
                         alignItems: "center"
                     },
                     children: [
-                        /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(DialogTitle_default, {
+                        /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(DialogTitle_default, {
                             children: title
                         }),
-                        /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Box_default, {
+                        /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(Box_default, {
                             sx: {
                                 flexGrow: 1
                             }
                         }),
-                        /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(IconButton_default, {
+                        /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(IconButton_default, {
                             sx: {
                                 mr: 2
                             },
                             onClick: onClose,
-                            children: /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Close_default, {})
+                            children: /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(Close_default, {})
                         })
                     ]
                 }),
-                /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(DialogContent_default, {
+                /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(DialogContent_default, {
                     dividers: true,
                     sx: contentSx,
                     children: children
                 }),
-                /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(DialogActions_default, {
-                    children: /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(Button_default, {
+                /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(DialogActions_default, {
+                    children: /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(Button_default, {
                         onClick: onClose,
                         children: "Cancel"
                     })
@@ -40275,17 +40311,17 @@ var agent = function() {
     };
     // src/Components/Views/WidgetInfoRowsView.tsx
     var import_react11 = __toESM(require_react());
-    var import_jsx_runtime40 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime41 = __toESM(require_jsx_runtime());
     var WidgetInfoRowsView = function(props) {
         var children = props.children, containerSx = props.containerSx;
-        return /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(Grid2_default, {
+        return /* @__PURE__ */ (0, import_jsx_runtime41.jsx)(Grid2_default, {
             container: true,
             spacing: 1,
             sx: _object_spread({
                 mt: 2
             }, containerSx),
             children: import_react11.Children.map(children, function(child, index) {
-                return child && /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(Grid2_default, {
+                return child && /* @__PURE__ */ (0, import_jsx_runtime41.jsx)(Grid2_default, {
                     size: {
                         xs: 12
                     },
@@ -40295,13 +40331,13 @@ var agent = function() {
         });
     };
     // node_modules/@mui/icons-material/esm/ContentCopy.js
-    var import_jsx_runtime41 = __toESM(require_jsx_runtime());
-    var ContentCopy_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime41.jsx)("path", {
+    var import_jsx_runtime42 = __toESM(require_jsx_runtime());
+    var ContentCopy_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime42.jsx)("path", {
         d: "M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"
     }), "ContentCopy");
     // src/Components/Views/BaseInfoRowView.tsx
     var import_react12 = __toESM(require_react());
-    var import_jsx_runtime42 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime43 = __toESM(require_jsx_runtime());
     var BaseInfoRowView = function(props) {
         var name = props.name, icon = props.icon, value = props.value, _props_noWrap = props.noWrap, noWrap = _props_noWrap === void 0 ? false : _props_noWrap, _props_allowCopy = props.allowCopy, allowCopy = _props_allowCopy === void 0 ? true : _props_allowCopy, _props_component = props.component, component = _props_component === void 0 ? false : _props_component, containerSx = props.containerSx;
         var internalValue = (0, import_react12.useMemo)(function() {
@@ -40330,13 +40366,13 @@ var agent = function() {
                 return _ref.apply(this, arguments);
             };
         }();
-        return /* @__PURE__ */ (0, import_jsx_runtime42.jsxs)(Box_default, {
+        return /* @__PURE__ */ (0, import_jsx_runtime43.jsxs)(Box_default, {
             sx: _object_spread({
                 display: "flex",
                 alignItems: "center"
             }, containerSx),
             children: [
-                /* @__PURE__ */ (0, import_jsx_runtime42.jsxs)(Typography_default, {
+                /* @__PURE__ */ (0, import_jsx_runtime43.jsxs)(Typography_default, {
                     noWrap: noWrap,
                     sx: {
                         display: "flex",
@@ -40350,17 +40386,17 @@ var agent = function() {
                         icon
                     ]
                 }),
-                Boolean(value) && allowCopy && /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(Box_default, {
+                Boolean(value) && allowCopy && /* @__PURE__ */ (0, import_jsx_runtime43.jsx)(Box_default, {
                     sx: {
                         display: "flex"
                     },
-                    children: /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(IconButton_default, {
+                    children: /* @__PURE__ */ (0, import_jsx_runtime43.jsx)(IconButton_default, {
                         size: "small",
                         sx: {
                             ml: 1
                         },
                         onClick: onCopy,
-                        children: /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(ContentCopy_default, {
+                        children: /* @__PURE__ */ (0, import_jsx_runtime43.jsx)(ContentCopy_default, {
                             fontSize: "small"
                         })
                     })
@@ -40371,7 +40407,7 @@ var agent = function() {
     // src/Components/Charts/Agent/Elements/ElementHistoryChartView.tsx
     var import_react28 = __toESM(require_react());
     // node_modules/@mui/x-charts/BarChart/BarPlot.js
-    var React102 = __toESM(require_react());
+    var React103 = __toESM(require_react());
     // node_modules/@react-spring/rafz/dist/react-spring_rafz.modern.mjs
     var updateQueue = makeQueue();
     var raf = function(fn2) {
@@ -41076,7 +41112,7 @@ var agent = function() {
     // node_modules/@react-spring/core/dist/react-spring_core.modern.mjs
     var import_react22 = __toESM(require_react(), 1);
     // node_modules/@react-spring/animated/dist/react-spring_animated.modern.mjs
-    var React65 = __toESM(require_react(), 1);
+    var React66 = __toESM(require_react(), 1);
     var import_react21 = __toESM(require_react(), 1);
     var $node = Symbol.for("Animated:node");
     var isAnimated = function(value) {
@@ -41410,7 +41446,7 @@ var agent = function() {
                 };
             });
             var usedProps = host2.getComponentProps(props.getValue());
-            return /* @__PURE__ */ React65.createElement(Component, _object_spread_props(_object_spread({}, usedProps), {
+            return /* @__PURE__ */ React66.createElement(Component, _object_spread_props(_object_spread({}, usedProps), {
                 ref: ref
             }));
         });
@@ -41437,8 +41473,8 @@ var agent = function() {
     var createHost = function(components) {
         var _ref = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {}, tmp = _ref.applyAnimatedValues, applyAnimatedValues2 = tmp === void 0 ? function() {
             return false;
-        } : tmp, _ref_createAnimatedStyle = _ref.createAnimatedStyle, createAnimatedStyle = _ref_createAnimatedStyle === void 0 ? function(style3) {
-            return new AnimatedObject(style3);
+        } : tmp, _ref_createAnimatedStyle = _ref.createAnimatedStyle, createAnimatedStyle = _ref_createAnimatedStyle === void 0 ? function(style4) {
+            return new AnimatedObject(style4);
         } : _ref_createAnimatedStyle, _ref_getComponentProps = _ref.getComponentProps, getComponentProps = _ref_getComponentProps === void 0 ? function(props) {
             return props;
         } : _ref_getComponentProps;
@@ -41471,7 +41507,7 @@ var agent = function() {
         return is.str(arg2) ? arg2 : arg2 && is.str(arg2.displayName) ? arg2.displayName : is.fun(arg2) && arg2.name || null;
     };
     // node_modules/@react-spring/core/dist/react-spring_core.modern.mjs
-    var React66 = __toESM(require_react(), 1);
+    var React67 = __toESM(require_react(), 1);
     var import_react23 = __toESM(require_react(), 1);
     var import_react24 = __toESM(require_react(), 1);
     var React210 = __toESM(require_react(), 1);
@@ -42866,7 +42902,7 @@ var agent = function() {
             immediate
         ]);
         var Provider = ctx.Provider;
-        return /* @__PURE__ */ React66.createElement(Provider, {
+        return /* @__PURE__ */ React67.createElement(Provider, {
             value: props
         }, children);
     };
@@ -43160,7 +43196,7 @@ var agent = function() {
         _inherits(AnimatedStyle, AnimatedObject);
         function AnimatedStyle(_param) {
             _class_call_check(this, AnimatedStyle);
-            var x = _param.x, y = _param.y, z = _param.z, style3 = _object_without_properties(_param, [
+            var x = _param.x, y = _param.y, z = _param.z, style4 = _object_without_properties(_param, [
                 "x",
                 "y",
                 "z"
@@ -43183,7 +43219,7 @@ var agent = function() {
                     ];
                 });
             }
-            eachProp(style3, function(value, key) {
+            eachProp(style4, function(value, key) {
                 if (key === "transform") {
                     inputs.push([
                         value || ""
@@ -43195,7 +43231,7 @@ var agent = function() {
                         ];
                     });
                 } else if (domTransforms.test(key)) {
-                    delete style3[key];
+                    delete style4[key];
                     if (is.und(value)) return;
                     var unit2 = pxTransforms.test(key) ? "px" : degTransforms.test(key) ? "deg" : "";
                     inputs.push(toArray(value));
@@ -43216,10 +43252,10 @@ var agent = function() {
                 }
             });
             if (inputs.length) {
-                style3.transform = new FluidTransform(inputs, transforms);
+                style4.transform = new FluidTransform(inputs, transforms);
             }
             return _call_super(this, AnimatedStyle, [
-                style3
+                style4
             ]);
         }
         return AnimatedStyle;
@@ -43436,8 +43472,8 @@ var agent = function() {
     });
     var host = createHost(primitives, {
         applyAnimatedValues: applyAnimatedValues,
-        createAnimatedStyle: function(style3) {
-            return new AnimatedStyle(style3);
+        createAnimatedStyle: function(style4) {
+            return new AnimatedStyle(style4);
         },
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         getComponentProps: function(_param) {
@@ -43450,7 +43486,7 @@ var agent = function() {
     });
     var animated = host.animated;
     // node_modules/@mui/x-charts/context/CartesianProvider/CartesianProvider.js
-    var React82 = __toESM(require_react());
+    var React83 = __toESM(require_react());
     // node_modules/d3-array/src/bisect.js
     var ascendingBisect = bisector(ascending);
     var bisectRight = ascendingBisect.right;
@@ -44438,7 +44474,7 @@ var agent = function() {
         return initInterpolator.apply(scale, arguments);
     }
     // node_modules/@mui/x-charts/hooks/useTicks.js
-    var React67 = __toESM(require_react());
+    var React68 = __toESM(require_react());
     var offsetRatio = {
         start: 0,
         extremities: 0,
@@ -44501,16 +44537,16 @@ var agent = function() {
     var DEFAULT_CATEGORY_GAP_RATIO = 0.2;
     var DEFAULT_BAR_GAP_RATIO = 0.1;
     // node_modules/@mui/x-charts/hooks/useDrawingArea.js
-    var React71 = __toESM(require_react());
+    var React72 = __toESM(require_react());
     // node_modules/@mui/x-charts/context/DrawingProvider.js
-    var React70 = __toESM(require_react());
+    var React71 = __toESM(require_react());
     // node_modules/@mui/x-charts/node_modules/@mui/utils/esm/useId/useId.js
-    var React68 = __toESM(require_react(), 1);
+    var React69 = __toESM(require_react(), 1);
     var globalId2 = 0;
-    var safeReact2 = _object_spread({}, React68);
+    var safeReact2 = _object_spread({}, React69);
     var maybeReactUseId2 = safeReact2.useId;
     // node_modules/@mui/x-charts/hooks/useChartDimensions.js
-    var React69 = __toESM(require_react());
+    var React70 = __toESM(require_react());
     // node_modules/@mui/x-charts/constants/index.js
     var DEFAULT_X_AXIS_KEY = "DEFAULT_X_AXIS_KEY";
     var DEFAULT_Y_AXIS_KEY = "DEFAULT_Y_AXIS_KEY";
@@ -44523,7 +44559,7 @@ var agent = function() {
     // node_modules/@mui/x-charts/hooks/useChartDimensions.js
     var useChartDimensions = function(width2, height2, margin2) {
         var defaultizedMargin = _extends1({}, DEFAULT_MARGINS, margin2);
-        var drawingArea = React69.useMemo(function() {
+        var drawingArea = React70.useMemo(function() {
             return {
                 left: defaultizedMargin.left,
                 top: defaultizedMargin.top,
@@ -44544,8 +44580,8 @@ var agent = function() {
     };
     var useChartDimensions_default = useChartDimensions;
     // node_modules/@mui/x-charts/context/DrawingProvider.js
-    var import_jsx_runtime43 = __toESM(require_jsx_runtime());
-    var DrawingContext = /* @__PURE__ */ React70.createContext({
+    var import_jsx_runtime44 = __toESM(require_jsx_runtime());
+    var DrawingContext = /* @__PURE__ */ React71.createContext({
         top: 0,
         left: 0,
         bottom: 0,
@@ -44560,7 +44596,7 @@ var agent = function() {
     if (false) {
         DrawingContext.displayName = "DrawingContext";
     }
-    var SvgContext = /* @__PURE__ */ React70.createContext({
+    var SvgContext = /* @__PURE__ */ React71.createContext({
         isInitialized: false,
         data: {
             current: null
@@ -44570,7 +44606,7 @@ var agent = function() {
         SvgContext.displayName = "SvgContext";
     }
     // node_modules/@mui/x-charts/hooks/useSeries.js
-    var React80 = __toESM(require_react());
+    var React81 = __toESM(require_react());
     // node_modules/@mui/x-charts/internals/defaultizeColor.js
     var DEFAULT_COLORS = [
         "#1f77b4",
@@ -44617,7 +44653,7 @@ var agent = function() {
         return formattedSeries;
     };
     // node_modules/@mui/x-charts/context/SeriesProvider/SeriesProvider.js
-    var React79 = __toESM(require_react());
+    var React80 = __toESM(require_react());
     // node_modules/@mui/x-charts/colorPalettes/colorPalettes.js
     var blueberryTwilightPaletteLight = [
         "#02B2AF",
@@ -44639,8 +44675,8 @@ var agent = function() {
         return mode === "dark" ? blueberryTwilightPaletteDark : blueberryTwilightPaletteLight;
     };
     // node_modules/@mui/x-charts/context/SeriesProvider/SeriesContext.js
-    var React72 = __toESM(require_react());
-    var SeriesContext = /* @__PURE__ */ React72.createContext({
+    var React73 = __toESM(require_react());
+    var SeriesContext = /* @__PURE__ */ React73.createContext({
         isInitialized: false,
         data: {}
     });
@@ -44648,10 +44684,10 @@ var agent = function() {
         SeriesContext.displayName = "SeriesContext";
     }
     // node_modules/@mui/x-charts/context/PluginProvider/PluginProvider.js
-    var React74 = __toESM(require_react());
+    var React75 = __toESM(require_react());
     // node_modules/@mui/x-charts/context/PluginProvider/PluginContext.js
-    var React73 = __toESM(require_react());
-    var PluginContext = /* @__PURE__ */ React73.createContext({
+    var React74 = __toESM(require_react());
+    var PluginContext = /* @__PURE__ */ React74.createContext({
         isInitialized: false,
         data: {
             colorProcessors: {},
@@ -45375,20 +45411,20 @@ var agent = function() {
         plugin4
     ];
     // node_modules/@mui/x-charts/context/PluginProvider/PluginProvider.js
-    var import_jsx_runtime44 = __toESM(require_jsx_runtime());
-    // node_modules/@mui/x-charts/context/PluginProvider/useColorProcessor.js
-    var React75 = __toESM(require_react());
-    // node_modules/@mui/x-charts/context/PluginProvider/useSeriesFormatter.js
-    var React76 = __toESM(require_react());
-    // node_modules/@mui/x-charts/context/PluginProvider/useXExtremumGetter.js
-    var React77 = __toESM(require_react());
-    // node_modules/@mui/x-charts/context/PluginProvider/useYExtremumGetter.js
-    var React78 = __toESM(require_react());
-    // node_modules/@mui/x-charts/context/SeriesProvider/SeriesProvider.js
     var import_jsx_runtime45 = __toESM(require_jsx_runtime());
+    // node_modules/@mui/x-charts/context/PluginProvider/useColorProcessor.js
+    var React76 = __toESM(require_react());
+    // node_modules/@mui/x-charts/context/PluginProvider/useSeriesFormatter.js
+    var React77 = __toESM(require_react());
+    // node_modules/@mui/x-charts/context/PluginProvider/useXExtremumGetter.js
+    var React78 = __toESM(require_react());
+    // node_modules/@mui/x-charts/context/PluginProvider/useYExtremumGetter.js
+    var React79 = __toESM(require_react());
+    // node_modules/@mui/x-charts/context/SeriesProvider/SeriesProvider.js
+    var import_jsx_runtime46 = __toESM(require_jsx_runtime());
     // node_modules/@mui/x-charts/context/CartesianProvider/CartesianContext.js
-    var React81 = __toESM(require_react());
-    var CartesianContext = /* @__PURE__ */ React81.createContext({
+    var React82 = __toESM(require_react());
+    var CartesianContext = /* @__PURE__ */ React82.createContext({
         isInitialized: false,
         data: {
             xAxis: {},
@@ -45401,17 +45437,17 @@ var agent = function() {
         CartesianContext.displayName = "CartesianContext";
     }
     // node_modules/@mui/x-charts/context/CartesianProvider/CartesianProvider.js
-    var import_jsx_runtime46 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime47 = __toESM(require_jsx_runtime());
     // node_modules/@mui/x-charts/context/CartesianProvider/useCartesianContext.js
-    var React83 = __toESM(require_react());
+    var React84 = __toESM(require_react());
     var useCartesianContext = function() {
-        var data = React83.useContext(CartesianContext).data;
+        var data = React84.useContext(CartesianContext).data;
         return data;
     };
     // node_modules/@mui/x-charts/BarChart/BarElement.js
-    var React92 = __toESM(require_react());
+    var React93 = __toESM(require_react());
     // node_modules/@mui/x-charts/node_modules/@mui/utils/esm/useForkRef/useForkRef.js
-    var React84 = __toESM(require_react(), 1);
+    var React85 = __toESM(require_react(), 1);
     var isHostComponent_default2 = isHostComponent2;
     var appendOwnerState_default2 = appendOwnerState2;
     var extractEventHandlers_default2 = extractEventHandlers2;
@@ -45455,11 +45491,11 @@ var agent = function() {
         selected: "selected"
     };
     // node_modules/@mui/x-charts/hooks/useInteractionItemProps.js
-    var React91 = __toESM(require_react());
+    var React92 = __toESM(require_react());
     // node_modules/@mui/x-charts/context/InteractionProvider.js
-    var React85 = __toESM(require_react());
-    var import_jsx_runtime47 = __toESM(require_jsx_runtime());
-    var InteractionContext = /* @__PURE__ */ React85.createContext({
+    var React86 = __toESM(require_react());
+    var import_jsx_runtime48 = __toESM(require_jsx_runtime());
+    var InteractionContext = /* @__PURE__ */ React86.createContext({
         item: null,
         axis: {
             x: null,
@@ -45515,12 +45551,12 @@ var agent = function() {
         }
     };
     // node_modules/@mui/x-charts/context/HighlightedProvider/HighlightedProvider.js
-    var React88 = __toESM(require_react());
+    var React89 = __toESM(require_react());
     // node_modules/@mui/x-charts/node_modules/@mui/utils/esm/useControlled/useControlled.js
-    var React86 = __toESM(require_react(), 1);
+    var React87 = __toESM(require_react(), 1);
     // node_modules/@mui/x-charts/context/HighlightedProvider/HighlightedContext.js
-    var React87 = __toESM(require_react());
-    var HighlightedContext = /* @__PURE__ */ React87.createContext({
+    var React88 = __toESM(require_react());
+    var HighlightedContext = /* @__PURE__ */ React88.createContext({
         isInitialized: false,
         data: {
             highlightedItem: null,
@@ -45568,7 +45604,7 @@ var agent = function() {
         };
     };
     // node_modules/@mui/x-charts/context/HighlightedProvider/HighlightedProvider.js
-    var import_jsx_runtime48 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime49 = __toESM(require_jsx_runtime());
     var _excluded = [
         "highlighted",
         "faded"
@@ -45602,11 +45638,11 @@ var agent = function() {
      */ onHighlightChange: import_prop_types.default.func
     } : void 0;
     // node_modules/@mui/x-charts/context/HighlightedProvider/useHighlighted.js
-    var React89 = __toESM(require_react());
-    // node_modules/@mui/x-charts/context/ZAxisContextProvider.js
     var React90 = __toESM(require_react());
-    var import_jsx_runtime49 = __toESM(require_jsx_runtime());
-    var ZAxisContext = /* @__PURE__ */ React90.createContext({
+    // node_modules/@mui/x-charts/context/ZAxisContextProvider.js
+    var React91 = __toESM(require_react());
+    var import_jsx_runtime50 = __toESM(require_jsx_runtime());
+    var ZAxisContext = /* @__PURE__ */ React91.createContext({
         zAxis: {},
         zAxisIds: []
     });
@@ -45675,7 +45711,7 @@ var agent = function() {
     } : void 0;
     // node_modules/@mui/x-charts/hooks/useInteractionItemProps.js
     var useInteractionItemProps = function(skip) {
-        var _React91_useContext = React91.useContext(InteractionContext), dispatchInteraction = _React91_useContext.dispatch;
+        var _React92_useContext = React92.useContext(InteractionContext), dispatchInteraction = _React92_useContext.dispatch;
         var _useHighlighted = useHighlighted(), setHighlighted = _useHighlighted.setHighlighted, clearHighlighted = _useHighlighted.clearHighlighted;
         if (skip) {
             return function() {
@@ -45717,7 +45753,7 @@ var agent = function() {
         return getInteractionItemProps;
     };
     // node_modules/@mui/x-charts/BarChart/BarElement.js
-    var import_jsx_runtime50 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime51 = __toESM(require_jsx_runtime());
     var _excluded2 = [
         "id",
         "dataIndex",
@@ -45777,11 +45813,11 @@ var agent = function() {
      */ slots: import_prop_types.default.object
     } : void 0;
     // node_modules/@mui/x-charts/hooks/useChartId.js
-    var React93 = __toESM(require_react());
-    // node_modules/@mui/x-charts/hooks/useSvgRef.js
     var React94 = __toESM(require_react());
-    // node_modules/@mui/x-charts/BarChart/BarClipPath.js
+    // node_modules/@mui/x-charts/hooks/useSvgRef.js
     var React95 = __toESM(require_react());
+    // node_modules/@mui/x-charts/BarChart/BarClipPath.js
+    var React96 = __toESM(require_react());
     // node_modules/@mui/x-charts/BarChart/getRadius.js
     var getRadius = function(corner, param) {
         var hasNegative = param.hasNegative, hasPositive = param.hasPositive, borderRadius2 = param.borderRadius, layout = param.layout;
@@ -45804,7 +45840,7 @@ var agent = function() {
         return 0;
     };
     // node_modules/@mui/x-charts/BarChart/BarClipPath.js
-    var import_jsx_runtime51 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime52 = __toESM(require_jsx_runtime());
     var _excluded3 = [
         "style",
         "maskId"
@@ -45813,9 +45849,9 @@ var agent = function() {
         return "inset(0px round ".concat(corners.topLeft, "px ").concat(corners.topRight, "px ").concat(corners.bottomRight, "px ").concat(corners.bottomLeft, "px)");
     };
     // node_modules/@mui/x-charts/BarChart/BarLabel/BarLabelPlot.js
-    var React98 = __toESM(require_react());
+    var React99 = __toESM(require_react());
     // node_modules/@mui/x-charts/BarChart/BarLabel/BarLabelItem.js
-    var React97 = __toESM(require_react());
+    var React98 = __toESM(require_react());
     var barLabelClasses = generateUtilityClasses2("MuiBarLabel", [
         "root",
         "highlighted",
@@ -45851,8 +45887,8 @@ var agent = function() {
         });
     };
     // node_modules/@mui/x-charts/BarChart/BarLabel/BarLabel.js
-    var React96 = __toESM(require_react());
-    var import_jsx_runtime52 = __toESM(require_jsx_runtime());
+    var React97 = __toESM(require_react());
+    var import_jsx_runtime53 = __toESM(require_jsx_runtime());
     var _excluded4 = [
         "seriesId",
         "dataIndex",
@@ -45901,7 +45937,7 @@ var agent = function() {
         ]).isRequired
     } : void 0;
     // node_modules/@mui/x-charts/BarChart/BarLabel/BarLabelItem.js
-    var import_jsx_runtime53 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime54 = __toESM(require_jsx_runtime());
     var _excluded5 = [
         "seriesId",
         "classes",
@@ -45961,7 +45997,7 @@ var agent = function() {
      */ width: import_prop_types.default.number.isRequired
     } : void 0;
     // node_modules/@mui/x-charts/BarChart/BarLabel/BarLabelPlot.js
-    var import_jsx_runtime54 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime55 = __toESM(require_jsx_runtime());
     var _excluded6 = [
         "bars",
         "skipAnimation"
@@ -45997,8 +46033,8 @@ var agent = function() {
         return axisId === axisDefaultKey ? "The first `".concat(axisIdName, "`") : "The ".concat(axisName, ' with id "').concat(axisId, '"');
     };
     // node_modules/@mui/x-charts/context/AnimationProvider/AnimationContext.js
-    var React99 = __toESM(require_react());
-    var AnimationContext = /* @__PURE__ */ React99.createContext({
+    var React100 = __toESM(require_react());
+    var AnimationContext = /* @__PURE__ */ React100.createContext({
         isInitialized: false,
         data: {
             skipAnimation: void 0
@@ -46008,12 +46044,12 @@ var agent = function() {
         AnimationContext.displayName = "AnimationContext";
     }
     // node_modules/@mui/x-charts/context/AnimationProvider/AnimationProvider.js
-    var React100 = __toESM(require_react());
-    var import_jsx_runtime55 = __toESM(require_jsx_runtime());
-    // node_modules/@mui/x-charts/context/AnimationProvider/useSkipAnimation.js
     var React101 = __toESM(require_react());
-    // node_modules/@mui/x-charts/BarChart/BarPlot.js
     var import_jsx_runtime56 = __toESM(require_jsx_runtime());
+    // node_modules/@mui/x-charts/context/AnimationProvider/useSkipAnimation.js
+    var React102 = __toESM(require_react());
+    // node_modules/@mui/x-charts/BarChart/BarPlot.js
+    var import_jsx_runtime57 = __toESM(require_jsx_runtime());
     var _excluded7 = [
         "skipAnimation",
         "onItemClick",
@@ -46174,26 +46210,26 @@ var agent = function() {
      */ slots: import_prop_types.default.object
     } : void 0;
     // node_modules/@mui/x-charts/ResponsiveChartContainer/ResponsiveChartContainer.js
-    var React113 = __toESM(require_react());
+    var React114 = __toESM(require_react());
     // node_modules/@mui/x-charts/ChartContainer/ChartContainer.js
-    var React110 = __toESM(require_react());
+    var React111 = __toESM(require_react());
     // node_modules/@mui/x-charts/ChartsSurface/ChartsSurface.js
-    var React104 = __toESM(require_react());
+    var React105 = __toESM(require_react());
     // node_modules/@mui/x-charts/hooks/useAxisEvents.js
-    var React103 = __toESM(require_react());
+    var React104 = __toESM(require_react());
     var useAxisEvents = function(disableAxisListener) {
         var svgRef = useSvgRef();
         var drawingArea = useDrawingArea();
         var _useCartesianContext = useCartesianContext(), xAxis = _useCartesianContext.xAxis, yAxis = _useCartesianContext.yAxis, xAxisIds = _useCartesianContext.xAxisIds, yAxisIds = _useCartesianContext.yAxisIds;
-        var dispatch = React103.useContext(InteractionContext).dispatch;
+        var dispatch = React104.useContext(InteractionContext).dispatch;
         var usedXAxis = xAxisIds[0];
         var usedYAxis = yAxisIds[0];
-        var mousePosition = React103.useRef({
+        var mousePosition = React104.useRef({
             isInChart: false,
             x: -1,
             y: -1
         });
-        React103.useEffect(function() {
+        React104.useEffect(function() {
             var getNewAxisState = function getNewAxisState(axisConfig, mouseValue) {
                 var _Math, _Math1;
                 var scale = axisConfig.scale, axisData = axisConfig.data, reverse = axisConfig.reverse;
@@ -46315,7 +46351,7 @@ var agent = function() {
         ]);
     };
     // node_modules/@mui/x-charts/ChartsSurface/ChartsSurface.js
-    var import_jsx_runtime57 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime58 = __toESM(require_jsx_runtime());
     var _excluded8 = [
         "children",
         "width",
@@ -46336,7 +46372,7 @@ var agent = function() {
             touchAction: "none"
         };
     });
-    var ChartsSurface = /* @__PURE__ */ React104.forwardRef(function ChartsSurface2(inProps, ref) {
+    var ChartsSurface = /* @__PURE__ */ React105.forwardRef(function ChartsSurface2(inProps, ref) {
         var props = useThemeProps2({
             props: inProps,
             name: "MuiChartsSurface"
@@ -46349,7 +46385,7 @@ var agent = function() {
             y: 0
         }, viewBox);
         useAxisEvents(disableAxisListener);
-        return /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(ChartChartsSurfaceStyles, _extends1({
+        return /* @__PURE__ */ (0, import_jsx_runtime58.jsxs)(ChartChartsSurfaceStyles, _extends1({
             width: width2,
             height: height2,
             viewBox: "".concat(svgView.x, " ").concat(svgView.y, " ").concat(svgView.width, " ").concat(svgView.height),
@@ -46357,10 +46393,10 @@ var agent = function() {
             className: className
         }, other, {
             children: [
-                /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("title", {
+                /* @__PURE__ */ (0, import_jsx_runtime58.jsx)("title", {
                     children: title
                 }),
-                /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("desc", {
+                /* @__PURE__ */ (0, import_jsx_runtime58.jsx)("desc", {
                     children: desc
                 }),
                 children
@@ -46404,20 +46440,20 @@ var agent = function() {
      */ width: import_prop_types.default.number.isRequired
     } : void 0;
     // node_modules/@mui/x-charts/internals/components/ChartsAxesGradients/ChartsAxesGradients.js
-    var React107 = __toESM(require_react());
+    var React108 = __toESM(require_react());
     // node_modules/@mui/x-charts/internals/components/ChartsAxesGradients/ChartsPiecewiseGradient.js
-    var React105 = __toESM(require_react());
-    var import_jsx_runtime58 = __toESM(require_jsx_runtime());
-    // node_modules/@mui/x-charts/internals/components/ChartsAxesGradients/ChartsContinuousGradient.js
     var React106 = __toESM(require_react());
     var import_jsx_runtime59 = __toESM(require_jsx_runtime());
+    // node_modules/@mui/x-charts/internals/components/ChartsAxesGradients/ChartsContinuousGradient.js
+    var React107 = __toESM(require_react());
+    var import_jsx_runtime60 = __toESM(require_jsx_runtime());
     var PX_PRECISION = 10;
     // node_modules/@mui/x-charts/internals/components/ChartsAxesGradients/ChartsAxesGradients.js
-    var import_jsx_runtime60 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime61 = __toESM(require_jsx_runtime());
     // node_modules/@mui/x-charts/ChartContainer/useChartContainerProps.js
-    var React109 = __toESM(require_react());
+    var React110 = __toESM(require_react());
     // node_modules/@mui/x-charts/ChartContainer/useDefaultizeAxis.js
-    var React108 = __toESM(require_react());
+    var React109 = __toESM(require_react());
     var defaultizeAxis = function(inAxis, dataset, axisName) {
         var DEFAULT_AXIS_KEY = axisName === "x" ? DEFAULT_X_AXIS_KEY : DEFAULT_Y_AXIS_KEY;
         var _inAxis_map;
@@ -46449,13 +46485,13 @@ var agent = function() {
         });
     };
     var useDefaultizeAxis = function(inXAxis, inYAxis, dataset) {
-        var xAxis = React108.useMemo(function() {
+        var xAxis = React109.useMemo(function() {
             return defaultizeAxis(inXAxis, dataset, "x");
         }, [
             inXAxis,
             dataset
         ]);
-        var yAxis = React108.useMemo(function() {
+        var yAxis = React109.useMemo(function() {
             return defaultizeAxis(inYAxis, dataset, "y");
         }, [
             inYAxis,
@@ -46489,7 +46525,7 @@ var agent = function() {
     ];
     var useChartContainerProps = function(props, ref) {
         var width2 = props.width, height2 = props.height, series = props.series, margin2 = props.margin, xAxis = props.xAxis, yAxis = props.yAxis, zAxis = props.zAxis, colors3 = props.colors, dataset = props.dataset, sx = props.sx, title = props.title, desc = props.desc, disableAxisListener = props.disableAxisListener, highlightedItem = props.highlightedItem, onHighlightChange = props.onHighlightChange, plugins = props.plugins, children = props.children, skipAnimation2 = props.skipAnimation, other = _objectWithoutPropertiesLoose(props, _excluded9);
-        var svgRef = React109.useRef(null);
+        var svgRef = React110.useRef(null);
         var chartSurfaceRef = useForkRef2(ref, svgRef);
         var _useDefaultizeAxis = _sliced_to_array(useDefaultizeAxis(xAxis, yAxis, dataset), 2), defaultizedXAxis = _useDefaultizeAxis[0], defaultizedYAxis = _useDefaultizeAxis[1];
         var drawingProviderProps = {
@@ -46546,20 +46582,20 @@ var agent = function() {
         };
     };
     // node_modules/@mui/x-charts/ChartContainer/ChartContainer.js
-    var import_jsx_runtime61 = __toESM(require_jsx_runtime());
-    var ChartContainer = /* @__PURE__ */ React110.forwardRef(function ChartContainer2(props, ref) {
+    var import_jsx_runtime62 = __toESM(require_jsx_runtime());
+    var ChartContainer = /* @__PURE__ */ React111.forwardRef(function ChartContainer2(props, ref) {
         var _useChartContainerProps = useChartContainerProps(props, ref), children = _useChartContainerProps.children, drawingProviderProps = _useChartContainerProps.drawingProviderProps, seriesProviderProps = _useChartContainerProps.seriesProviderProps, cartesianProviderProps = _useChartContainerProps.cartesianProviderProps, zAxisContextProps = _useChartContainerProps.zAxisContextProps, highlightedProviderProps = _useChartContainerProps.highlightedProviderProps, chartsSurfaceProps = _useChartContainerProps.chartsSurfaceProps, pluginProviderProps = _useChartContainerProps.pluginProviderProps, animationProviderProps = _useChartContainerProps.animationProviderProps;
-        return /* @__PURE__ */ (0, import_jsx_runtime61.jsx)(DrawingProvider, _extends1({}, drawingProviderProps, {
-            children: /* @__PURE__ */ (0, import_jsx_runtime61.jsx)(PluginProvider, _extends1({}, pluginProviderProps, {
-                children: /* @__PURE__ */ (0, import_jsx_runtime61.jsx)(SeriesProvider, _extends1({}, seriesProviderProps, {
-                    children: /* @__PURE__ */ (0, import_jsx_runtime61.jsx)(CartesianProvider, _extends1({}, cartesianProviderProps, {
-                        children: /* @__PURE__ */ (0, import_jsx_runtime61.jsx)(ZAxisContextProvider, _extends1({}, zAxisContextProps, {
-                            children: /* @__PURE__ */ (0, import_jsx_runtime61.jsx)(InteractionProvider, {
-                                children: /* @__PURE__ */ (0, import_jsx_runtime61.jsx)(HighlightedProvider, _extends1({}, highlightedProviderProps, {
-                                    children: /* @__PURE__ */ (0, import_jsx_runtime61.jsxs)(ChartsSurface, _extends1({}, chartsSurfaceProps, {
+        return /* @__PURE__ */ (0, import_jsx_runtime62.jsx)(DrawingProvider, _extends1({}, drawingProviderProps, {
+            children: /* @__PURE__ */ (0, import_jsx_runtime62.jsx)(PluginProvider, _extends1({}, pluginProviderProps, {
+                children: /* @__PURE__ */ (0, import_jsx_runtime62.jsx)(SeriesProvider, _extends1({}, seriesProviderProps, {
+                    children: /* @__PURE__ */ (0, import_jsx_runtime62.jsx)(CartesianProvider, _extends1({}, cartesianProviderProps, {
+                        children: /* @__PURE__ */ (0, import_jsx_runtime62.jsx)(ZAxisContextProvider, _extends1({}, zAxisContextProps, {
+                            children: /* @__PURE__ */ (0, import_jsx_runtime62.jsx)(InteractionProvider, {
+                                children: /* @__PURE__ */ (0, import_jsx_runtime62.jsx)(HighlightedProvider, _extends1({}, highlightedProviderProps, {
+                                    children: /* @__PURE__ */ (0, import_jsx_runtime62.jsxs)(ChartsSurface, _extends1({}, chartsSurfaceProps, {
                                         children: [
-                                            /* @__PURE__ */ (0, import_jsx_runtime61.jsx)(ChartsAxesGradients, {}),
-                                            /* @__PURE__ */ (0, import_jsx_runtime61.jsx)(AnimationProvider, _extends1({}, animationProviderProps, {
+                                            /* @__PURE__ */ (0, import_jsx_runtime62.jsx)(ChartsAxesGradients, {}),
+                                            /* @__PURE__ */ (0, import_jsx_runtime62.jsx)(AnimationProvider, _extends1({}, animationProviderProps, {
                                                 children: children
                                             }))
                                         ]
@@ -46996,22 +47032,22 @@ var agent = function() {
         };
     });
     // node_modules/@mui/x-charts/ResponsiveChartContainer/useChartContainerDimensions.js
-    var React112 = __toESM(require_react());
+    var React113 = __toESM(require_react());
     // node_modules/@mui/x-charts/node_modules/@mui/utils/esm/useEnhancedEffect/useEnhancedEffect.js
-    var React111 = __toESM(require_react(), 1);
-    var useEnhancedEffect2 = typeof window !== "undefined" ? React111.useLayoutEffect : React111.useEffect;
+    var React112 = __toESM(require_react(), 1);
+    var useEnhancedEffect2 = typeof window !== "undefined" ? React112.useLayoutEffect : React112.useEffect;
     var useEnhancedEffect_default2 = useEnhancedEffect2;
     // node_modules/@mui/x-charts/ResponsiveChartContainer/useChartContainerDimensions.js
     var useChartContainerDimensions = function(inWidth, inHeight, resolveSizeBeforeRender) {
-        var stateRef = React112.useRef({
+        var stateRef = React113.useRef({
             displayError: false,
             initialCompute: true,
             computeRun: 0
         });
-        var rootRef = React112.useRef(null);
-        var _React112_useState = _sliced_to_array(React112.useState(0), 2), width2 = _React112_useState[0], setWidth = _React112_useState[1];
-        var _React112_useState1 = _sliced_to_array(React112.useState(0), 2), height2 = _React112_useState1[0], setHeight = _React112_useState1[1];
-        var computeSize = React112.useCallback(function() {
+        var rootRef = React113.useRef(null);
+        var _React113_useState = _sliced_to_array(React113.useState(0), 2), width2 = _React113_useState[0], setWidth = _React113_useState[1];
+        var _React113_useState1 = _sliced_to_array(React113.useState(0), 2), height2 = _React113_useState1[0], setHeight = _React113_useState1[1];
+        var computeSize = React113.useCallback(function() {
             var mainEl = rootRef === null || rootRef === void 0 ? void 0 : rootRef.current;
             if (!mainEl) {
                 return {};
@@ -47027,7 +47063,7 @@ var agent = function() {
                 height: newHeight
             };
         }, []);
-        React112.useEffect(function() {
+        React113.useEffect(function() {
             stateRef.current.displayError = true;
         }, []);
         useEnhancedEffect_default2(function() {
@@ -47155,11 +47191,11 @@ var agent = function() {
         };
     };
     // node_modules/@mui/x-charts/ResponsiveChartContainer/ResponsiveChartContainer.js
-    var import_jsx_runtime62 = __toESM(require_jsx_runtime());
-    var ResponsiveChartContainer = /* @__PURE__ */ React113.forwardRef(function ResponsiveChartContainer2(props, ref) {
+    var import_jsx_runtime63 = __toESM(require_jsx_runtime());
+    var ResponsiveChartContainer = /* @__PURE__ */ React114.forwardRef(function ResponsiveChartContainer2(props, ref) {
         var _useResponsiveChartContainerProps = useResponsiveChartContainerProps(props, ref), hasIntrinsicSize = _useResponsiveChartContainerProps.hasIntrinsicSize, chartContainerProps = _useResponsiveChartContainerProps.chartContainerProps, resizableChartContainerProps = _useResponsiveChartContainerProps.resizableChartContainerProps;
-        return /* @__PURE__ */ (0, import_jsx_runtime62.jsx)(ResizableContainer, _extends1({}, resizableChartContainerProps, {
-            children: hasIntrinsicSize ? /* @__PURE__ */ (0, import_jsx_runtime62.jsx)(ChartContainer, _extends1({}, chartContainerProps)) : null
+        return /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(ResizableContainer, _extends1({}, resizableChartContainerProps, {
+            children: hasIntrinsicSize ? /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(ChartContainer, _extends1({}, chartContainerProps)) : null
         }));
     });
     false ? ResponsiveChartContainer.propTypes = {
@@ -47572,7 +47608,7 @@ var agent = function() {
         }))
     } : void 0;
     // node_modules/@mui/x-charts/ChartsXAxis/ChartsXAxis.js
-    var React116 = __toESM(require_react());
+    var React117 = __toESM(require_react());
     var axisClasses = generateUtilityClasses2("MuiChartsAxis", [
         "root",
         "line",
@@ -47611,7 +47647,7 @@ var agent = function() {
         }), _obj;
     });
     // node_modules/@mui/x-charts/ChartsText/ChartsText.js
-    var React114 = __toESM(require_react());
+    var React115 = __toESM(require_react());
     var stringCache = {
         widthCache: {},
         cacheCount: 0
@@ -47648,14 +47684,14 @@ var agent = function() {
         "marginBottom"
     ];
     var MEASUREMENT_SPAN_ID = "mui_measurement_span";
-    var getStyleString = function(style3) {
-        return Object.keys(style3).sort().reduce(function(result, s) {
-            return "".concat(result).concat(camelToMiddleLine(s), ":").concat(autoCompleteStyle(s, style3[s]), ";");
+    var getStyleString = function(style4) {
+        return Object.keys(style4).sort().reduce(function(result, s) {
+            return "".concat(result).concat(camelToMiddleLine(s), ":").concat(autoCompleteStyle(s, style4[s]), ";");
         }, "");
     };
     var domCleanTimeout;
     var getStringSize = function(text) {
-        var style3 = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {};
+        var style4 = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {};
         if (text === void 0 || text === null || isSsr()) {
             return {
                 width: 0,
@@ -47663,7 +47699,7 @@ var agent = function() {
             };
         }
         var str = "".concat(text);
-        var styleString = getStyleString(style3);
+        var styleString = getStyleString(style4);
         var cacheKey2 = "".concat(str, "-").concat(styleString);
         if (stringCache.widthCache[cacheKey2]) {
             return stringCache.widthCache[cacheKey2];
@@ -47676,7 +47712,7 @@ var agent = function() {
                 measurementSpan.setAttribute("aria-hidden", "true");
                 document.body.appendChild(measurementSpan);
             }
-            var measurementSpanStyle = _extends1({}, SPAN_STYLE, style3);
+            var measurementSpanStyle = _extends1({}, SPAN_STYLE, style4);
             Object.keys(measurementSpanStyle).map(function(styleKey) {
                 measurementSpan.style[camelToMiddleLine(styleKey)] = autoCompleteStyle(styleKey, measurementSpanStyle[styleKey]);
                 return styleKey;
@@ -47709,7 +47745,7 @@ var agent = function() {
         }
     };
     // node_modules/@mui/x-charts/ChartsText/ChartsText.js
-    var import_jsx_runtime63 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime64 = __toESM(require_jsx_runtime());
     var _excluded11 = [
         "x",
         "y",
@@ -47745,9 +47781,9 @@ var agent = function() {
     // node_modules/@mui/x-charts/internals/geometry.js
     var ANGLE_APPROX = 5;
     // node_modules/@mui/x-charts/hooks/useMounted.js
-    var React115 = __toESM(require_react());
+    var React116 = __toESM(require_react());
     // node_modules/@mui/x-charts/ChartsXAxis/ChartsXAxis.js
-    var import_jsx_runtime64 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime65 = __toESM(require_jsx_runtime());
     var _excluded12 = [
         "scale",
         "tickNumber",
@@ -47929,8 +47965,8 @@ var agent = function() {
      */ tickSize: import_prop_types.default.number
     } : void 0;
     // node_modules/@mui/x-charts/ChartsYAxis/ChartsYAxis.js
-    var React117 = __toESM(require_react());
-    var import_jsx_runtime65 = __toESM(require_jsx_runtime());
+    var React118 = __toESM(require_react());
+    var import_jsx_runtime66 = __toESM(require_jsx_runtime());
     var _excluded13 = [
         "scale",
         "tickNumber"
@@ -48113,13 +48149,13 @@ var agent = function() {
      */ tickSize: import_prop_types.default.number
     } : void 0;
     // node_modules/@mui/x-charts/ChartsTooltip/ChartsTooltip.js
-    var React123 = __toESM(require_react());
+    var React124 = __toESM(require_react());
     // node_modules/@mui/x-charts/ChartsTooltip/utils.js
-    var React118 = __toESM(require_react());
-    // node_modules/@mui/x-charts/ChartsTooltip/ChartsItemTooltipContent.js
-    var React120 = __toESM(require_react());
-    // node_modules/@mui/x-charts/ChartsTooltip/DefaultChartsItemTooltipContent.js
     var React119 = __toESM(require_react());
+    // node_modules/@mui/x-charts/ChartsTooltip/ChartsItemTooltipContent.js
+    var React121 = __toESM(require_react());
+    // node_modules/@mui/x-charts/ChartsTooltip/DefaultChartsItemTooltipContent.js
+    var React120 = __toESM(require_react());
     var chartsTooltipClasses = generateUtilityClasses2("MuiChartsTooltip", [
         "root",
         "paper",
@@ -48226,7 +48262,7 @@ var agent = function() {
         };
     });
     // node_modules/@mui/x-charts/ChartsTooltip/DefaultChartsItemTooltipContent.js
-    var import_jsx_runtime66 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime67 = __toESM(require_jsx_runtime());
     false ? DefaultChartsItemTooltipContent.propTypes = {
         // ----------------------------- Warning --------------------------------
         // | These PropTypes are generated from the TypeScript type definitions |
@@ -48269,11 +48305,11 @@ var agent = function() {
         ])
     } : void 0;
     // node_modules/@mui/x-charts/ChartsTooltip/ChartsItemTooltipContent.js
-    var import_jsx_runtime67 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime68 = __toESM(require_jsx_runtime());
     // node_modules/@mui/x-charts/ChartsTooltip/ChartsAxisTooltipContent.js
-    var React122 = __toESM(require_react());
+    var React123 = __toESM(require_react());
     // node_modules/@mui/x-charts/ChartsTooltip/DefaultChartsAxisTooltipContent.js
-    var React121 = __toESM(require_react());
+    var React122 = __toESM(require_react());
     // node_modules/@mui/x-charts/internals/configInit.js
     var instance;
     var CartesianSeriesTypes = /*#__PURE__*/ function() {
@@ -48306,7 +48342,7 @@ var agent = function() {
     cartesianSeriesTypes.addType("line");
     cartesianSeriesTypes.addType("scatter");
     // node_modules/@mui/x-charts/ChartsTooltip/DefaultChartsAxisTooltipContent.js
-    var import_jsx_runtime68 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime69 = __toESM(require_jsx_runtime());
     false ? DefaultChartsAxisTooltipContent.propTypes = {
         // ----------------------------- Warning --------------------------------
         // | These PropTypes are generated from the TypeScript type definitions |
@@ -48362,9 +48398,9 @@ var agent = function() {
         ])
     } : void 0;
     // node_modules/@mui/x-charts/ChartsTooltip/ChartsAxisTooltipContent.js
-    var import_jsx_runtime69 = __toESM(require_jsx_runtime());
-    // node_modules/@mui/x-charts/ChartsTooltip/ChartsTooltip.js
     var import_jsx_runtime70 = __toESM(require_jsx_runtime());
+    // node_modules/@mui/x-charts/ChartsTooltip/ChartsTooltip.js
+    var import_jsx_runtime71 = __toESM(require_jsx_runtime());
     var useUtilityClasses27 = function(ownerState) {
         var classes = ownerState.classes;
         var slots = {
@@ -48447,381 +48483,13 @@ var agent = function() {
             "none"
         ])
     } : void 0;
-    // node_modules/@mui/x-charts/ChartsLegend/ChartsLegend.js
-    var React127 = __toESM(require_react());
-    // node_modules/@mui/x-charts/BarChart/legend.js
-    var legendGetter = function(params) {
-        var seriesOrder = params.seriesOrder, series = params.series;
-        return seriesOrder.reduce(function(acc, seriesId) {
-            var formattedLabel = getLabel(series[seriesId].label, "legend");
-            if (formattedLabel === void 0) {
-                return acc;
-            }
-            acc.push({
-                id: seriesId,
-                seriesId: seriesId,
-                color: series[seriesId].color,
-                label: formattedLabel
-            });
-            return acc;
-        }, []);
-    };
-    var legend_default = legendGetter;
-    // node_modules/@mui/x-charts/ScatterChart/legend.js
-    var legendGetter2 = function(params) {
-        var seriesOrder = params.seriesOrder, series = params.series;
-        return seriesOrder.reduce(function(acc, seriesId) {
-            var formattedLabel = getLabel(series[seriesId].label, "legend");
-            if (formattedLabel === void 0) {
-                return acc;
-            }
-            acc.push({
-                id: seriesId,
-                seriesId: seriesId,
-                color: series[seriesId].color,
-                label: formattedLabel
-            });
-            return acc;
-        }, []);
-    };
-    var legend_default2 = legendGetter2;
-    // node_modules/@mui/x-charts/LineChart/legend.js
-    var legendGetter3 = function(params) {
-        var seriesOrder = params.seriesOrder, series = params.series;
-        return seriesOrder.reduce(function(acc, seriesId) {
-            var formattedLabel = getLabel(series[seriesId].label, "legend");
-            if (formattedLabel === void 0) {
-                return acc;
-            }
-            acc.push({
-                id: seriesId,
-                seriesId: seriesId,
-                color: series[seriesId].color,
-                label: formattedLabel
-            });
-            return acc;
-        }, []);
-    };
-    var legend_default3 = legendGetter3;
-    // node_modules/@mui/x-charts/PieChart/legend.js
-    var legendGetter4 = function(params) {
-        var seriesOrder = params.seriesOrder, series = params.series;
-        return seriesOrder.reduce(function(acc, seriesId) {
-            series[seriesId].data.forEach(function(item) {
-                var formattedLabel = getLabel(item.label, "legend");
-                if (formattedLabel === void 0) {
-                    return;
-                }
-                acc.push({
-                    id: item.id,
-                    seriesId: seriesId,
-                    color: item.color,
-                    label: formattedLabel,
-                    itemId: item.id
-                });
-            });
-            return acc;
-        }, []);
-    };
-    var legend_default4 = legendGetter4;
-    // node_modules/@mui/x-charts/ChartsLegend/utils.js
-    var legendGetter5 = {
-        bar: legend_default,
-        scatter: legend_default2,
-        line: legend_default3,
-        pie: legend_default4
-    };
-    var legendClasses = generateUtilityClasses2("MuiChartsLegend", [
-        "root",
-        "series",
-        "itemBackground",
-        "mark",
-        "label",
-        "column",
-        "row"
-    ]);
-    // node_modules/@mui/x-charts/ChartsLegend/DefaultChartsLegend.js
-    var React126 = __toESM(require_react());
-    // node_modules/@mui/x-charts/ChartsLegend/LegendPerItem.js
-    var React125 = __toESM(require_react());
-    // node_modules/@mui/x-charts/ChartsLegend/legendItemsPlacement.js
-    var _excluded14 = [
-        "label"
-    ];
-    // node_modules/@mui/x-charts/ChartsLegend/ChartsLegendItem.js
-    var React124 = __toESM(require_react());
-    var import_jsx_runtime71 = __toESM(require_jsx_runtime());
-    // node_modules/@mui/x-charts/ChartsLegend/LegendPerItem.js
-    var import_react27 = __toESM(require_react());
-    var import_jsx_runtime72 = __toESM(require_jsx_runtime());
-    var _excluded15 = [
-        "rotate",
-        "dominantBaseline"
-    ];
-    var ChartsLegendRoot = styled_default2("g", {
-        name: "MuiChartsLegend",
-        slot: "Root",
-        overridesResolver: function(props, styles2) {
-            return styles2.root;
-        }
-    })({});
-    var getStandardizedPadding = function(padding2) {
-        if (typeof padding2 === "number") {
-            return {
-                left: padding2,
-                right: padding2,
-                top: padding2,
-                bottom: padding2
-            };
-        }
-        return _extends1({
-            left: 0,
-            right: 0,
-            top: 0,
-            bottom: 0
-        }, padding2);
-    };
-    // node_modules/@mui/x-charts/ChartsLegend/DefaultChartsLegend.js
-    var import_jsx_runtime73 = __toESM(require_jsx_runtime());
-    var _excluded16 = [
-        "drawingArea",
-        "seriesToDisplay",
-        "hidden",
-        "onItemClick"
-    ];
-    var seriesContextBuilder = function(context) {
-        return {
-            type: "series",
-            color: context.color,
-            label: context.label,
-            seriesId: context.seriesId,
-            itemId: context.itemId
-        };
-    };
-    false ? DefaultChartsLegend.propTypes = {
-        // ----------------------------- Warning --------------------------------
-        // | These PropTypes are generated from the TypeScript type definitions |
-        // | To update them edit the TypeScript types and run "pnpm proptypes"  |
-        // ----------------------------------------------------------------------
-        /**
-     * Override or extend the styles applied to the component.
-     */ classes: import_prop_types.default.object,
-        /**
-     * The direction of the legend layout.
-     * The default depends on the chart.
-     */ direction: import_prop_types.default.oneOf([
-            "column",
-            "row"
-        ]).isRequired,
-        /**
-     * @deprecated Use the `useDrawingArea` hook instead.
-     */ drawingArea: import_prop_types.default.shape({
-            bottom: import_prop_types.default.number.isRequired,
-            height: import_prop_types.default.number.isRequired,
-            left: import_prop_types.default.number.isRequired,
-            right: import_prop_types.default.number.isRequired,
-            top: import_prop_types.default.number.isRequired,
-            width: import_prop_types.default.number.isRequired
-        }).isRequired,
-        /**
-     * Set to true to hide the legend.
-     * @default false
-     */ hidden: import_prop_types.default.bool,
-        /**
-     * Space between two legend items (in px).
-     * @default 10
-     */ itemGap: import_prop_types.default.number,
-        /**
-     * Height of the item mark (in px).
-     * @default 20
-     */ itemMarkHeight: import_prop_types.default.number,
-        /**
-     * Width of the item mark (in px).
-     * @default 20
-     */ itemMarkWidth: import_prop_types.default.number,
-        /**
-     * Style applied to legend labels.
-     * @default theme.typography.subtitle1
-     */ labelStyle: import_prop_types.default.object,
-        /**
-     * Space between the mark and the label (in px).
-     * @default 5
-     */ markGap: import_prop_types.default.number,
-        /**
-     * Callback fired when a legend item is clicked.
-     * @param {React.MouseEvent<SVGRectElement, MouseEvent>} event The click event.
-     * @param {SeriesLegendItemContext} legendItem The legend item data.
-     * @param {number} index The index of the clicked legend item.
-     */ onItemClick: import_prop_types.default.func,
-        /**
-     * Legend padding (in px).
-     * Can either be a single number, or an object with top, left, bottom, right properties.
-     * @default 10
-     */ padding: import_prop_types.default.oneOfType([
-            import_prop_types.default.number,
-            import_prop_types.default.shape({
-                bottom: import_prop_types.default.number,
-                left: import_prop_types.default.number,
-                right: import_prop_types.default.number,
-                top: import_prop_types.default.number
-            })
-        ]),
-        /**
-     * The position of the legend.
-     */ position: import_prop_types.default.shape({
-            horizontal: import_prop_types.default.oneOf([
-                "left",
-                "middle",
-                "right"
-            ]).isRequired,
-            vertical: import_prop_types.default.oneOf([
-                "bottom",
-                "middle",
-                "top"
-            ]).isRequired
-        }).isRequired,
-        series: import_prop_types.default.object.isRequired,
-        seriesToDisplay: import_prop_types.default.arrayOf(import_prop_types.default.shape({
-            color: import_prop_types.default.string.isRequired,
-            id: import_prop_types.default.oneOfType([
-                import_prop_types.default.number,
-                import_prop_types.default.string
-            ]).isRequired,
-            itemId: import_prop_types.default.oneOfType([
-                import_prop_types.default.number,
-                import_prop_types.default.string
-            ]),
-            label: import_prop_types.default.string.isRequired,
-            maxValue: import_prop_types.default.oneOfType([
-                import_prop_types.default.instanceOf(Date),
-                import_prop_types.default.number
-            ]),
-            minValue: import_prop_types.default.oneOfType([
-                import_prop_types.default.instanceOf(Date),
-                import_prop_types.default.number
-            ]),
-            seriesId: import_prop_types.default.oneOfType([
-                import_prop_types.default.number,
-                import_prop_types.default.string
-            ])
-        })).isRequired
-    } : void 0;
-    // node_modules/@mui/x-charts/ChartsLegend/ChartsLegend.js
-    var import_jsx_runtime74 = __toESM(require_jsx_runtime());
-    var _excluded17 = [
-        "slots",
-        "slotProps"
-    ];
-    var useUtilityClasses28 = function(ownerState) {
-        var classes = ownerState.classes, direction = ownerState.direction;
-        var slots = {
-            root: [
-                "root",
-                direction
-            ],
-            mark: [
-                "mark"
-            ],
-            label: [
-                "label"
-            ],
-            series: [
-                "series"
-            ],
-            itemBackground: [
-                "itemBackground"
-            ]
-        };
-        return composeClasses2(slots, getLegendUtilityClass, classes);
-    };
-    false ? ChartsLegend.propTypes = {
-        // ----------------------------- Warning --------------------------------
-        // | These PropTypes are generated from the TypeScript type definitions |
-        // | To update them edit the TypeScript types and run "pnpm proptypes"  |
-        // ----------------------------------------------------------------------
-        /**
-     * Override or extend the styles applied to the component.
-     */ classes: import_prop_types.default.object,
-        /**
-     * The direction of the legend layout.
-     * The default depends on the chart.
-     */ direction: import_prop_types.default.oneOf([
-            "column",
-            "row"
-        ]),
-        /**
-     * Set to true to hide the legend.
-     * @default false
-     */ hidden: import_prop_types.default.bool,
-        /**
-     * Space between two legend items (in px).
-     * @default 10
-     */ itemGap: import_prop_types.default.number,
-        /**
-     * Height of the item mark (in px).
-     * @default 20
-     */ itemMarkHeight: import_prop_types.default.number,
-        /**
-     * Width of the item mark (in px).
-     * @default 20
-     */ itemMarkWidth: import_prop_types.default.number,
-        /**
-     * Style applied to legend labels.
-     * @default theme.typography.subtitle1
-     */ labelStyle: import_prop_types.default.object,
-        /**
-     * Space between the mark and the label (in px).
-     * @default 5
-     */ markGap: import_prop_types.default.number,
-        /**
-     * Callback fired when a legend item is clicked.
-     * @param {React.MouseEvent<SVGRectElement, MouseEvent>} event The click event.
-     * @param {SeriesLegendItemContext} legendItem The legend item data.
-     * @param {number} index The index of the clicked legend item.
-     */ onItemClick: import_prop_types.default.func,
-        /**
-     * Legend padding (in px).
-     * Can either be a single number, or an object with top, left, bottom, right properties.
-     * @default 10
-     */ padding: import_prop_types.default.oneOfType([
-            import_prop_types.default.number,
-            import_prop_types.default.shape({
-                bottom: import_prop_types.default.number,
-                left: import_prop_types.default.number,
-                right: import_prop_types.default.number,
-                top: import_prop_types.default.number
-            })
-        ]),
-        /**
-     * The position of the legend.
-     */ position: import_prop_types.default.shape({
-            horizontal: import_prop_types.default.oneOf([
-                "left",
-                "middle",
-                "right"
-            ]).isRequired,
-            vertical: import_prop_types.default.oneOf([
-                "bottom",
-                "middle",
-                "top"
-            ]).isRequired
-        }),
-        /**
-     * The props used for each component slot.
-     * @default {}
-     */ slotProps: import_prop_types.default.object,
-        /**
-     * Overridable component slots.
-     * @default {}
-     */ slots: import_prop_types.default.object
-    } : void 0;
     // node_modules/@mui/x-charts/ChartsAxisHighlight/ChartsAxisHighlight.js
-    var React128 = __toESM(require_react());
-    var import_jsx_runtime75 = __toESM(require_jsx_runtime());
+    var React125 = __toESM(require_react());
+    var import_jsx_runtime72 = __toESM(require_jsx_runtime());
     var chartsAxisHighlightClasses = generateUtilityClasses2("MuiChartsAxisHighlight", [
         "root"
     ]);
-    var useUtilityClasses29 = function() {
+    var useUtilityClasses28 = function() {
         var slots = {
             root: [
                 "root"
@@ -48882,7 +48550,7 @@ var agent = function() {
         ])
     } : void 0;
     // node_modules/@mui/x-charts/ChartsGrid/ChartsGrid.js
-    var React131 = __toESM(require_react());
+    var React128 = __toESM(require_react());
     var chartsGridClasses = generateUtilityClasses2("MuiChartsGrid", [
         "root",
         "line",
@@ -48916,18 +48584,18 @@ var agent = function() {
         };
     });
     // node_modules/@mui/x-charts/ChartsGrid/ChartsVerticalGrid.js
-    var React129 = __toESM(require_react());
-    var import_jsx_runtime76 = __toESM(require_jsx_runtime());
+    var React126 = __toESM(require_react());
+    var import_jsx_runtime73 = __toESM(require_jsx_runtime());
     // node_modules/@mui/x-charts/ChartsGrid/ChartsHorizontalGrid.js
-    var React130 = __toESM(require_react());
-    var import_jsx_runtime77 = __toESM(require_jsx_runtime());
+    var React127 = __toESM(require_react());
+    var import_jsx_runtime74 = __toESM(require_jsx_runtime());
     // node_modules/@mui/x-charts/ChartsGrid/ChartsGrid.js
-    var import_jsx_runtime78 = __toESM(require_jsx_runtime());
-    var _excluded18 = [
+    var import_jsx_runtime75 = __toESM(require_jsx_runtime());
+    var _excluded14 = [
         "vertical",
         "horizontal"
     ];
-    var useUtilityClasses30 = function(param) {
+    var useUtilityClasses29 = function(param) {
         var classes = param.classes;
         var slots = {
             root: [
@@ -48960,61 +48628,101 @@ var agent = function() {
      */ vertical: import_prop_types.default.bool
     } : void 0;
     // src/Components/Charts/BaseBarChart.tsx
-    var import_jsx_runtime79 = __toESM(require_jsx_runtime());
+    var import_react27 = __toESM(require_react());
+    // src/Components/Charts/BaseBarChartLegend.tsx
+    var import_jsx_runtime76 = __toESM(require_jsx_runtime());
+    var BaseBarChartLegend = function(param) {
+        var yAxis = param.yAxis;
+        return /* @__PURE__ */ (0, import_jsx_runtime76.jsx)(Stack_default, {
+            spacing: 2,
+            direction: "row",
+            flexWrap: "wrap",
+            justifyContent: "center",
+            children: yAxis.map(function(axis, index) {
+                return /* @__PURE__ */ (0, import_jsx_runtime76.jsxs)(Box_default, {
+                    display: "flex",
+                    alignItems: "center",
+                    children: [
+                        /* @__PURE__ */ (0, import_jsx_runtime76.jsx)(Box_default, {
+                            sx: {
+                                width: 12,
+                                height: 12,
+                                bgcolor: axis.color,
+                                borderRadius: "2px",
+                                mr: 1
+                            }
+                        }),
+                        /* @__PURE__ */ (0, import_jsx_runtime76.jsx)(Typography_default, {
+                            variant: "body2",
+                            children: axis.label
+                        })
+                    ]
+                }, index);
+            })
+        });
+    };
+    // src/Components/Charts/BaseBarChart.tsx
+    var import_jsx_runtime77 = __toESM(require_jsx_runtime());
     var BaseBarChart = function(param) {
         var xAxis = param.xAxis, yAxis = param.yAxis, dataset = param.dataset;
-        var theme = useTheme4();
-        return /* @__PURE__ */ (0, import_jsx_runtime79.jsxs)(ResponsiveChartContainer, {
-            xAxis: xAxis,
-            series: yAxis.map(function(axis) {
-                return _object_spread_props(_object_spread({}, axis), {
-                    type: "bar"
-                });
-            }),
-            dataset: dataset,
+        return /* @__PURE__ */ (0, import_jsx_runtime77.jsxs)(import_react27.Fragment, {
             children: [
-                /* @__PURE__ */ (0, import_jsx_runtime79.jsx)(BarPlot, {}),
-                /* @__PURE__ */ (0, import_jsx_runtime79.jsx)(ChartsGrid, {
-                    vertical: true,
-                    horizontal: true
-                }),
-                /* @__PURE__ */ (0, import_jsx_runtime79.jsx)(ChartsXAxis, {}),
-                /* @__PURE__ */ (0, import_jsx_runtime79.jsx)(ChartsYAxis, {}),
-                /* @__PURE__ */ (0, import_jsx_runtime79.jsx)(ChartsLegend, {
-                    itemMarkHeight: 13,
-                    itemMarkWidth: 13,
-                    position: {
-                        horizontal: "middle",
-                        vertical: "top"
+                /* @__PURE__ */ (0, import_jsx_runtime77.jsx)(Box_default, {
+                    sx: {
+                        height: 300
                     },
-                    labelStyle: {
-                        fontSize: theme.typography.subtitle2.fontSize
-                    }
+                    children: /* @__PURE__ */ (0, import_jsx_runtime77.jsxs)(ResponsiveChartContainer, {
+                        xAxis: xAxis,
+                        margin: {
+                            top: 20,
+                            left: 35,
+                            right: 20,
+                            bottom: 35
+                        },
+                        series: yAxis.map(function(axis) {
+                            return _object_spread_props(_object_spread({}, axis), {
+                                type: "bar"
+                            });
+                        }),
+                        dataset: dataset,
+                        children: [
+                            /* @__PURE__ */ (0, import_jsx_runtime77.jsx)(BarPlot, {}),
+                            /* @__PURE__ */ (0, import_jsx_runtime77.jsx)(ChartsGrid, {
+                                vertical: true,
+                                horizontal: true
+                            }),
+                            /* @__PURE__ */ (0, import_jsx_runtime77.jsx)(ChartsXAxis, {}),
+                            /* @__PURE__ */ (0, import_jsx_runtime77.jsx)(ChartsYAxis, {}),
+                            /* @__PURE__ */ (0, import_jsx_runtime77.jsx)(ChartsTooltip, {}),
+                            /* @__PURE__ */ (0, import_jsx_runtime77.jsx)(ChartsAxisHighlight, {
+                                x: "band"
+                            })
+                        ]
+                    })
                 }),
-                /* @__PURE__ */ (0, import_jsx_runtime79.jsx)(ChartsTooltip, {}),
-                /* @__PURE__ */ (0, import_jsx_runtime79.jsx)(ChartsAxisHighlight, {
-                    x: "band"
+                /* @__PURE__ */ (0, import_jsx_runtime77.jsx)(BaseBarChartLegend, {
+                    yAxis: yAxis
                 })
             ]
         });
     };
     // src/Components/Charts/BaseChartView.tsx
-    var import_jsx_runtime80 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime78 = __toESM(require_jsx_runtime());
     var BaseChartView = function(param) {
         var title = param.title, children = param.children, childrenSx = param.childrenSx, containerSx = param.containerSx;
-        return /* @__PURE__ */ (0, import_jsx_runtime80.jsxs)(Paper_default, {
+        return /* @__PURE__ */ (0, import_jsx_runtime78.jsxs)(Paper_default, {
             sx: _object_spread({
-                height: 300,
+                width: "100%",
                 p: 2,
                 mt: 3
             }, containerSx),
             children: [
-                /* @__PURE__ */ (0, import_jsx_runtime80.jsx)(Box_default, {
+                /* @__PURE__ */ (0, import_jsx_runtime78.jsx)(Box_default, {
                     sx: {
                         display: "flex",
                         alignItems: "center"
                     },
-                    children: /* @__PURE__ */ (0, import_jsx_runtime80.jsx)(Typography_default, {
+                    children: /* @__PURE__ */ (0, import_jsx_runtime78.jsx)(Typography_default, {
                         sx: {
                             mr: 2
                         },
@@ -49022,7 +48730,7 @@ var agent = function() {
                         children: title
                     })
                 }),
-                /* @__PURE__ */ (0, import_jsx_runtime80.jsx)(Box_default, {
+                /* @__PURE__ */ (0, import_jsx_runtime78.jsx)(Box_default, {
                     sx: _object_spread({
                         height: "100%"
                     }, childrenSx),
@@ -49049,9 +48757,9 @@ var agent = function() {
                 key: "getEnvConfig",
                 value: function getEnvConfig() {
                     return {
-                        repositoryUrl: "",
-                        apiDateFormat: "",
-                        apiTimeFormat: ""
+                        repositoryUrl: "https://raw.githubusercontent.com/Nikita-Filonov/ui-coverage-report",
+                        apiDateFormat: "YYYY-MM-DD",
+                        apiTimeFormat: "HH:mm:ss"
                     };
                 }
             },
@@ -49101,9 +48809,18 @@ var agent = function() {
     // src/Models/Actions.ts
     var ActionType = /* @__PURE__ */ function(ActionType2) {
         ActionType2["Fill"] = "FILL";
+        ActionType2["Type"] = "TYPE";
+        ActionType2["Select"] = "SELECT";
         ActionType2["Click"] = "CLICK";
-        ActionType2["AssertVisible"] = "ASSERT_VISIBLE";
-        ActionType2["AssertHaveText"] = "ASSERT_HAVE_TEXT";
+        ActionType2["Hover"] = "HOVER";
+        ActionType2["Text"] = "TEXT";
+        ActionType2["Value"] = "VALUE";
+        ActionType2["Hidden"] = "HIDDEN";
+        ActionType2["Visible"] = "VISIBLE";
+        ActionType2["Checked"] = "CHECKED";
+        ActionType2["Enabled"] = "ENABLED";
+        ActionType2["Disabled"] = "DISABLED";
+        ActionType2["Unchecked"] = "UNCHECKED";
         return ActionType2;
     }(ActionType || {});
     // src/Services/Actions.ts
@@ -49141,9 +48858,33 @@ var agent = function() {
         return base;
     };
     var _obj2;
-    var MAP_ACTION_TYPE_TO_COLOR = (_obj2 = {}, _define_property(_obj2, "FILL" /* Fill */ , green_default["300"]), _define_property(_obj2, "CLICK" /* Click */ , blue_default["300"]), _define_property(_obj2, "ASSERT_VISIBLE" /* AssertVisible */ , purple_default["300"]), _define_property(_obj2, "ASSERT_HAVE_TEXT" /* AssertHaveText */ , orange_default["300"]), _obj2);
+    var MAP_ACTION_TYPE_TO_COLOR = (_obj2 = {}, // input
+    _define_property(_obj2, "FILL" /* Fill */ , green_default["300"]), _define_property(_obj2, "TYPE" /* Type */ , green_default["400"]), _define_property(_obj2, "SELECT" /* Select */ , green_default["500"]), // action
+    _define_property(_obj2, "CLICK" /* Click */ , blue_default["300"]), _define_property(_obj2, "HOVER" /* Hover */ , blue_default["400"]), // assert
+    _define_property(_obj2, "TEXT" /* Text */ , purple_default["300"]), _define_property(_obj2, "VALUE" /* Value */ , purple_default["400"]), _define_property(_obj2, "HIDDEN" /* Hidden */ , purple_default["500"]), _define_property(_obj2, "VISIBLE" /* Visible */ , purple_default["600"]), _define_property(_obj2, "CHECKED" /* Checked */ , orange_default["300"]), _define_property(_obj2, "ENABLED" /* Enabled */ , orange_default["400"]), _define_property(_obj2, "DISABLED" /* Disabled */ , orange_default["500"]), _define_property(_obj2, "UNCHECKED" /* Unchecked */ , orange_default["600"]), _obj2);
+    var ACTION_TYPES_BY_GROUP = {
+        input: [
+            "FILL" /* Fill */ ,
+            "TYPE" /* Type */ ,
+            "SELECT" /* Select */ 
+        ],
+        action: [
+            "CLICK" /* Click */ ,
+            "HOVER" /* Hover */ 
+        ],
+        assert: [
+            "TEXT" /* Text */ ,
+            "VALUE" /* Value */ ,
+            "HIDDEN" /* Hidden */ ,
+            "VISIBLE" /* Visible */ ,
+            "CHECKED" /* Checked */ ,
+            "ENABLED" /* Enabled */ ,
+            "DISABLED" /* Disabled */ ,
+            "UNCHECKED" /* Unchecked */ 
+        ]
+    };
     // src/Components/Charts/Agent/Elements/ElementHistoryChartView.tsx
-    var import_jsx_runtime81 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime79 = __toESM(require_jsx_runtime());
     var ElementHistoryChartView = function(param) {
         var history2 = param.history;
         var chartData = (0, import_react28.useMemo)(function() {
@@ -49151,9 +48892,9 @@ var agent = function() {
         }, [
             history2
         ]);
-        return /* @__PURE__ */ (0, import_jsx_runtime81.jsx)(BaseChartView, {
+        return /* @__PURE__ */ (0, import_jsx_runtime79.jsx)(BaseChartView, {
             title: "Element history",
-            children: /* @__PURE__ */ (0, import_jsx_runtime81.jsx)(BaseBarChart, {
+            children: /* @__PURE__ */ (0, import_jsx_runtime79.jsx)(BaseBarChart, {
                 xAxis: [
                     {
                         dataKey: "createdAt",
@@ -49203,17 +48944,17 @@ var agent = function() {
         };
     };
     // src/Components/Tables/BaseTableCell.tsx
-    var import_jsx_runtime82 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime80 = __toESM(require_jsx_runtime());
     var BaseTableCell = function(param) {
         var text = param.text, icon = param.icon;
-        return /* @__PURE__ */ (0, import_jsx_runtime82.jsxs)(Box_default, {
+        return /* @__PURE__ */ (0, import_jsx_runtime80.jsxs)(Box_default, {
             sx: {
                 display: "flex",
                 alignItems: "center"
             },
             children: [
                 icon,
-                /* @__PURE__ */ (0, import_jsx_runtime82.jsx)(Typography_default, {
+                /* @__PURE__ */ (0, import_jsx_runtime80.jsx)(Typography_default, {
                     variant: "body2",
                     children: text
                 })
@@ -49221,44 +48962,112 @@ var agent = function() {
         });
     };
     // node_modules/@mui/icons-material/esm/MouseOutlined.js
-    var import_jsx_runtime83 = __toESM(require_jsx_runtime());
-    var MouseOutlined_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime83.jsx)("path", {
+    var import_jsx_runtime81 = __toESM(require_jsx_runtime());
+    var MouseOutlined_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime81.jsx)("path", {
         d: "M20 9c-.04-4.39-3.6-7.93-8-7.93S4.04 4.61 4 9v6c0 4.42 3.58 8 8 8s8-3.58 8-8zm-2 0h-5V3.16c2.81.47 4.96 2.9 5 5.84m-7-5.84V9H6c.04-2.94 2.19-5.37 5-5.84M18 15c0 3.31-2.69 6-6 6s-6-2.69-6-6v-4h12z"
     }), "MouseOutlined");
     // node_modules/@mui/icons-material/esm/EditOutlined.js
-    var import_jsx_runtime84 = __toESM(require_jsx_runtime());
-    var EditOutlined_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime84.jsx)("path", {
+    var import_jsx_runtime82 = __toESM(require_jsx_runtime());
+    var EditOutlined_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime82.jsx)("path", {
         d: "m14.06 9.02.92.92L5.92 19H5v-.92zM17.66 3c-.25 0-.51.1-.7.29l-1.83 1.83 3.75 3.75 1.83-1.83c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.2-.2-.45-.29-.71-.29m-3.6 3.19L3 17.25V21h3.75L17.81 9.94z"
     }), "EditOutlined");
-    // node_modules/@mui/icons-material/esm/VisibilityOutlined.js
+    // node_modules/@mui/icons-material/esm/ToggleOn.js
+    var import_jsx_runtime83 = __toESM(require_jsx_runtime());
+    var ToggleOn_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime83.jsx)("path", {
+        d: "M17 7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h10c2.76 0 5-2.24 5-5s-2.24-5-5-5m0 8c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3"
+    }), "ToggleOn");
+    // node_modules/@mui/icons-material/esm/DoNotTouchOutlined.js
+    var import_jsx_runtime84 = __toESM(require_jsx_runtime());
+    var DoNotTouchOutlined_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime84.jsx)("path", {
+        d: "M2.81 2.81 1.39 4.22 7 9.83v4.3l-2.6-1.48c-.17-.09-.34-.14-.54-.14-.26 0-.5.09-.7.26L2 13.88l6.8 7.18c.57.6 1.35.94 2.18.94H17c.62 0 1.18-.19 1.66-.52l1.12 1.12 1.41-1.41zM17 20h-6c-.39 0-.64-.23-.75-.36L6.87 16H9v-4.17l8.14 8.14c-.05.01-.09.03-.14.03m-3.17-9H14V3.25c0-.69.56-1.25 1.25-1.25s1.25.56 1.25 1.25V11h1V5.25c0-.69.56-1.25 1.25-1.25S20 4.56 20 5.25v11.92l-2-2V13h-2.17zm-.83-.83V2.25C13 1.56 12.44 1 11.75 1s-1.25.56-1.25 1.25v5.42zm-3.5-3.5V4.25C9.5 3.56 8.94 3 8.25 3c-.67 0-1.2.53-1.24 1.18z"
+    }), "DoNotTouchOutlined");
+    // node_modules/@mui/icons-material/esm/CheckBoxOutlined.js
     var import_jsx_runtime85 = __toESM(require_jsx_runtime());
-    var VisibilityOutlined_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime85.jsx)("path", {
+    var CheckBoxOutlined_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime85.jsx)("path", {
+        d: "M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2m0 16H5V5h14zM17.99 9l-1.41-1.42-6.59 6.59-2.58-2.57-1.42 1.41 4 3.99z"
+    }), "CheckBoxOutlined");
+    // node_modules/@mui/icons-material/esm/CheckBoxOutlineBlank.js
+    var import_jsx_runtime86 = __toESM(require_jsx_runtime());
+    var CheckBoxOutlineBlank_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime86.jsx)("path", {
+        d: "M19 5v14H5V5zm0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2"
+    }), "CheckBoxOutlineBlank");
+    // node_modules/@mui/icons-material/esm/VisibilityOutlined.js
+    var import_jsx_runtime87 = __toESM(require_jsx_runtime());
+    var VisibilityOutlined_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime87.jsx)("path", {
         d: "M12 6c3.79 0 7.17 2.13 8.82 5.5C19.17 14.87 15.79 17 12 17s-7.17-2.13-8.82-5.5C4.83 8.13 8.21 6 12 6m0-2C7 4 2.73 7.11 1 11.5 2.73 15.89 7 19 12 19s9.27-3.11 11-7.5C21.27 7.11 17 4 12 4m0 5c1.38 0 2.5 1.12 2.5 2.5S13.38 14 12 14s-2.5-1.12-2.5-2.5S10.62 9 12 9m0-2c-2.48 0-4.5 2.02-4.5 4.5S9.52 16 12 16s4.5-2.02 4.5-4.5S14.48 7 12 7"
     }), "VisibilityOutlined");
-    // node_modules/@mui/icons-material/esm/TextSnippetOutlined.js
-    var import_jsx_runtime86 = __toESM(require_jsx_runtime());
-    var TextSnippetOutlined_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime86.jsx)("path", {
-        d: "M14.17 5 19 9.83V19H5V5zm0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V9.83c0-.53-.21-1.04-.59-1.41l-4.83-4.83c-.37-.38-.88-.59-1.41-.59M7 15h10v2H7zm0-4h10v2H7zm0-4h7v2H7z"
-    }), "TextSnippetOutlined");
+    // node_modules/@mui/icons-material/esm/VisibilityOffOutlined.js
+    var import_jsx_runtime88 = __toESM(require_jsx_runtime());
+    var VisibilityOffOutlined_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime88.jsx)("path", {
+        d: "M12 6c3.79 0 7.17 2.13 8.82 5.5-.59 1.22-1.42 2.27-2.41 3.12l1.41 1.41c1.39-1.23 2.49-2.77 3.18-4.53C21.27 7.11 17 4 12 4c-1.27 0-2.49.2-3.64.57l1.65 1.65C10.66 6.09 11.32 6 12 6m-1.07 1.14L13 9.21c.57.25 1.03.71 1.28 1.28l2.07 2.07c.08-.34.14-.7.14-1.07C16.5 9.01 14.48 7 12 7c-.37 0-.72.05-1.07.14M2.01 3.87l2.68 2.68C3.06 7.83 1.77 9.53 1 11.5 2.73 15.89 7 19 12 19c1.52 0 2.98-.29 4.32-.82l3.42 3.42 1.41-1.41L3.42 2.45zm7.5 7.5 2.61 2.61c-.04.01-.08.02-.12.02-1.38 0-2.5-1.12-2.5-2.5 0-.05.01-.08.01-.13m-3.4-3.4 1.75 1.75c-.23.55-.36 1.15-.36 1.78 0 2.48 2.02 4.5 4.5 4.5.63 0 1.23-.13 1.77-.36l.98.98c-.88.24-1.8.38-2.75.38-3.79 0-7.17-2.13-8.82-5.5.7-1.43 1.72-2.61 2.93-3.53"
+    }), "VisibilityOffOutlined");
     // src/Components/Tables/Agent/Elements/ActionCell.tsx
-    var import_jsx_runtime87 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime89 = __toESM(require_jsx_runtime());
     var _obj3;
-    var MAP_ACTION_TYPE_TO_ICON = (_obj3 = {}, _define_property(_obj3, "FILL" /* Fill */ , /* @__PURE__ */ (0, import_jsx_runtime87.jsx)(EditOutlined_default, {
+    var MAP_ACTION_TYPE_TO_ICON = (_obj3 = {}, // input
+    _define_property(_obj3, "FILL" /* Fill */ , /* @__PURE__ */ (0, import_jsx_runtime89.jsx)(EditOutlined_default, {
         sx: {
             mr: 1.5
         },
         fontSize: "small"
-    })), _define_property(_obj3, "CLICK" /* Click */ , /* @__PURE__ */ (0, import_jsx_runtime87.jsx)(MouseOutlined_default, {
+    })), _define_property(_obj3, "TYPE" /* Type */ , /* @__PURE__ */ (0, import_jsx_runtime89.jsx)(EditOutlined_default, {
         sx: {
             mr: 1.5
         },
         fontSize: "small"
-    })), _define_property(_obj3, "ASSERT_VISIBLE" /* AssertVisible */ , /* @__PURE__ */ (0, import_jsx_runtime87.jsx)(VisibilityOutlined_default, {
+    })), _define_property(_obj3, "SELECT" /* Select */ , /* @__PURE__ */ (0, import_jsx_runtime89.jsx)(EditOutlined_default, {
         sx: {
             mr: 1.5
         },
         fontSize: "small"
-    })), _define_property(_obj3, "ASSERT_HAVE_TEXT" /* AssertHaveText */ , /* @__PURE__ */ (0, import_jsx_runtime87.jsx)(TextSnippetOutlined_default, {
+    })), // action
+    _define_property(_obj3, "CLICK" /* Click */ , /* @__PURE__ */ (0, import_jsx_runtime89.jsx)(MouseOutlined_default, {
+        sx: {
+            mr: 1.5
+        },
+        fontSize: "small"
+    })), _define_property(_obj3, "HOVER" /* Hover */ , /* @__PURE__ */ (0, import_jsx_runtime89.jsx)(MouseOutlined_default, {
+        sx: {
+            mr: 1.5
+        },
+        fontSize: "small"
+    })), // assert
+    _define_property(_obj3, "TEXT" /* Text */ , /* @__PURE__ */ (0, import_jsx_runtime89.jsx)(VisibilityOutlined_default, {
+        sx: {
+            mr: 1.5
+        },
+        fontSize: "small"
+    })), _define_property(_obj3, "VALUE" /* Value */ , /* @__PURE__ */ (0, import_jsx_runtime89.jsx)(VisibilityOutlined_default, {
+        sx: {
+            mr: 1.5
+        },
+        fontSize: "small"
+    })), _define_property(_obj3, "HIDDEN" /* Hidden */ , /* @__PURE__ */ (0, import_jsx_runtime89.jsx)(VisibilityOffOutlined_default, {
+        sx: {
+            mr: 1.5
+        },
+        fontSize: "small"
+    })), _define_property(_obj3, "VISIBLE" /* Visible */ , /* @__PURE__ */ (0, import_jsx_runtime89.jsx)(VisibilityOutlined_default, {
+        sx: {
+            mr: 1.5
+        },
+        fontSize: "small"
+    })), _define_property(_obj3, "CHECKED" /* Checked */ , /* @__PURE__ */ (0, import_jsx_runtime89.jsx)(CheckBoxOutlined_default, {
+        sx: {
+            mr: 1.5
+        },
+        fontSize: "small"
+    })), _define_property(_obj3, "ENABLED" /* Enabled */ , /* @__PURE__ */ (0, import_jsx_runtime89.jsx)(ToggleOn_default, {
+        sx: {
+            mr: 1.5
+        },
+        fontSize: "small"
+    })), _define_property(_obj3, "DISABLED" /* Disabled */ , /* @__PURE__ */ (0, import_jsx_runtime89.jsx)(DoNotTouchOutlined_default, {
+        sx: {
+            mr: 1.5
+        },
+        fontSize: "small"
+    })), _define_property(_obj3, "UNCHECKED" /* Unchecked */ , /* @__PURE__ */ (0, import_jsx_runtime89.jsx)(CheckBoxOutlineBlank_default, {
         sx: {
             mr: 1.5
         },
@@ -49266,16 +49075,16 @@ var agent = function() {
     })), _obj3);
     var ActionCell = function(param) {
         var type = param.type;
-        return /* @__PURE__ */ (0, import_jsx_runtime87.jsx)(BaseTableCell, {
+        return /* @__PURE__ */ (0, import_jsx_runtime89.jsx)(BaseTableCell, {
             text: normalizeActionType(type),
             icon: MAP_ACTION_TYPE_TO_ICON[type]
         });
     };
     // src/Components/Tables/BaseTableRow.tsx
-    var import_jsx_runtime88 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime90 = __toESM(require_jsx_runtime());
     var BaseTableRow = function(param) {
         var cells = param.cells;
-        return /* @__PURE__ */ (0, import_jsx_runtime88.jsx)(TableRow_default, {
+        return /* @__PURE__ */ (0, import_jsx_runtime90.jsx)(TableRow_default, {
             hover: true,
             sx: {
                 "&:last-child td, &:last-child th": {
@@ -49283,7 +49092,7 @@ var agent = function() {
                 }
             },
             children: cells.map(function(cell, index) {
-                return /* @__PURE__ */ (0, import_jsx_runtime88.jsx)(TableCell_default, {
+                return /* @__PURE__ */ (0, import_jsx_runtime90.jsx)(TableCell_default, {
                     align: cell.align || "left",
                     children: cell.value
                 }, index);
@@ -49291,13 +49100,13 @@ var agent = function() {
         });
     };
     // src/Components/Tables/Agent/Elements/ActionCoverageTableRow.tsx
-    var import_jsx_runtime89 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime91 = __toESM(require_jsx_runtime());
     var ActionCoverageTableRow = function(param) {
         var action = param.action;
-        return /* @__PURE__ */ (0, import_jsx_runtime89.jsx)(BaseTableRow, {
+        return /* @__PURE__ */ (0, import_jsx_runtime91.jsx)(BaseTableRow, {
             cells: [
                 {
-                    value: /* @__PURE__ */ (0, import_jsx_runtime89.jsx)(ActionCell, {
+                    value: /* @__PURE__ */ (0, import_jsx_runtime91.jsx)(ActionCell, {
                         type: action.type
                     })
                 },
@@ -49308,7 +49117,7 @@ var agent = function() {
         });
     };
     // src/Components/Tables/BaseTableHeader.tsx
-    var import_jsx_runtime90 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime92 = __toESM(require_jsx_runtime());
     var BaseTableHeader = function(props) {
         var cells = props.cells, orderBy = props.orderBy, setOrderBy = props.setOrderBy, orderDirection = props.orderDirection, setOrderDirection = props.setOrderDirection;
         var onOrder = function(key) {
@@ -49317,17 +49126,17 @@ var agent = function() {
                 setOrderDirection(orderDirection === "asc" ? "desc" : "asc");
             };
         };
-        return /* @__PURE__ */ (0, import_jsx_runtime90.jsx)(TableHead_default, {
-            children: /* @__PURE__ */ (0, import_jsx_runtime90.jsx)(TableRow_default, {
+        return /* @__PURE__ */ (0, import_jsx_runtime92.jsx)(TableHead_default, {
+            children: /* @__PURE__ */ (0, import_jsx_runtime92.jsx)(TableRow_default, {
                 children: cells.map(function(cell, index) {
-                    return /* @__PURE__ */ (0, import_jsx_runtime90.jsx)(TableCell_default, {
+                    return /* @__PURE__ */ (0, import_jsx_runtime92.jsx)(TableCell_default, {
                         align: cell.align || "left",
                         sx: {
                             whiteSpace: "nowrap",
                             pt: 2,
                             pb: 2
                         },
-                        children: cell.orderKey ? /* @__PURE__ */ (0, import_jsx_runtime90.jsx)(TableSortLabel_default, {
+                        children: cell.orderKey ? /* @__PURE__ */ (0, import_jsx_runtime92.jsx)(TableSortLabel_default, {
                             active: orderBy === cell.orderKey,
                             direction: orderDirection,
                             onClick: onOrder(cell.orderKey),
@@ -49339,10 +49148,10 @@ var agent = function() {
         });
     };
     // src/Components/Tables/Agent/Elements/ActionCoverageTableHeader.tsx
-    var import_jsx_runtime91 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime93 = __toESM(require_jsx_runtime());
     var ActionCoverageTableHeader = function(props) {
         var orderBy = props.orderBy, setOrderBy = props.setOrderBy, orderDirection = props.orderDirection, setOrderDirection = props.setOrderDirection;
-        return /* @__PURE__ */ (0, import_jsx_runtime91.jsx)(BaseTableHeader, {
+        return /* @__PURE__ */ (0, import_jsx_runtime93.jsx)(BaseTableHeader, {
             cells: [
                 {
                     value: "Action",
@@ -49360,19 +49169,19 @@ var agent = function() {
         });
     };
     // src/Components/Tables/BaseTable.tsx
-    var import_jsx_runtime92 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime94 = __toESM(require_jsx_runtime());
     var BaseTable = function(props) {
         var header = props.header, children = props.children, containerSx = props.containerSx;
-        return /* @__PURE__ */ (0, import_jsx_runtime92.jsx)(TableContainer_default, {
+        return /* @__PURE__ */ (0, import_jsx_runtime94.jsx)(TableContainer_default, {
             component: Paper_default,
             sx: _object_spread_props(_object_spread({}, containerSx), {
                 width: "100%"
             }),
-            children: /* @__PURE__ */ (0, import_jsx_runtime92.jsxs)(Table_default, {
+            children: /* @__PURE__ */ (0, import_jsx_runtime94.jsxs)(Table_default, {
                 size: "small",
                 children: [
                     header,
-                    /* @__PURE__ */ (0, import_jsx_runtime92.jsx)(TableBody_default, {
+                    /* @__PURE__ */ (0, import_jsx_runtime94.jsx)(TableBody_default, {
                         children: children
                     })
                 ]
@@ -49380,75 +49189,75 @@ var agent = function() {
         });
     };
     // src/Components/Tables/Agent/Elements/ActionCoverageTable.tsx
-    var import_jsx_runtime93 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime95 = __toESM(require_jsx_runtime());
     var ActionCoverageTable = function(param) {
         var actions = param.actions;
         var _useTableSorting = useTableSorting({
             items: actions
         }), sortedItems = _useTableSorting.sortedItems, orderBy = _useTableSorting.orderBy, setOrderBy = _useTableSorting.setOrderBy, orderDirection = _useTableSorting.orderDirection, setOrderDirection = _useTableSorting.setOrderDirection;
-        return /* @__PURE__ */ (0, import_jsx_runtime93.jsx)(BaseTable, {
+        return /* @__PURE__ */ (0, import_jsx_runtime95.jsx)(BaseTable, {
             containerSx: {
                 mt: 3
             },
-            header: /* @__PURE__ */ (0, import_jsx_runtime93.jsx)(ActionCoverageTableHeader, {
+            header: /* @__PURE__ */ (0, import_jsx_runtime95.jsx)(ActionCoverageTableHeader, {
                 orderBy: orderBy,
                 setOrderBy: setOrderBy,
                 orderDirection: orderDirection,
                 setOrderDirection: setOrderDirection
             }),
             children: sortedItems.map(function(action, index) {
-                return /* @__PURE__ */ (0, import_jsx_runtime93.jsx)(ActionCoverageTableRow, {
+                return /* @__PURE__ */ (0, import_jsx_runtime95.jsx)(ActionCoverageTableRow, {
                     action: action
                 }, index);
             })
         });
     };
     // src/Views/Agent/Elements/ElementDetailsView.tsx
-    var import_jsx_runtime94 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime96 = __toESM(require_jsx_runtime());
     var ElementDetailsView = function(param) {
         var element = param.element;
-        return /* @__PURE__ */ (0, import_jsx_runtime94.jsxs)(Box_default, {
+        return /* @__PURE__ */ (0, import_jsx_runtime96.jsxs)(Box_default, {
             children: [
-                /* @__PURE__ */ (0, import_jsx_runtime94.jsxs)(WidgetInfoRowsView, {
+                /* @__PURE__ */ (0, import_jsx_runtime96.jsxs)(WidgetInfoRowsView, {
                     containerSx: {
                         mt: 0
                     },
                     children: [
-                        /* @__PURE__ */ (0, import_jsx_runtime94.jsx)(BaseInfoRowView, {
+                        /* @__PURE__ */ (0, import_jsx_runtime96.jsx)(BaseInfoRowView, {
                             name: "Selector",
                             value: element.selector
                         }),
-                        /* @__PURE__ */ (0, import_jsx_runtime94.jsx)(BaseInfoRowView, {
+                        /* @__PURE__ */ (0, import_jsx_runtime96.jsx)(BaseInfoRowView, {
                             name: "Selector type",
                             value: element.selectorType
                         })
                     ]
                 }),
-                /* @__PURE__ */ (0, import_jsx_runtime94.jsx)(ActionCoverageTable, {
+                /* @__PURE__ */ (0, import_jsx_runtime96.jsx)(ActionCoverageTable, {
                     actions: element.actions
                 }),
-                /* @__PURE__ */ (0, import_jsx_runtime94.jsx)(ElementHistoryChartView, {
+                /* @__PURE__ */ (0, import_jsx_runtime96.jsx)(ElementHistoryChartView, {
                     history: element.history
                 })
             ]
         });
     };
     // src/Components/Modals/Agent/Elements/ElementDetailsModal.tsx
-    var import_jsx_runtime95 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime97 = __toESM(require_jsx_runtime());
     var ElementDetailsModal = function(param) {
         var modal = param.modal, setModal = param.setModal, element = param.element;
-        return /* @__PURE__ */ (0, import_jsx_runtime95.jsx)(BaseModal, {
+        return /* @__PURE__ */ (0, import_jsx_runtime97.jsx)(BaseModal, {
             title: "Element details",
             modal: modal,
             setModal: setModal,
             maxWidth: "md",
-            children: /* @__PURE__ */ (0, import_jsx_runtime95.jsx)(ElementDetailsView, {
+            children: /* @__PURE__ */ (0, import_jsx_runtime97.jsx)(ElementDetailsView, {
                 element: element
             })
         });
     };
     // src/Views/Agent/Elements/ElementView.tsx
-    var import_jsx_runtime96 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime98 = __toESM(require_jsx_runtime());
     var ElementView = function(param) {
         var element = param.element;
         var _state_settings;
@@ -49463,17 +49272,17 @@ var agent = function() {
         var onElementDetails = function() {
             return setElementDetailsModal(true);
         };
-        return /* @__PURE__ */ (0, import_jsx_runtime96.jsxs)(BasePopper, {
+        return /* @__PURE__ */ (0, import_jsx_runtime98.jsxs)(BasePopper, {
             anchor: node2,
             children: [
-                /* @__PURE__ */ (0, import_jsx_runtime96.jsx)(IconButton_default, {
+                /* @__PURE__ */ (0, import_jsx_runtime98.jsx)(IconButton_default, {
                     onClick: onElementDetails,
-                    children: /* @__PURE__ */ (0, import_jsx_runtime96.jsx)(Badge_default, {
+                    children: /* @__PURE__ */ (0, import_jsx_runtime98.jsx)(Badge_default, {
                         color: (_state_settings = state.settings) === null || _state_settings === void 0 ? void 0 : _state_settings.badgeColor,
                         badgeContent: element.actions.length
                     })
                 }),
-                /* @__PURE__ */ (0, import_jsx_runtime96.jsx)(ElementDetailsModal, {
+                /* @__PURE__ */ (0, import_jsx_runtime98.jsx)(ElementDetailsModal, {
                     modal: elementDetailsModal,
                     setModal: setElementDetailsModal,
                     element: element
@@ -49482,28 +49291,28 @@ var agent = function() {
         });
     };
     // src/Views/Agent/Elements/ElementsView.tsx
-    var import_jsx_runtime97 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime99 = __toESM(require_jsx_runtime());
     var ElementsView = function() {
         var _state_elements;
         var state = useAgentInitialState().state;
-        return /* @__PURE__ */ (0, import_jsx_runtime97.jsx)(import_react31.Fragment, {
+        return /* @__PURE__ */ (0, import_jsx_runtime99.jsx)(import_react31.Fragment, {
             children: state === null || state === void 0 ? void 0 : (_state_elements = state.elements) === null || _state_elements === void 0 ? void 0 : _state_elements.map(function(element, index) {
-                return /* @__PURE__ */ (0, import_jsx_runtime97.jsx)(ElementView, {
+                return /* @__PURE__ */ (0, import_jsx_runtime99.jsx)(ElementView, {
                     element: element
                 }, index);
             })
         });
     };
     // src/agent.index.tsx
-    var import_jsx_runtime98 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime100 = __toESM(require_jsx_runtime());
     var IndexAgent = function() {
-        return /* @__PURE__ */ (0, import_jsx_runtime98.jsx)(AgentInitialStateProvider, {
-            children: /* @__PURE__ */ (0, import_jsx_runtime98.jsx)(ElementsView, {})
+        return /* @__PURE__ */ (0, import_jsx_runtime100.jsx)(AgentInitialStateProvider, {
+            children: /* @__PURE__ */ (0, import_jsx_runtime100.jsx)(ElementsView, {})
         });
     };
     document.addEventListener("DOMContentLoaded", function() {
         watchFrameRoot(function() {
-            return /* @__PURE__ */ (0, import_jsx_runtime98.jsx)(IndexAgent, {});
+            return /* @__PURE__ */ (0, import_jsx_runtime100.jsx)(IndexAgent, {});
         });
     });
 }(); /*! Bundled license information:
