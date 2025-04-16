@@ -2,7 +2,7 @@ import React, { Dispatch, FC, PropsWithChildren, SetStateAction, useContext, use
 import { AgentFilters } from '../Models/Agent';
 import { ActionType } from '../Models/Actions';
 
-const DEFAILT_AGENT_FILTERS: AgentFilters = {
+const DEFAULT_AGENT_FILTERS: AgentFilters = {
   actions: Object.values(ActionType)
 };
 
@@ -15,9 +15,9 @@ export type AgentFiltersContextProps = {
 const AgentFiltersContext = React.createContext<AgentFiltersContextProps | null>(null);
 
 const AgentFiltersProvider: FC<PropsWithChildren> = ({ children }) => {
-  const [filters, setFilters] = useState<AgentFilters>(DEFAILT_AGENT_FILTERS);
+  const [filters, setFilters] = useState<AgentFilters>(DEFAULT_AGENT_FILTERS);
 
-  const clearAllFilters = () => setFilters(DEFAILT_AGENT_FILTERS);
+  const clearAllFilters = () => setFilters(DEFAULT_AGENT_FILTERS);
 
   return (
     <AgentFiltersContext.Provider value={{ filters, setFilters, clearAllFilters }}>
