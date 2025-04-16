@@ -32,8 +32,37 @@ export const getActionsChartData = (props: GetActionsChartDataProps): Record<str
 };
 
 export const MAP_ACTION_TYPE_TO_COLOR: Record<ActionType, string> = {
+  // input
   [ActionType.Fill]: green['300'],
+  [ActionType.Type]: green['400'],
+  [ActionType.Select]: green['500'],
+
+  // action
   [ActionType.Click]: blue['300'],
-  [ActionType.AssertVisible]: purple['300'],
-  [ActionType.AssertHaveText]: orange['300']
+  [ActionType.Hover]: blue['400'],
+
+  // assert
+  [ActionType.Text]: purple['300'],
+  [ActionType.Value]: purple['400'],
+  [ActionType.Hidden]: purple['500'],
+  [ActionType.Visible]: purple['600'],
+  [ActionType.Checked]: orange['300'],
+  [ActionType.Enabled]: orange['400'],
+  [ActionType.Disabled]: orange['500'],
+  [ActionType.Unchecked]: orange['600']
+};
+
+export const ACTION_TYPES_BY_GROUP: Record<'input' | 'action' | 'assert', ActionType[]> = {
+  input: [ActionType.Fill, ActionType.Type, ActionType.Select],
+  action: [ActionType.Click, ActionType.Hover],
+  assert: [
+    ActionType.Text,
+    ActionType.Value,
+    ActionType.Hidden,
+    ActionType.Visible,
+    ActionType.Checked,
+    ActionType.Enabled,
+    ActionType.Disabled,
+    ActionType.Unchecked
+  ]
 };
