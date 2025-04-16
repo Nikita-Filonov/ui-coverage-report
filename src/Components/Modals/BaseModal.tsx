@@ -29,7 +29,7 @@ export const BaseModal: FC<BaseModalProps> = (props) => {
   const onClose = () => (onCancel ? onCancel() : setModal(false));
 
   return (
-    <Dialog open={modal} onClose={onClose} scroll={'paper'} fullWidth maxWidth={maxWidth}>
+    <Dialog sx={{ zIndex: 1900 }} open={modal} onClose={onClose} scroll={'paper'} fullWidth maxWidth={maxWidth}>
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <DialogTitle>{title}</DialogTitle>
         <Box sx={{ flexGrow: 1 }} />
