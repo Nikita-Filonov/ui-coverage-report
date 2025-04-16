@@ -8,7 +8,7 @@ type Props = {
 export const BasePopper: FC<Props> = ({ anchor, children }) => {
   return (
     <Popper
-      sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
+      sx={{ zIndex: 1700 }}
       open={true}
       anchorEl={anchor}
       placement={'left'}
