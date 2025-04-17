@@ -47,7 +47,7 @@ export const BaseBarChart = <T,>({ xAxis, yAxis, dataset }: BaseLineChartProps<T
           <ChartsGrid vertical={true} horizontal={true} />
           <ChartsXAxis />
           <ChartsYAxis />
-          <ChartsTooltip />
+          <ChartsTooltip slotProps={{ popper: { sx: { zIndex: 2000 } } }} />
           <ChartsAxisHighlight x={'band'} />
         </ResponsiveChartContainer>
       </Box>
