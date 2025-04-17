@@ -2,8 +2,10 @@ import { Box, Breakpoint, Button, Dialog, DialogActions, DialogContent, DialogTi
 import { FC, ReactNode } from 'react';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
+import { SxProps, Theme } from '@mui/system';
 
 export type BaseModalProps = {
+  sx?: SxProps<Theme>;
   children: ReactNode;
   title: string;
   modal: boolean;
@@ -13,12 +15,12 @@ export type BaseModalProps = {
 };
 
 export const BaseModal: FC<BaseModalProps> = (props) => {
-  const { children, title, modal, setModal, maxWidth, onCancel } = props;
+  const { sx, children, title, modal, setModal, maxWidth, onCancel } = props;
 
   const onClose = () => (onCancel ? onCancel() : setModal(false));
 
   return (
-    <Dialog sx={{ zIndex: 1900 }} open={modal} onClose={onClose} scroll={'paper'} fullWidth maxWidth={maxWidth}>
+    <Dialog sx={sx} open={modal} onClose={onClose} scroll={'paper'} fullWidth maxWidth={maxWidth}>
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <DialogTitle>{title}</DialogTitle>
         <Box sx={{ flexGrow: 1 }} />
