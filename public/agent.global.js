@@ -40258,12 +40258,14 @@ var agent = function() {
     // src/Components/Modals/BaseModal.tsx
     var import_jsx_runtime40 = __toESM(require_jsx_runtime());
     var BaseModal = function(props) {
-        var sx = props.sx, children = props.children, title = props.title, modal = props.modal, setModal = props.setModal, maxWidth2 = props.maxWidth, onCancel = props.onCancel;
+        var children = props.children, title = props.title, modal = props.modal, setModal = props.setModal, maxWidth2 = props.maxWidth, onCancel = props.onCancel;
         var onClose = function() {
             return onCancel ? onCancel() : setModal(false);
         };
         return /* @__PURE__ */ (0, import_jsx_runtime40.jsxs)(Dialog_default, {
-            sx: sx,
+            sx: {
+                zIndex: 1900
+            },
             open: modal,
             onClose: onClose,
             scroll: "paper",
@@ -48690,7 +48692,15 @@ var agent = function() {
                             }),
                             /* @__PURE__ */ (0, import_jsx_runtime77.jsx)(ChartsXAxis, {}),
                             /* @__PURE__ */ (0, import_jsx_runtime77.jsx)(ChartsYAxis, {}),
-                            /* @__PURE__ */ (0, import_jsx_runtime77.jsx)(ChartsTooltip, {}),
+                            /* @__PURE__ */ (0, import_jsx_runtime77.jsx)(ChartsTooltip, {
+                                slotProps: {
+                                    popper: {
+                                        sx: {
+                                            zIndex: 2e3
+                                        }
+                                    }
+                                }
+                            }),
                             /* @__PURE__ */ (0, import_jsx_runtime77.jsx)(ChartsAxisHighlight, {
                                 x: "band"
                             })
@@ -49242,9 +49252,8 @@ var agent = function() {
     // src/Components/Modals/Agent/Elements/ElementDetailsModal.tsx
     var import_jsx_runtime97 = __toESM(require_jsx_runtime());
     var ElementDetailsModal = function(param) {
-        var sx = param.sx, modal = param.modal, setModal = param.setModal, element = param.element;
+        var modal = param.modal, setModal = param.setModal, element = param.element;
         return /* @__PURE__ */ (0, import_jsx_runtime97.jsx)(BaseModal, {
-            sx: sx,
             title: "Element details",
             modal: modal,
             setModal: setModal,
@@ -49281,9 +49290,6 @@ var agent = function() {
                     })
                 }),
                 /* @__PURE__ */ (0, import_jsx_runtime98.jsx)(ElementDetailsModal, {
-                    sx: {
-                        zIndex: 1900
-                    },
                     modal: elementDetailsModal,
                     setModal: setElementDetailsModal,
                     element: element
