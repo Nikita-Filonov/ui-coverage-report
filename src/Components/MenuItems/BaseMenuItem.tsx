@@ -13,7 +13,7 @@ export const BaseMenuItem: FC<Props> = (props) => {
   const { icon, title, subtitle, label, action } = props;
 
   return (
-    <ListItem dense disableGutters>
+    <ListItem dense disableGutters disablePadding>
       {icon}
       <ListItemText primary={title} secondary={subtitle} />
       {label}
