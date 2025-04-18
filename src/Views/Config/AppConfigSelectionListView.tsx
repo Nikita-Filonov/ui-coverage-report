@@ -29,8 +29,10 @@ export const AppConfigSelectionListView: FC<Props> = ({ onSelectConfigCallback }
   };
 
   return (
-    <BoxView title={'Services'} containerSx={{ mt: 0 }}>
-      {appConfigs.length === 0 && <EmptyView title={'Empty apps'} description={'There is no apps to select'} />}
+    <BoxView title={'Applications'} containerSx={{ mt: 0 }}>
+      {appConfigs.length === 0 && (
+        <EmptyView title={'Empty applications'} description={'There is no applications to select'} />
+      )}
       {appConfigs.length > 0 && (
         <SearchTextField sx={{ mt: 2 }} search={search} setSearch={setSearch} placeholder={'Search by name'} />
       )}
