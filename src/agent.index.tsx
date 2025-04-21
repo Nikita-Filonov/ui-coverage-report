@@ -1,11 +1,14 @@
 import { watchFrameRoot } from './Services/Frame/Root';
 import { AgentInitialStateProvider } from './Providers/AgentInitialStateProvider';
 import { ElementsView } from './Views/Agent/Elements/ElementsView';
+import { AgentThemeProvider } from './Providers/AgentThemeProvider';
 
 const IndexAgent = () => {
   return (
     <AgentInitialStateProvider>
-      <ElementsView />
+      <AgentThemeProvider>
+        <ElementsView />
+      </AgentThemeProvider>
     </AgentInitialStateProvider>
   );
 };
