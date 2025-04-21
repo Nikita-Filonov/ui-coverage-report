@@ -1,7 +1,39 @@
-import React, { Dispatch, FC, PropsWithChildren, SetStateAction, useContext, useEffect, useState } from 'react';
-import { DEFAULT_APP_CONFIG, DEFAULT_APP_COVERAGE, InitialState, loadInitialState } from '../State/Controllers';
+import { createContext, Dispatch, FC, PropsWithChildren, SetStateAction, useContext, useEffect, useState } from 'react';
 import { AppConfig } from '../Models/Config';
 import { AppCoverage } from '../Models/Coverage/Coverage';
+import { InitialState } from '../Models/InitialState';
+
+const DEFAULT_APP_CONFIG: AppConfig = {
+  key: '',
+  url: '',
+  name: '',
+  tags: [],
+  repository: null
+};
+
+const DEFAULT_APP_COVERAGE: AppCoverage = {
+  history: [],
+  elements: []
+};
+
+const DEFAULT_INITIAL_STATE: InitialState = {
+  config: { apps: [] },
+  createdAt: '',
+  appsCoverage: {}
+};
+
+export const loadInitialState = (): InitialState => {
+  const stateElement = document.getElementById('state');
+  if (stateElement === null) {
+    return DEFAULT_INITIAL_STATE;
+  }
+
+  try {
+    return JSON.parse(stateElement.textContent || '');
+  } catch {
+    return DEFAULT_INITIAL_STATE;
+  }
+};
 
 export type InitialStateContextProps = {
   appConfig: AppConfig;
@@ -11,7 +43,7 @@ export type InitialStateContextProps = {
   appCoverage: AppCoverage;
 };
 
-const InitialStateContext = React.createContext<InitialStateContextProps | null>(null);
+const InitialStateContext = createContext<InitialStateContextProps | null>(null);
 
 const InitialStateProvider: FC<PropsWithChildren> = ({ children }) => {
   const [state, setState] = useState<InitialState>(loadInitialState());
