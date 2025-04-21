@@ -1,11 +1,11 @@
-import React, { FC, PropsWithChildren, useCallback, useContext, useEffect, useState } from 'react';
+import { createContext, FC, PropsWithChildren, useCallback, useContext, useEffect, useState } from 'react';
 import { AgentState } from '../Models/Agent';
 
 export type AgentInitialStateContextProps = {
   state: AgentState;
 };
 
-const AgentInitialStateContext = React.createContext<AgentInitialStateContextProps | null>(null);
+const AgentInitialStateContext = createContext<AgentInitialStateContextProps | null>(null);
 
 const AgentInitialStateProvider: FC<PropsWithChildren> = ({ children }) => {
   const [state, setState] = useState<AgentState>({});
