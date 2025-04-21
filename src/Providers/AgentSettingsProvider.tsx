@@ -1,6 +1,7 @@
-import React, { Dispatch, FC, PropsWithChildren, SetStateAction, useContext, useState } from 'react';
+import { createContext, FC, PropsWithChildren, useContext, useState } from 'react';
 import { Color } from '../Models/Core';
 import { AgentSettings } from '../Models/Agent';
+import { loadFromStorage, saveIntoStorage, StorageKey } from '../Services/Storage';
 
 const DEFAULT_AGENT_SETTINGS: AgentSettings = {
   badgeColor: Color.Primary,
@@ -9,14 +10,21 @@ const DEFAULT_AGENT_SETTINGS: AgentSettings = {
 
 export type AgentSettingsContextProps = {
   settings: AgentSettings;
-  setSettings: Dispatch<SetStateAction<AgentSettings>>;
+  setSettings: (settings: AgentSettings) => void;
   clearAllSettings: () => void;
 };
 
-const AgentSettingsContext = React.createContext<AgentSettingsContextProps | null>(null);
+const AgentSettingsContext = createContext<AgentSettingsContextProps | null>(null);
 
 const AgentSettingsProvider: FC<PropsWithChildren> = ({ children }) => {
-  const [settings, setSettings] = useState<AgentSettings>(DEFAULT_AGENT_SETTINGS);
+  const [settings, setSettingsInternal] = useState<AgentSettings>(
+    loadFromStorage({ key: StorageKey.AgentSettings, fallback: DEFAULT_AGENT_SETTINGS })
+  );
+
+  const setSettings = (settings: AgentSettings) => {
+    setSettingsInternal(settings);
+    saveIntoStorage({ key: StorageKey.AgentSettings, data: settings });
+  };
 
   const clearAllSettings = () => setSettings(DEFAULT_AGENT_SETTINGS);
 
