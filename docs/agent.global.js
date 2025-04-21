@@ -910,6 +910,18 @@ var agent = function() {
             }
         };
     };
+    var isEmpty = function isEmpty(obj) {
+        return obj === void 0 || obj === null || Object.keys(obj).length === 0;
+    };
+    var GlobalStyles = function GlobalStyles(props) {
+        var styles2 = props.styles, tmp = props.defaultTheme, defaultTheme5 = tmp === void 0 ? {} : tmp;
+        var globalStyles = typeof styles2 === "function" ? function(themeInput) {
+            return styles2(isEmpty(themeInput) ? defaultTheme5 : themeInput);
+        } : styles2;
+        return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(Global, {
+            styles: globalStyles
+        });
+    };
     var styled = // node_modules/@mui/styled-engine/index.js
     function styled(tag, options) {
         var stylesFactory = newStyled(tag, options);
@@ -1693,7 +1705,7 @@ var agent = function() {
                 "className",
                 "component"
             ]);
-            return /* @__PURE__ */ (0, import_jsx_runtime2.jsx)(BoxRoot, _object_spread({
+            return /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(BoxRoot, _object_spread({
                 as: component,
                 ref: ref,
                 className: clsx_default(className, generateClassName ? generateClassName(defaultClassName) : defaultClassName),
@@ -2417,6 +2429,72 @@ var agent = function() {
         }
         return (element === null || element === void 0 ? void 0 : element.ref) || null;
     };
+    var useTheme4 = function useTheme4() {
+        var theme = React19.useContext(ThemeContext_default);
+        if (false) {
+            React19.useDebugValue(theme);
+        }
+        return theme;
+    };
+    var mergeOuterLocalTheme = function mergeOuterLocalTheme(outerTheme, localTheme) {
+        if (typeof localTheme === "function") {
+            var mergedTheme = localTheme(outerTheme);
+            if (false) {
+                if (!mergedTheme) {
+                    console.error([
+                        "MUI: You should return an object from your theme function, i.e.",
+                        "<ThemeProvider theme={() => ({})} />"
+                    ].join("\n"));
+                }
+            }
+            return mergedTheme;
+        }
+        return _object_spread({}, outerTheme, localTheme);
+    };
+    var ThemeProvider2 = function ThemeProvider2(props) {
+        var children = props.children, localTheme = props.theme;
+        var outerTheme = useTheme4();
+        if (false) {
+            if (outerTheme === null && typeof localTheme === "function") {
+                console.error([
+                    "MUI: You are providing a theme function prop to the ThemeProvider component:",
+                    "<ThemeProvider theme={outerTheme => outerTheme} />",
+                    "",
+                    "However, no outer theme is present.",
+                    "Make sure a theme is already injected higher in the React tree or provide a theme object."
+                ].join("\n"));
+            }
+        }
+        var theme = React20.useMemo(function() {
+            var output = outerTheme === null ? _object_spread({}, localTheme) : mergeOuterLocalTheme(outerTheme, localTheme);
+            if (output != null) {
+                output[nested_default] = outerTheme !== null;
+            }
+            return output;
+        }, [
+            localTheme,
+            outerTheme
+        ]);
+        return /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(ThemeContext_default.Provider, {
+            value: theme,
+            children: children
+        });
+    };
+    var RtlProvider = function RtlProvider(_param) {
+        var value = _param.value, props = _object_without_properties(_param, [
+            "value"
+        ]);
+        return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(RtlContext.Provider, _object_spread({
+            value: value !== null && value !== void 0 ? value : true
+        }, props));
+    };
+    var DefaultPropsProvider = function DefaultPropsProvider(param) {
+        var value = param.value, children = param.children;
+        return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(PropsContext.Provider, {
+            value: value,
+            children: children
+        });
+    };
     var getThemeProps2 = function getThemeProps2(params) {
         var theme = params.theme, name = params.name, props = params.props;
         if (!theme || !theme.components || !theme.components[name]) {
@@ -2433,13 +2511,67 @@ var agent = function() {
     };
     var useDefaultProps = function useDefaultProps(param) {
         var props = param.props, name = param.name;
-        var ctx2 = React19.useContext(PropsContext);
+        var ctx2 = React22.useContext(PropsContext);
         return getThemeProps2({
             props: props,
             name: name,
             theme: {
                 components: ctx2
             }
+        });
+    };
+    var useThemeScoping = function useThemeScoping(themeId, upperTheme, localTheme) {
+        var isPrivate = arguments.length > 3 && arguments[3] !== void 0 ? arguments[3] : false;
+        return React23.useMemo(function() {
+            var resolvedTheme = themeId ? upperTheme[themeId] || upperTheme : upperTheme;
+            if (typeof localTheme === "function") {
+                var mergedTheme = localTheme(resolvedTheme);
+                var result = themeId ? _object_spread_props(_object_spread({}, upperTheme), _define_property({}, themeId, mergedTheme)) : mergedTheme;
+                if (isPrivate) {
+                    return function() {
+                        return result;
+                    };
+                }
+                return result;
+            }
+            return themeId ? _object_spread_props(_object_spread({}, upperTheme), _define_property({}, themeId, localTheme)) : _object_spread({}, upperTheme, localTheme);
+        }, [
+            themeId,
+            upperTheme,
+            localTheme,
+            isPrivate
+        ]);
+    };
+    var ThemeProvider3 = function ThemeProvider3(props) {
+        var children = props.children, localTheme = props.theme, themeId = props.themeId;
+        var upperTheme = useThemeWithoutDefault_default(EMPTY_THEME);
+        var upperPrivateTheme = useTheme4() || EMPTY_THEME;
+        if (false) {
+            if (upperTheme === null && typeof localTheme === "function" || themeId && upperTheme && !upperTheme[themeId] && typeof localTheme === "function") {
+                console.error([
+                    "MUI: You are providing a theme function prop to the ThemeProvider component:",
+                    "<ThemeProvider theme={outerTheme => outerTheme} />",
+                    "",
+                    "However, no outer theme is present.",
+                    "Make sure a theme is already injected higher in the React tree or provide a theme object."
+                ].join("\n"));
+            }
+        }
+        var engineTheme = useThemeScoping(themeId, upperTheme, localTheme);
+        var privateTheme = useThemeScoping(themeId, upperPrivateTheme, localTheme, true);
+        var rtlValue = (themeId ? engineTheme[themeId] : engineTheme).direction === "rtl";
+        return /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(ThemeProvider_default, {
+            theme: privateTheme,
+            children: /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(ThemeContext.Provider, {
+                value: engineTheme,
+                children: /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(RtlProvider_default, {
+                    value: rtlValue,
+                    children: /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(DefaultPropsProvider_default, {
+                        value: themeId ? engineTheme[themeId].components : engineTheme.components,
+                        children: children
+                    })
+                })
+            })
         });
     };
     var unstable_memoTheme = function unstable_memoTheme(styleFn) {
@@ -2454,6 +2586,577 @@ var agent = function() {
                 lastTheme = props.theme;
             }
             return value;
+        };
+    };
+    var InitColorSchemeScript = function InitColorSchemeScript(options) {
+        var _ref = options || {}, _ref_defaultMode = _ref.defaultMode, defaultMode = _ref_defaultMode === void 0 ? "system" : _ref_defaultMode, _ref_defaultLightColorScheme = _ref.defaultLightColorScheme, defaultLightColorScheme = _ref_defaultLightColorScheme === void 0 ? "light" : _ref_defaultLightColorScheme, _ref_defaultDarkColorScheme = _ref.defaultDarkColorScheme, defaultDarkColorScheme = _ref_defaultDarkColorScheme === void 0 ? "dark" : _ref_defaultDarkColorScheme, _ref_modeStorageKey = _ref.modeStorageKey, modeStorageKey = _ref_modeStorageKey === void 0 ? DEFAULT_MODE_STORAGE_KEY : _ref_modeStorageKey, _ref_colorSchemeStorageKey = _ref.colorSchemeStorageKey, colorSchemeStorageKey = _ref_colorSchemeStorageKey === void 0 ? DEFAULT_COLOR_SCHEME_STORAGE_KEY : _ref_colorSchemeStorageKey, tmp = _ref.attribute, initialAttribute = tmp === void 0 ? DEFAULT_ATTRIBUTE : tmp, _ref_colorSchemeNode = _ref.colorSchemeNode, colorSchemeNode = _ref_colorSchemeNode === void 0 ? "document.documentElement" : _ref_colorSchemeNode, nonce = _ref.nonce;
+        var setter = "";
+        var attribute = initialAttribute;
+        if (initialAttribute === "class") {
+            attribute = ".%s";
+        }
+        if (initialAttribute === "data") {
+            attribute = "[data-%s]";
+        }
+        if (attribute.startsWith(".")) {
+            var selector = attribute.substring(1);
+            setter += "".concat(colorSchemeNode, ".classList.remove('").concat(selector, "'.replace('%s', light), '").concat(selector, "'.replace('%s', dark));\n      ").concat(colorSchemeNode, ".classList.add('").concat(selector, "'.replace('%s', colorScheme));");
+        }
+        var matches = attribute.match(/\[([^\]]+)\]/);
+        if (matches) {
+            var _matches__split = _sliced_to_array(matches[1].split("="), 2), attr = _matches__split[0], value = _matches__split[1];
+            if (!value) {
+                setter += "".concat(colorSchemeNode, ".removeAttribute('").concat(attr, "'.replace('%s', light));\n      ").concat(colorSchemeNode, ".removeAttribute('").concat(attr, "'.replace('%s', dark));");
+            }
+            setter += "\n      ".concat(colorSchemeNode, ".setAttribute('").concat(attr, "'.replace('%s', colorScheme), ").concat(value ? "".concat(value, ".replace('%s', colorScheme)") : '""', ");");
+        } else {
+            setter += "".concat(colorSchemeNode, ".setAttribute('").concat(attribute, "', colorScheme);");
+        }
+        return /* @__PURE__ */ (0, import_jsx_runtime8.jsx)("script", {
+            suppressHydrationWarning: true,
+            nonce: typeof window === "undefined" ? nonce : "",
+            dangerouslySetInnerHTML: {
+                __html: "(function() {\ntry {\n  let colorScheme = '';\n  const mode = localStorage.getItem('".concat(modeStorageKey, "') || '").concat(defaultMode, "';\n  const dark = localStorage.getItem('").concat(colorSchemeStorageKey, "-dark') || '").concat(defaultDarkColorScheme, "';\n  const light = localStorage.getItem('").concat(colorSchemeStorageKey, "-light') || '").concat(defaultLightColorScheme, "';\n  if (mode === 'system') {\n    // handle system mode\n    const mql = window.matchMedia('(prefers-color-scheme: dark)');\n    if (mql.matches) {\n      colorScheme = dark\n    } else {\n      colorScheme = light\n    }\n  }\n  if (mode === 'light') {\n    colorScheme = light;\n  }\n  if (mode === 'dark') {\n    colorScheme = dark;\n  }\n  if (colorScheme) {\n    ").concat(setter, "\n  }\n} catch(e){}})();")
+            }
+        }, "mui-color-scheme-init");
+    };
+    var noop = // node_modules/@mui/system/esm/cssVars/localStorageManager.js
+    function noop() {};
+    var noop2 = // node_modules/@mui/system/esm/cssVars/useCurrentColorScheme.js
+    function noop2() {};
+    var getSystemMode = function getSystemMode(mode) {
+        if (typeof window !== "undefined" && typeof window.matchMedia === "function" && mode === "system") {
+            var mql = window.matchMedia("(prefers-color-scheme: dark)");
+            if (mql.matches) {
+                return "dark";
+            }
+            return "light";
+        }
+        return void 0;
+    };
+    var processState = function processState(state, callback) {
+        if (state.mode === "light" || state.mode === "system" && state.systemMode === "light") {
+            return callback("light");
+        }
+        if (state.mode === "dark" || state.mode === "system" && state.systemMode === "dark") {
+            return callback("dark");
+        }
+        return void 0;
+    };
+    var getColorScheme = function getColorScheme(state) {
+        return processState(state, function(mode) {
+            if (mode === "light") {
+                return state.lightColorScheme;
+            }
+            if (mode === "dark") {
+                return state.darkColorScheme;
+            }
+            return void 0;
+        });
+    };
+    var useCurrentColorScheme = function useCurrentColorScheme(options) {
+        var _options_defaultMode = options.defaultMode, defaultMode = _options_defaultMode === void 0 ? "light" : _options_defaultMode, defaultLightColorScheme = options.defaultLightColorScheme, defaultDarkColorScheme = options.defaultDarkColorScheme, _options_supportedColorSchemes = options.supportedColorSchemes, supportedColorSchemes = _options_supportedColorSchemes === void 0 ? [] : _options_supportedColorSchemes, _options_modeStorageKey = options.modeStorageKey, modeStorageKey = _options_modeStorageKey === void 0 ? DEFAULT_MODE_STORAGE_KEY : _options_modeStorageKey, _options_colorSchemeStorageKey = options.colorSchemeStorageKey, colorSchemeStorageKey = _options_colorSchemeStorageKey === void 0 ? DEFAULT_COLOR_SCHEME_STORAGE_KEY : _options_colorSchemeStorageKey, _options_storageWindow = options.storageWindow, storageWindow = _options_storageWindow === void 0 ? typeof window === "undefined" ? void 0 : window : _options_storageWindow, _options_storageManager = options.storageManager, storageManager = _options_storageManager === void 0 ? localStorageManager_default : _options_storageManager, _options_noSsr = options.noSsr, noSsr = _options_noSsr === void 0 ? false : _options_noSsr;
+        var joinedColorSchemes = supportedColorSchemes.join(",");
+        var isMultiSchemes = supportedColorSchemes.length > 1;
+        var modeStorage = React25.useMemo(function() {
+            return storageManager === null || storageManager === void 0 ? void 0 : storageManager({
+                key: modeStorageKey,
+                storageWindow: storageWindow
+            });
+        }, [
+            storageManager,
+            modeStorageKey,
+            storageWindow
+        ]);
+        var lightStorage = React25.useMemo(function() {
+            return storageManager === null || storageManager === void 0 ? void 0 : storageManager({
+                key: "".concat(colorSchemeStorageKey, "-light"),
+                storageWindow: storageWindow
+            });
+        }, [
+            storageManager,
+            colorSchemeStorageKey,
+            storageWindow
+        ]);
+        var darkStorage = React25.useMemo(function() {
+            return storageManager === null || storageManager === void 0 ? void 0 : storageManager({
+                key: "".concat(colorSchemeStorageKey, "-dark"),
+                storageWindow: storageWindow
+            });
+        }, [
+            storageManager,
+            colorSchemeStorageKey,
+            storageWindow
+        ]);
+        var _React25_useState = _sliced_to_array(React25.useState(function() {
+            var initialMode = (modeStorage === null || modeStorage === void 0 ? void 0 : modeStorage.get(defaultMode)) || defaultMode;
+            var lightColorScheme = (lightStorage === null || lightStorage === void 0 ? void 0 : lightStorage.get(defaultLightColorScheme)) || defaultLightColorScheme;
+            var darkColorScheme = (darkStorage === null || darkStorage === void 0 ? void 0 : darkStorage.get(defaultDarkColorScheme)) || defaultDarkColorScheme;
+            return {
+                mode: initialMode,
+                systemMode: getSystemMode(initialMode),
+                lightColorScheme: lightColorScheme,
+                darkColorScheme: darkColorScheme
+            };
+        }), 2), state = _React25_useState[0], setState = _React25_useState[1];
+        var _React25_useState1 = _sliced_to_array(React25.useState(noSsr || !isMultiSchemes), 2), isClient = _React25_useState1[0], setIsClient = _React25_useState1[1];
+        React25.useEffect(function() {
+            setIsClient(true);
+        }, []);
+        var colorScheme = getColorScheme(state);
+        var setMode = React25.useCallback(function(mode) {
+            setState(function(currentState) {
+                if (mode === currentState.mode) {
+                    return currentState;
+                }
+                var newMode = mode !== null && mode !== void 0 ? mode : defaultMode;
+                modeStorage === null || modeStorage === void 0 ? void 0 : modeStorage.set(newMode);
+                return _object_spread_props(_object_spread({}, currentState), {
+                    mode: newMode,
+                    systemMode: getSystemMode(newMode)
+                });
+            });
+        }, [
+            modeStorage,
+            defaultMode
+        ]);
+        var setColorScheme = React25.useCallback(function(value) {
+            if (!value) {
+                setState(function(currentState) {
+                    lightStorage === null || lightStorage === void 0 ? void 0 : lightStorage.set(defaultLightColorScheme);
+                    darkStorage === null || darkStorage === void 0 ? void 0 : darkStorage.set(defaultDarkColorScheme);
+                    return _object_spread_props(_object_spread({}, currentState), {
+                        lightColorScheme: defaultLightColorScheme,
+                        darkColorScheme: defaultDarkColorScheme
+                    });
+                });
+            } else if (typeof value === "string") {
+                if (value && !joinedColorSchemes.includes(value)) {
+                    console.error("`".concat(value, "` does not exist in `theme.colorSchemes`."));
+                } else {
+                    setState(function(currentState) {
+                        var newState = _object_spread({}, currentState);
+                        processState(currentState, function(mode) {
+                            if (mode === "light") {
+                                lightStorage === null || lightStorage === void 0 ? void 0 : lightStorage.set(value);
+                                newState.lightColorScheme = value;
+                            }
+                            if (mode === "dark") {
+                                darkStorage === null || darkStorage === void 0 ? void 0 : darkStorage.set(value);
+                                newState.darkColorScheme = value;
+                            }
+                        });
+                        return newState;
+                    });
+                }
+            } else {
+                setState(function(currentState) {
+                    var newState = _object_spread({}, currentState);
+                    var newLightColorScheme = value.light === null ? defaultLightColorScheme : value.light;
+                    var newDarkColorScheme = value.dark === null ? defaultDarkColorScheme : value.dark;
+                    if (newLightColorScheme) {
+                        if (!joinedColorSchemes.includes(newLightColorScheme)) {
+                            console.error("`".concat(newLightColorScheme, "` does not exist in `theme.colorSchemes`."));
+                        } else {
+                            newState.lightColorScheme = newLightColorScheme;
+                            lightStorage === null || lightStorage === void 0 ? void 0 : lightStorage.set(newLightColorScheme);
+                        }
+                    }
+                    if (newDarkColorScheme) {
+                        if (!joinedColorSchemes.includes(newDarkColorScheme)) {
+                            console.error("`".concat(newDarkColorScheme, "` does not exist in `theme.colorSchemes`."));
+                        } else {
+                            newState.darkColorScheme = newDarkColorScheme;
+                            darkStorage === null || darkStorage === void 0 ? void 0 : darkStorage.set(newDarkColorScheme);
+                        }
+                    }
+                    return newState;
+                });
+            }
+        }, [
+            joinedColorSchemes,
+            lightStorage,
+            darkStorage,
+            defaultLightColorScheme,
+            defaultDarkColorScheme
+        ]);
+        var handleMediaQuery = React25.useCallback(function(event) {
+            if (state.mode === "system") {
+                setState(function(currentState) {
+                    var systemMode = (event === null || event === void 0 ? void 0 : event.matches) ? "dark" : "light";
+                    if (currentState.systemMode === systemMode) {
+                        return currentState;
+                    }
+                    return _object_spread_props(_object_spread({}, currentState), {
+                        systemMode: systemMode
+                    });
+                });
+            }
+        }, [
+            state.mode
+        ]);
+        var mediaListener = React25.useRef(handleMediaQuery);
+        mediaListener.current = handleMediaQuery;
+        React25.useEffect(function() {
+            var _mediaListener;
+            if (typeof window.matchMedia !== "function" || !isMultiSchemes) {
+                return void 0;
+            }
+            var handler = function() {
+                for(var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++){
+                    args[_key] = arguments[_key];
+                }
+                return (_mediaListener = mediaListener).current.apply(_mediaListener, _to_consumable_array(args));
+            };
+            var media = window.matchMedia("(prefers-color-scheme: dark)");
+            media.addListener(handler);
+            handler(media);
+            return function() {
+                media.removeListener(handler);
+            };
+        }, [
+            isMultiSchemes
+        ]);
+        React25.useEffect(function() {
+            if (isMultiSchemes) {
+                var unsubscribeMode = (modeStorage === null || modeStorage === void 0 ? void 0 : modeStorage.subscribe(function(value) {
+                    if (!value || [
+                        "light",
+                        "dark",
+                        "system"
+                    ].includes(value)) {
+                        setMode(value || defaultMode);
+                    }
+                })) || noop2;
+                var unsubscribeLight = (lightStorage === null || lightStorage === void 0 ? void 0 : lightStorage.subscribe(function(value) {
+                    if (!value || joinedColorSchemes.match(value)) {
+                        setColorScheme({
+                            light: value
+                        });
+                    }
+                })) || noop2;
+                var unsubscribeDark = (darkStorage === null || darkStorage === void 0 ? void 0 : darkStorage.subscribe(function(value) {
+                    if (!value || joinedColorSchemes.match(value)) {
+                        setColorScheme({
+                            dark: value
+                        });
+                    }
+                })) || noop2;
+                return function() {
+                    unsubscribeMode();
+                    unsubscribeLight();
+                    unsubscribeDark();
+                };
+            }
+            return void 0;
+        }, [
+            setColorScheme,
+            setMode,
+            joinedColorSchemes,
+            defaultMode,
+            storageWindow,
+            isMultiSchemes,
+            modeStorage,
+            lightStorage,
+            darkStorage
+        ]);
+        return _object_spread_props(_object_spread({}, state), {
+            mode: isClient ? state.mode : void 0,
+            systemMode: isClient ? state.systemMode : void 0,
+            colorScheme: isClient ? colorScheme : void 0,
+            setMode: setMode,
+            setColorScheme: setColorScheme
+        });
+    };
+    var createCssVarsProvider = function createCssVarsProvider(options) {
+        var themeId = options.themeId, tmp = options./**
+       * This `theme` object needs to follow a certain structure to
+       * be used correctly by the finel `CssVarsProvider`. It should have a
+       * `colorSchemes` key with the light and dark (and any other) palette.
+       * It should also ideally have a vars object created using `prepareCssVars`.
+       */ theme, defaultTheme5 = tmp === void 0 ? {} : tmp, tmp1 = options.modeStorageKey, defaultModeStorageKey = tmp1 === void 0 ? DEFAULT_MODE_STORAGE_KEY : tmp1, tmp2 = options.colorSchemeStorageKey, defaultColorSchemeStorageKey = tmp2 === void 0 ? DEFAULT_COLOR_SCHEME_STORAGE_KEY : tmp2, tmp3 = options.disableTransitionOnChange, designSystemTransitionOnChange = tmp3 === void 0 ? false : tmp3, defaultColorScheme = options.defaultColorScheme, resolveTheme = options.resolveTheme;
+        var defaultContext = {
+            allColorSchemes: [],
+            colorScheme: void 0,
+            darkColorScheme: void 0,
+            lightColorScheme: void 0,
+            mode: void 0,
+            setColorScheme: function() {},
+            setMode: function() {},
+            systemMode: void 0
+        };
+        var ColorSchemeContext = /* @__PURE__ */ React26.createContext(void 0);
+        if (false) {
+            ColorSchemeContext.displayName = "ColorSchemeContext";
+        }
+        var useColorScheme2 = function() {
+            return React26.useContext(ColorSchemeContext) || defaultContext;
+        };
+        var defaultColorSchemes = {};
+        var defaultComponents = {};
+        function CssVarsProvider2(props) {
+            var _colorSchemes_restThemeProp_defaultColorScheme_palette, _colorSchemes_restThemeProp_defaultColorScheme, _restThemeProp_palette, _memoTheme2_generateStyleSheets;
+            var children = props.children, themeProp = props.theme, _props_modeStorageKey = props.modeStorageKey, modeStorageKey = _props_modeStorageKey === void 0 ? defaultModeStorageKey : _props_modeStorageKey, _props_colorSchemeStorageKey = props.colorSchemeStorageKey, colorSchemeStorageKey = _props_colorSchemeStorageKey === void 0 ? defaultColorSchemeStorageKey : _props_colorSchemeStorageKey, _props_disableTransitionOnChange = props.disableTransitionOnChange, disableTransitionOnChange = _props_disableTransitionOnChange === void 0 ? designSystemTransitionOnChange : _props_disableTransitionOnChange, storageManager = props.storageManager, _props_storageWindow = props.storageWindow, storageWindow = _props_storageWindow === void 0 ? typeof window === "undefined" ? void 0 : window : _props_storageWindow, _props_documentNode = props.documentNode, documentNode = _props_documentNode === void 0 ? typeof document === "undefined" ? void 0 : document : _props_documentNode, _props_colorSchemeNode = props.colorSchemeNode, colorSchemeNode = _props_colorSchemeNode === void 0 ? typeof document === "undefined" ? void 0 : document.documentElement : _props_colorSchemeNode, _props_disableNestedContext = props.disableNestedContext, disableNestedContext = _props_disableNestedContext === void 0 ? false : _props_disableNestedContext, _props_disableStyleSheetGeneration = props.disableStyleSheetGeneration, disableStyleSheetGeneration = _props_disableStyleSheetGeneration === void 0 ? false : _props_disableStyleSheetGeneration, tmp = props.defaultMode, initialMode = tmp === void 0 ? "system" : tmp, noSsr = props.noSsr;
+            var hasMounted = React26.useRef(false);
+            var upperTheme = useTheme4();
+            var ctx2 = React26.useContext(ColorSchemeContext);
+            var nested = !!ctx2 && !disableNestedContext;
+            var initialTheme = React26.useMemo(function() {
+                if (themeProp) {
+                    return themeProp;
+                }
+                return typeof defaultTheme5 === "function" ? defaultTheme5() : defaultTheme5;
+            }, [
+                themeProp
+            ]);
+            var scopedTheme = initialTheme[themeId];
+            var restThemeProp = scopedTheme || initialTheme;
+            var _restThemeProp_colorSchemes = restThemeProp.colorSchemes, colorSchemes = _restThemeProp_colorSchemes === void 0 ? defaultColorSchemes : _restThemeProp_colorSchemes, _restThemeProp_components = restThemeProp.components, components = _restThemeProp_components === void 0 ? defaultComponents : _restThemeProp_components, cssVarPrefix = restThemeProp.cssVarPrefix;
+            var joinedColorSchemes = Object.keys(colorSchemes).filter(function(k) {
+                return !!colorSchemes[k];
+            }).join(",");
+            var allColorSchemes = React26.useMemo(function() {
+                return joinedColorSchemes.split(",");
+            }, [
+                joinedColorSchemes
+            ]);
+            var defaultLightColorScheme2 = typeof defaultColorScheme === "string" ? defaultColorScheme : defaultColorScheme.light;
+            var defaultDarkColorScheme2 = typeof defaultColorScheme === "string" ? defaultColorScheme : defaultColorScheme.dark;
+            var defaultMode = colorSchemes[defaultLightColorScheme2] && colorSchemes[defaultDarkColorScheme2] ? initialMode : ((_colorSchemes_restThemeProp_defaultColorScheme = colorSchemes[restThemeProp.defaultColorScheme]) === null || _colorSchemes_restThemeProp_defaultColorScheme === void 0 ? void 0 : (_colorSchemes_restThemeProp_defaultColorScheme_palette = _colorSchemes_restThemeProp_defaultColorScheme.palette) === null || _colorSchemes_restThemeProp_defaultColorScheme_palette === void 0 ? void 0 : _colorSchemes_restThemeProp_defaultColorScheme_palette.mode) || ((_restThemeProp_palette = restThemeProp.palette) === null || _restThemeProp_palette === void 0 ? void 0 : _restThemeProp_palette.mode);
+            var _useCurrentColorScheme = useCurrentColorScheme({
+                supportedColorSchemes: allColorSchemes,
+                defaultLightColorScheme: defaultLightColorScheme2,
+                defaultDarkColorScheme: defaultDarkColorScheme2,
+                modeStorageKey: modeStorageKey,
+                colorSchemeStorageKey: colorSchemeStorageKey,
+                defaultMode: defaultMode,
+                storageManager: storageManager,
+                storageWindow: storageWindow,
+                noSsr: noSsr
+            }), stateMode = _useCurrentColorScheme.mode, setMode = _useCurrentColorScheme.setMode, systemMode = _useCurrentColorScheme.systemMode, lightColorScheme = _useCurrentColorScheme.lightColorScheme, darkColorScheme = _useCurrentColorScheme.darkColorScheme, stateColorScheme = _useCurrentColorScheme.colorScheme, setColorScheme = _useCurrentColorScheme.setColorScheme;
+            var mode = stateMode;
+            var colorScheme = stateColorScheme;
+            if (nested) {
+                mode = ctx2.mode;
+                colorScheme = ctx2.colorScheme;
+            }
+            var memoTheme2 = React26.useMemo(function() {
+                var _restThemeProp_generateThemeVars;
+                var calculatedColorScheme = colorScheme || restThemeProp.defaultColorScheme;
+                var themeVars = ((_restThemeProp_generateThemeVars = restThemeProp.generateThemeVars) === null || _restThemeProp_generateThemeVars === void 0 ? void 0 : _restThemeProp_generateThemeVars.call(restThemeProp)) || restThemeProp.vars;
+                var theme = _object_spread_props(_object_spread({}, restThemeProp), {
+                    components: components,
+                    colorSchemes: colorSchemes,
+                    cssVarPrefix: cssVarPrefix,
+                    vars: themeVars
+                });
+                if (typeof theme.generateSpacing === "function") {
+                    theme.spacing = theme.generateSpacing();
+                }
+                if (calculatedColorScheme) {
+                    var scheme = colorSchemes[calculatedColorScheme];
+                    if (scheme && (typeof scheme === "undefined" ? "undefined" : _type_of(scheme)) === "object") {
+                        Object.keys(scheme).forEach(function(schemeKey) {
+                            if (scheme[schemeKey] && _type_of(scheme[schemeKey]) === "object") {
+                                theme[schemeKey] = _object_spread({}, theme[schemeKey], scheme[schemeKey]);
+                            } else {
+                                theme[schemeKey] = scheme[schemeKey];
+                            }
+                        });
+                    }
+                }
+                return resolveTheme ? resolveTheme(theme) : theme;
+            }, [
+                restThemeProp,
+                colorScheme,
+                components,
+                colorSchemes,
+                cssVarPrefix
+            ]);
+            var colorSchemeSelector = restThemeProp.colorSchemeSelector;
+            useEnhancedEffect_default(function() {
+                if (colorScheme && colorSchemeNode && colorSchemeSelector && colorSchemeSelector !== "media") {
+                    var selector = colorSchemeSelector;
+                    var rule = colorSchemeSelector;
+                    if (selector === "class") {
+                        rule = ".%s";
+                    }
+                    if (selector === "data") {
+                        rule = "[data-%s]";
+                    }
+                    if ((selector === null || selector === void 0 ? void 0 : selector.startsWith("data-")) && !selector.includes("%s")) {
+                        rule = "[".concat(selector, '="%s"]');
+                    }
+                    if (rule.startsWith(".")) {
+                        var _colorSchemeNode_classList;
+                        (_colorSchemeNode_classList = colorSchemeNode.classList).remove.apply(_colorSchemeNode_classList, _to_consumable_array(allColorSchemes.map(function(scheme) {
+                            return rule.substring(1).replace("%s", scheme);
+                        })));
+                        colorSchemeNode.classList.add(rule.substring(1).replace("%s", colorScheme));
+                    } else {
+                        var matches = rule.replace("%s", colorScheme).match(/\[([^\]]+)\]/);
+                        if (matches) {
+                            var _matches__split = _sliced_to_array(matches[1].split("="), 2), attr = _matches__split[0], value = _matches__split[1];
+                            if (!value) {
+                                allColorSchemes.forEach(function(scheme) {
+                                    colorSchemeNode.removeAttribute(attr.replace(colorScheme, scheme));
+                                });
+                            }
+                            colorSchemeNode.setAttribute(attr, value ? value.replace(/"|'/g, "") : "");
+                        } else {
+                            colorSchemeNode.setAttribute(rule, colorScheme);
+                        }
+                    }
+                }
+            }, [
+                colorScheme,
+                colorSchemeSelector,
+                colorSchemeNode,
+                allColorSchemes
+            ]);
+            React26.useEffect(function() {
+                var timer;
+                if (disableTransitionOnChange && hasMounted.current && documentNode) {
+                    var css2 = documentNode.createElement("style");
+                    css2.appendChild(documentNode.createTextNode(DISABLE_CSS_TRANSITION));
+                    documentNode.head.appendChild(css2);
+                    (function() {
+                        return window.getComputedStyle(documentNode.body);
+                    })();
+                    timer = setTimeout(function() {
+                        documentNode.head.removeChild(css2);
+                    }, 1);
+                }
+                return function() {
+                    clearTimeout(timer);
+                };
+            }, [
+                colorScheme,
+                disableTransitionOnChange,
+                documentNode
+            ]);
+            React26.useEffect(function() {
+                hasMounted.current = true;
+                return function() {
+                    hasMounted.current = false;
+                };
+            }, []);
+            var contextValue = React26.useMemo(function() {
+                return {
+                    allColorSchemes: allColorSchemes,
+                    colorScheme: colorScheme,
+                    darkColorScheme: darkColorScheme,
+                    lightColorScheme: lightColorScheme,
+                    mode: mode,
+                    setColorScheme: setColorScheme,
+                    setMode: true ? setMode : function(newMode) {
+                        if (memoTheme2.colorSchemeSelector === "media") {
+                            console.error([
+                                "MUI: The `setMode` function has no effect if `colorSchemeSelector` is `media` (`media` is the default value).",
+                                "To toggle the mode manually, please configure `colorSchemeSelector` to use a class or data attribute.",
+                                "To learn more, visit https://mui.com/material-ui/customization/css-theme-variables/configuration/#toggling-dark-mode-manually"
+                            ].join("\n"));
+                        }
+                        setMode(newMode);
+                    },
+                    systemMode: systemMode
+                };
+            }, [
+                allColorSchemes,
+                colorScheme,
+                darkColorScheme,
+                lightColorScheme,
+                mode,
+                setColorScheme,
+                setMode,
+                systemMode,
+                memoTheme2.colorSchemeSelector
+            ]);
+            var shouldGenerateStyleSheet = true;
+            if (disableStyleSheetGeneration || restThemeProp.cssVariables === false || nested && (upperTheme === null || upperTheme === void 0 ? void 0 : upperTheme.cssVarPrefix) === cssVarPrefix) {
+                shouldGenerateStyleSheet = false;
+            }
+            var element = /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)(React26.Fragment, {
+                children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(ThemeProvider_default2, {
+                        themeId: scopedTheme ? themeId : void 0,
+                        theme: memoTheme2,
+                        children: children
+                    }),
+                    shouldGenerateStyleSheet && /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(GlobalStyles, {
+                        styles: ((_memoTheme2_generateStyleSheets = memoTheme2.generateStyleSheets) === null || _memoTheme2_generateStyleSheets === void 0 ? void 0 : _memoTheme2_generateStyleSheets.call(memoTheme2)) || []
+                    })
+                ]
+            });
+            if (nested) {
+                return element;
+            }
+            return /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(ColorSchemeContext.Provider, {
+                value: contextValue,
+                children: element
+            });
+        }
+        false ? CssVarsProvider2.propTypes = {
+            /**
+       * The component tree.
+       */ children: import_prop_types.default.node,
+            /**
+       * The node used to attach the color-scheme attribute
+       */ colorSchemeNode: import_prop_types.default.any,
+            /**
+       * localStorage key used to store `colorScheme`
+       */ colorSchemeStorageKey: import_prop_types.default.string,
+            /**
+       * The default mode when the storage is empty,
+       * require the theme to have `colorSchemes` with light and dark.
+       */ defaultMode: import_prop_types.default.string,
+            /**
+       * If `true`, the provider creates its own context and generate stylesheet as if it is a root `CssVarsProvider`.
+       */ disableNestedContext: import_prop_types.default.bool,
+            /**
+       * If `true`, the style sheet won't be generated.
+       *
+       * This is useful for controlling nested CssVarsProvider behavior.
+       */ disableStyleSheetGeneration: import_prop_types.default.bool,
+            /**
+       * Disable CSS transitions when switching between modes or color schemes.
+       */ disableTransitionOnChange: import_prop_types.default.bool,
+            /**
+       * The document to attach the attribute to.
+       */ documentNode: import_prop_types.default.any,
+            /**
+       * The key in the local storage used to store current color scheme.
+       */ modeStorageKey: import_prop_types.default.string,
+            /**
+       * If `true`, the mode will be the same value as the storage without an extra rerendering after the hydration.
+       * You should use this option in conjuction with `InitColorSchemeScript` component.
+       */ noSsr: import_prop_types.default.bool,
+            /**
+       * The storage manager to be used for storing the mode and color scheme
+       * @default using `window.localStorage`
+       */ storageManager: import_prop_types.default.func,
+            /**
+       * The window that attaches the 'storage' event listener.
+       * @default window
+       */ storageWindow: import_prop_types.default.any,
+            /**
+       * The calculated theme object that will be passed through context.
+       */ theme: import_prop_types.default.object
+        } : void 0;
+        var defaultLightColorScheme = typeof defaultColorScheme === "string" ? defaultColorScheme : defaultColorScheme.light;
+        var defaultDarkColorScheme = typeof defaultColorScheme === "string" ? defaultColorScheme : defaultColorScheme.dark;
+        var getInitColorSchemeScript = function(params) {
+            return InitColorSchemeScript(_object_spread({
+                colorSchemeStorageKey: defaultColorSchemeStorageKey,
+                defaultLightColorScheme: defaultLightColorScheme,
+                defaultDarkColorScheme: defaultDarkColorScheme,
+                modeStorageKey: defaultModeStorageKey
+            }, params));
+        };
+        return {
+            CssVarsProvider: CssVarsProvider2,
+            useColorScheme: useColorScheme2,
+            getInitColorSchemeScript: getInitColorSchemeScript
         };
     };
     var createGetCssVar = // node_modules/@mui/system/esm/cssVars/createGetCssVar.js
@@ -2682,7 +3385,7 @@ var agent = function() {
     var createGrid = function createGrid() {
         var options = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {};
         var _options_createStyledComponent = options.// This will allow adding custom styled fn (for example for custom sx style function)
-        createStyledComponent, createStyledComponent = _options_createStyledComponent === void 0 ? defaultCreateStyledComponent : _options_createStyledComponent, tmp = options.useThemeProps, useThemeProps3 = tmp === void 0 ? useThemePropsDefault : tmp, tmp1 = options.useTheme, useTheme5 = tmp1 === void 0 ? useTheme_default : tmp1, _options_componentName = options.componentName, componentName = _options_componentName === void 0 ? "MuiGrid" : _options_componentName;
+        createStyledComponent, createStyledComponent = _options_createStyledComponent === void 0 ? defaultCreateStyledComponent : _options_createStyledComponent, tmp = options.useThemeProps, useThemeProps3 = tmp === void 0 ? useThemePropsDefault : tmp, tmp1 = options.useTheme, useTheme6 = tmp1 === void 0 ? useTheme_default : tmp1, _options_componentName = options.componentName, componentName = _options_componentName === void 0 ? "MuiGrid" : _options_componentName;
         var useUtilityClasses30 = function(ownerState, theme) {
             var container2 = ownerState.container, direction = ownerState.direction, spacing2 = ownerState.spacing, wrap = ownerState.wrap, size = ownerState.size;
             var slots = {
@@ -2723,8 +3426,8 @@ var agent = function() {
             return parsedProp;
         }
         var GridRoot2 = createStyledComponent(generateGridColumnsStyles, generateGridColumnSpacingStyles, generateGridRowSpacingStyles, generateGridSizeStyles, generateGridDirectionStyles, generateGridStyles, generateGridOffsetStyles);
-        var Grid = /* @__PURE__ */ React20.forwardRef(function Grid3(inProps, ref) {
-            var theme = useTheme5();
+        var Grid = /* @__PURE__ */ React27.forwardRef(function Grid3(inProps, ref) {
+            var theme = useTheme6();
             var themeProps = useThemeProps3(inProps);
             var props = extendSxProp(themeProps);
             deleteLegacyGridProps(props, theme.breakpoints);
@@ -2768,19 +3471,19 @@ var agent = function() {
                 offset: offset2
             });
             var classes = useUtilityClasses30(ownerState, theme);
-            return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(GridRoot2, _object_spread_props(_object_spread({
+            return /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(GridRoot2, _object_spread_props(_object_spread({
                 ref: ref,
                 as: component,
                 ownerState: ownerState,
                 className: clsx_default(classes.root, className)
             }, other), {
-                children: React20.Children.map(children, function(child) {
-                    if (/* @__PURE__ */ React20.isValidElement(child) && isMuiElement(child, [
+                children: React27.Children.map(children, function(child) {
+                    if (/* @__PURE__ */ React27.isValidElement(child) && isMuiElement(child, [
                         "Grid"
                     ]) && container2 && child.props.container) {
                         var _child_props;
                         var _child_props_unstable_level;
-                        return /* @__PURE__ */ React20.cloneElement(child, {
+                        return /* @__PURE__ */ React27.cloneElement(child, {
                             unstable_level: (_child_props_unstable_level = (_child_props = child.props) === null || _child_props === void 0 ? void 0 : _child_props.unstable_level) !== null && _child_props_unstable_level !== void 0 ? _child_props_unstable_level : level + 1
                         });
                     }
@@ -2886,11 +3589,11 @@ var agent = function() {
         });
     };
     var joinChildren = function joinChildren(children, separator) {
-        var childrenArray = React21.Children.toArray(children).filter(Boolean);
+        var childrenArray = React28.Children.toArray(children).filter(Boolean);
         return childrenArray.reduce(function(output, child, index) {
             output.push(child);
             if (index < childrenArray.length - 1) {
-                output.push(/* @__PURE__ */ React21.cloneElement(separator, {
+                output.push(/* @__PURE__ */ React28.cloneElement(separator, {
                     key: "separator-".concat(index)
                 }));
             }
@@ -2912,7 +3615,7 @@ var agent = function() {
             }, {});
         };
         var StackRoot = createStyledComponent(style3);
-        var Stack2 = /* @__PURE__ */ React21.forwardRef(function Grid(inProps, ref) {
+        var Stack2 = /* @__PURE__ */ React28.forwardRef(function Grid(inProps, ref) {
             var themeProps = useThemeProps3(inProps);
             var props = extendSxProp(themeProps);
             var _props_component = props.component, component = _props_component === void 0 ? "div" : _props_component, _props_direction = props.direction, direction = _props_direction === void 0 ? "column" : _props_direction, tmp = props.spacing, spacing2 = tmp === void 0 ? 0 : tmp, divider = props.divider, children = props.children, className = props.className, _props_useFlexGap = props.useFlexGap, useFlexGap = _props_useFlexGap === void 0 ? false : _props_useFlexGap, other = _object_without_properties(props, [
@@ -2930,7 +3633,7 @@ var agent = function() {
                 useFlexGap: useFlexGap
             };
             var classes = useUtilityClasses30();
-            return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(StackRoot, _object_spread_props(_object_spread({
+            return /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(StackRoot, _object_spread_props(_object_spread({
                 as: component,
                 ownerState: ownerState,
                 ref: ref,
@@ -4035,11 +4738,11 @@ var agent = function() {
             }), typeof cssVariables !== "boolean" && cssVariables)
         ].concat(_to_consumable_array(args)));
     };
-    var useTheme4 = // node_modules/@mui/material/styles/useTheme.js
-    function useTheme4() {
+    var useTheme5 = // node_modules/@mui/material/styles/useTheme.js
+    function useTheme5() {
         var theme = useTheme_default(defaultTheme_default);
         if (false) {
-            React22.useDebugValue(theme);
+            React29.useDebugValue(theme);
         }
         return theme[identifier_default] || theme;
     };
@@ -4057,6 +4760,42 @@ var agent = function() {
     function slotShouldForwardProp(prop) {
         return prop !== "ownerState" && prop !== "theme" && prop !== "sx" && prop !== "as";
     };
+    var ThemeProviderNoVars = function ThemeProviderNoVars(_param) {
+        var themeInput = _param.theme, props = _object_without_properties(_param, [
+            "theme"
+        ]);
+        var scopedTheme = identifier_default in themeInput ? themeInput[identifier_default] : void 0;
+        return /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(ThemeProvider_default2, _object_spread_props(_object_spread({}, props), {
+            themeId: scopedTheme ? identifier_default : void 0,
+            theme: scopedTheme || themeInput
+        }));
+    };
+    var ThemeProvider4 = function ThemeProvider4(_param) {
+        var theme = _param.theme, props = _object_without_properties(_param, [
+            "theme"
+        ]);
+        if (typeof theme === "function") {
+            return /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(ThemeProviderNoVars, _object_spread({
+                theme: theme
+            }, props));
+        }
+        var muiTheme = identifier_default in theme ? theme[identifier_default] : theme;
+        if (!("colorSchemes" in muiTheme)) {
+            if (!("vars" in muiTheme)) {
+                return /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(ThemeProviderNoVars, _object_spread({
+                    theme: _object_spread_props(_object_spread({}, theme), {
+                        vars: null
+                    })
+                }, props));
+            }
+            return /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(ThemeProviderNoVars, _object_spread({
+                theme: theme
+            }, props));
+        }
+        return /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(CssVarsProvider, _object_spread({
+            theme: theme
+        }, props));
+    };
     var internal_createExtendSxProp = function internal_createExtendSxProp() {
         return extendSxProp;
     };
@@ -4069,7 +4808,7 @@ var agent = function() {
     };
     var createSvgIcon = function createSvgIcon(path, displayName) {
         function Component(props, ref) {
-            return /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(SvgIcon_default, _object_spread_props(_object_spread({
+            return /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(SvgIcon_default, _object_spread_props(_object_spread({
                 "data-testid": "".concat(displayName, "Icon"),
                 ref: ref
             }, props), {
@@ -4080,7 +4819,7 @@ var agent = function() {
             Component.displayName = "".concat(displayName, "Icon");
         }
         Component.muiName = SvgIcon_default.muiName;
-        return /* @__PURE__ */ React26.memo(/* @__PURE__ */ React26.forwardRef(Component));
+        return /* @__PURE__ */ React37.memo(/* @__PURE__ */ React37.forwardRef(Component));
     };
     var _objectWithoutPropertiesLoose = // node_modules/@babel/runtime/helpers/esm/objectWithoutPropertiesLoose.js
     function _objectWithoutPropertiesLoose(r2, e) {
@@ -4096,7 +4835,7 @@ var agent = function() {
     function _inheritsLoose(t, o) {
         t.prototype = Object.create(o.prototype), t.prototype.constructor = t, _setPrototypeOf(t, o);
     };
-    var noop = function noop() {};
+    var noop3 = function noop3() {};
     var _assertThisInitialized = // node_modules/@babel/runtime/helpers/esm/assertThisInitialized.js
     function _assertThisInitialized(e) {
         if (void 0 === e) throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
@@ -4104,10 +4843,10 @@ var agent = function() {
     };
     var getChildMapping = function getChildMapping(children, mapFn) {
         var mapper = function mapper2(child) {
-            return mapFn && (0, import_react8.isValidElement)(child) ? mapFn(child) : child;
+            return mapFn && (0, import_react9.isValidElement)(child) ? mapFn(child) : child;
         };
         var result = /* @__PURE__ */ Object.create(null);
-        if (children) import_react8.Children.map(children, function(c) {
+        if (children) import_react9.Children.map(children, function(c) {
             return c;
         }).forEach(function(child) {
             result[child.key] = mapper(child);
@@ -4153,7 +4892,7 @@ var agent = function() {
     };
     var getInitialChildMapping = function getInitialChildMapping(props, onExited) {
         return getChildMapping(props.children, function(child) {
-            return (0, import_react8.cloneElement)(child, {
+            return (0, import_react9.cloneElement)(child, {
                 onExited: onExited.bind(null, child),
                 in: true,
                 appear: getProp(child, "appear", props),
@@ -4167,24 +4906,24 @@ var agent = function() {
         var children = mergeChildMappings(prevChildMapping, nextChildMapping);
         Object.keys(children).forEach(function(key) {
             var child = children[key];
-            if (!(0, import_react8.isValidElement)(child)) return;
+            if (!(0, import_react9.isValidElement)(child)) return;
             var hasPrev = key in prevChildMapping;
             var hasNext = key in nextChildMapping;
             var prevChild = prevChildMapping[key];
-            var isLeaving = (0, import_react8.isValidElement)(prevChild) && !prevChild.props.in;
+            var isLeaving = (0, import_react9.isValidElement)(prevChild) && !prevChild.props.in;
             if (hasNext && (!hasPrev || isLeaving)) {
-                children[key] = (0, import_react8.cloneElement)(child, {
+                children[key] = (0, import_react9.cloneElement)(child, {
                     onExited: onExited.bind(null, child),
                     in: true,
                     exit: getProp(child, "exit", nextProps),
                     enter: getProp(child, "enter", nextProps)
                 });
             } else if (!hasNext && hasPrev && !isLeaving) {
-                children[key] = (0, import_react8.cloneElement)(child, {
+                children[key] = (0, import_react9.cloneElement)(child, {
                     in: false
                 });
-            } else if (hasNext && hasPrev && (0, import_react8.isValidElement)(prevChild)) {
-                children[key] = (0, import_react8.cloneElement)(child, {
+            } else if (hasNext && hasPrev && (0, import_react9.isValidElement)(prevChild)) {
+                children[key] = (0, import_react9.cloneElement)(child, {
                     onExited: onExited.bind(null, child),
                     in: prevChild.props.in,
                     exit: getProp(child, "exit", nextProps),
@@ -4262,7 +5001,7 @@ var agent = function() {
     };
     var Ripple = function Ripple(props) {
         var className = props.className, classes = props.classes, _props_pulsate = props.pulsate, pulsate = _props_pulsate === void 0 ? false : _props_pulsate, rippleX = props.rippleX, rippleY = props.rippleY, rippleSize = props.rippleSize, inProp = props.in, onExited = props.onExited, timeout2 = props.timeout;
-        var _React32_useState = _sliced_to_array(React32.useState(false), 2), leaving = _React32_useState[0], setLeaving = _React32_useState[1];
+        var _React43_useState = _sliced_to_array(React43.useState(false), 2), leaving = _React43_useState[0], setLeaving = _React43_useState[1];
         var rippleClassName = clsx_default(className, classes.ripple, classes.rippleVisible, pulsate && classes.ripplePulsate);
         var rippleStyles = {
             width: rippleSize,
@@ -4274,7 +5013,7 @@ var agent = function() {
         if (!inProp && !leaving) {
             setLeaving(true);
         }
-        React32.useEffect(function() {
+        React43.useEffect(function() {
             if (!inProp && onExited != null) {
                 var timeoutId = setTimeout(onExited, timeout2);
                 return function() {
@@ -4287,10 +5026,10 @@ var agent = function() {
             inProp,
             timeout2
         ]);
-        return /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("span", {
+        return /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("span", {
             className: rippleClassName,
             style: rippleStyles,
-            children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("span", {
+            children: /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("span", {
                 className: childClassName
             })
         });
@@ -5900,16 +6639,16 @@ var agent = function() {
     };
     var FocusTrap = function FocusTrap(props) {
         var children = props.children, _props_disableAutoFocus = props.disableAutoFocus, disableAutoFocus = _props_disableAutoFocus === void 0 ? false : _props_disableAutoFocus, _props_disableEnforceFocus = props.disableEnforceFocus, disableEnforceFocus = _props_disableEnforceFocus === void 0 ? false : _props_disableEnforceFocus, _props_disableRestoreFocus = props.disableRestoreFocus, disableRestoreFocus = _props_disableRestoreFocus === void 0 ? false : _props_disableRestoreFocus, _props_getTabbable = props.getTabbable, getTabbable = _props_getTabbable === void 0 ? defaultGetTabbable : _props_getTabbable, _props_isEnabled = props.isEnabled, isEnabled = _props_isEnabled === void 0 ? defaultIsEnabled : _props_isEnabled, open = props.open;
-        var ignoreNextEnforceFocus = React47.useRef(false);
-        var sentinelStart = React47.useRef(null);
-        var sentinelEnd = React47.useRef(null);
-        var nodeToRestore = React47.useRef(null);
-        var reactFocusEventTarget = React47.useRef(null);
-        var activated = React47.useRef(false);
-        var rootRef = React47.useRef(null);
+        var ignoreNextEnforceFocus = React58.useRef(false);
+        var sentinelStart = React58.useRef(null);
+        var sentinelEnd = React58.useRef(null);
+        var nodeToRestore = React58.useRef(null);
+        var reactFocusEventTarget = React58.useRef(null);
+        var activated = React58.useRef(false);
+        var rootRef = React58.useRef(null);
         var handleRef = useForkRef(getReactElementRef(children), rootRef);
-        var lastKeydown = React47.useRef(null);
-        React47.useEffect(function() {
+        var lastKeydown = React58.useRef(null);
+        React58.useEffect(function() {
             if (!open || !rootRef.current) {
                 return;
             }
@@ -5918,7 +6657,7 @@ var agent = function() {
             disableAutoFocus,
             open
         ]);
-        React47.useEffect(function() {
+        React58.useEffect(function() {
             if (!open || !rootRef.current) {
                 return;
             }
@@ -5949,7 +6688,7 @@ var agent = function() {
         }, [
             open
         ]);
-        React47.useEffect(function() {
+        React58.useEffect(function() {
             if (!open || !rootRef.current) {
                 return;
             }
@@ -6046,19 +6785,19 @@ var agent = function() {
             }
             activated.current = true;
         };
-        return /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)(React47.Fragment, {
+        return /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)(React58.Fragment, {
             children: [
-                /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("div", {
+                /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("div", {
                     tabIndex: open ? 0 : -1,
                     onFocus: handleFocusSentinel,
                     ref: sentinelStart,
                     "data-testid": "sentinelStart"
                 }),
-                /* @__PURE__ */ React47.cloneElement(children, {
+                /* @__PURE__ */ React58.cloneElement(children, {
                     ref: handleRef,
                     onFocus: onFocus
                 }),
-                /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("div", {
+                /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("div", {
                     tabIndex: open ? 0 : -1,
                     onFocus: handleFocusSentinel,
                     ref: sentinelEnd,
@@ -6075,11 +6814,11 @@ var agent = function() {
     };
     var useModal = function useModal(parameters) {
         var container2 = parameters.container, _parameters_disableEscapeKeyDown = parameters.disableEscapeKeyDown, disableEscapeKeyDown = _parameters_disableEscapeKeyDown === void 0 ? false : _parameters_disableEscapeKeyDown, _parameters_disableScrollLock = parameters.disableScrollLock, disableScrollLock = _parameters_disableScrollLock === void 0 ? false : _parameters_disableScrollLock, _parameters_closeAfterTransition = parameters.closeAfterTransition, closeAfterTransition = _parameters_closeAfterTransition === void 0 ? false : _parameters_closeAfterTransition, onTransitionEnter = parameters.onTransitionEnter, onTransitionExited = parameters.onTransitionExited, children = parameters.children, onClose = parameters.onClose, open = parameters.open, rootRef = parameters.rootRef;
-        var modal = React48.useRef({});
-        var mountNodeRef = React48.useRef(null);
-        var modalRef = React48.useRef(null);
+        var modal = React59.useRef({});
+        var mountNodeRef = React59.useRef(null);
+        var modalRef = React59.useRef(null);
         var handleRef = useForkRef(modalRef, rootRef);
-        var _React48_useState = _sliced_to_array(React48.useState(!open), 2), exited = _React48_useState[0], setExited = _React48_useState[1];
+        var _React59_useState = _sliced_to_array(React59.useState(!open), 2), exited = _React59_useState[0], setExited = _React59_useState[1];
         var hasTransition = getHasTransition(children);
         var ariaHiddenProp = true;
         if (parameters["aria-hidden"] === "false" || parameters["aria-hidden"] === false) {
@@ -6122,19 +6861,19 @@ var agent = function() {
                 ariaHidden(modalRef.current, ariaHiddenProp);
             }
         });
-        var handleClose = React48.useCallback(function() {
+        var handleClose = React59.useCallback(function() {
             manager.remove(getModal(), ariaHiddenProp);
         }, [
             ariaHiddenProp
         ]);
-        React48.useEffect(function() {
+        React59.useEffect(function() {
             return function() {
                 handleClose();
             };
         }, [
             handleClose
         ]);
-        React48.useEffect(function() {
+        React59.useEffect(function() {
             if (open) {
                 handleOpen();
             } else if (!hasTransition || !closeAfterTransition) {
@@ -6221,8 +6960,8 @@ var agent = function() {
             };
             var _children_props_onEnter, _children_props_onExited;
             return {
-                onEnter: createChainedFunction(handleEnter, (_children_props_onEnter = children === null || children === void 0 ? void 0 : children.props.onEnter) !== null && _children_props_onEnter !== void 0 ? _children_props_onEnter : noop2),
-                onExited: createChainedFunction(handleExited, (_children_props_onExited = children === null || children === void 0 ? void 0 : children.props.onExited) !== null && _children_props_onExited !== void 0 ? _children_props_onExited : noop2)
+                onEnter: createChainedFunction(handleEnter, (_children_props_onEnter = children === null || children === void 0 ? void 0 : children.props.onEnter) !== null && _children_props_onEnter !== void 0 ? _children_props_onEnter : noop4),
+                onExited: createChainedFunction(handleExited, (_children_props_onExited = children === null || children === void 0 ? void 0 : children.props.onExited) !== null && _children_props_onExited !== void 0 ? _children_props_onExited : noop4)
             };
         };
         return {
@@ -6258,7 +6997,7 @@ var agent = function() {
     };
     var NoSsr = function NoSsr(props) {
         var children = props.children, _props_defer = props.defer, defer = _props_defer === void 0 ? false : _props_defer, _props_fallback = props.fallback, fallback = _props_fallback === void 0 ? null : _props_fallback;
-        var _React55_useState = _sliced_to_array(React55.useState(false), 2), mountedState = _React55_useState[0], setMountedState = _React55_useState[1];
+        var _React66_useState = _sliced_to_array(React66.useState(false), 2), mountedState = _React66_useState[0], setMountedState = _React66_useState[1];
         useEnhancedEffect_default(function() {
             if (!defer) {
                 setMountedState(true);
@@ -6266,7 +7005,7 @@ var agent = function() {
         }, [
             defer
         ]);
-        React55.useEffect(function() {
+        React66.useEffect(function() {
             if (defer) {
                 setMountedState(true);
             }
@@ -6377,7 +7116,7 @@ var agent = function() {
             }
         });
     };
-    var noop3 = function noop3() {};
+    var noop5 = function noop5() {};
     var isEqual = function isEqual(a, b) {
         if (is.arr(a)) {
             if (!is.arr(b) || a.length !== b.length) return false;
@@ -6630,7 +7369,7 @@ var agent = function() {
         !isSSR() && cssVariableRegex.test(value) || value in (colors || {}));
     };
     var useForceUpdate = function useForceUpdate() {
-        var update3 = (0, import_react14.useState)()[1];
+        var update3 = (0, import_react15.useState)()[1];
         var isMounted = useIsMounted();
         return function() {
             if (isMounted.current) {
@@ -6639,13 +7378,13 @@ var agent = function() {
         };
     };
     var useMemoOne = function useMemoOne(getResult, inputs) {
-        var _ref = _sliced_to_array((0, import_react17.useState)(function() {
+        var _ref = _sliced_to_array((0, import_react18.useState)(function() {
             return {
                 inputs: inputs,
                 result: getResult()
             };
         }), 1), initial = _ref[0];
-        var committed = (0, import_react17.useRef)();
+        var committed = (0, import_react18.useRef)();
         var prevCache = committed.current;
         var cache = prevCache;
         if (cache) {
@@ -6659,7 +7398,7 @@ var agent = function() {
         } else {
             cache = initial;
         }
-        (0, import_react17.useEffect)(function() {
+        (0, import_react18.useEffect)(function() {
             committed.current = cache;
             if (prevCache == initial) {
                 initial.inputs = initial.result = void 0;
@@ -6681,8 +7420,8 @@ var agent = function() {
         return true;
     };
     var usePrev = function usePrev(value) {
-        var prevRef = (0, import_react19.useRef)();
-        (0, import_react19.useEffect)(function() {
+        var prevRef = (0, import_react20.useRef)();
+        (0, import_react20.useEffect)(function() {
             prevRef.current = value;
         });
         return prevRef.current;
@@ -6767,11 +7506,11 @@ var agent = function() {
             ctrl.ref = ref;
         }
     };
-    var mergeConfig = function mergeConfig(config2, newConfig, defaultConfig) {
-        if (defaultConfig) {
-            defaultConfig = _object_spread({}, defaultConfig);
-            sanitizeConfig(defaultConfig, newConfig);
-            newConfig = _object_spread({}, defaultConfig, newConfig);
+    var mergeConfig = function mergeConfig(config2, newConfig, defaultConfig2) {
+        if (defaultConfig2) {
+            defaultConfig2 = _object_spread({}, defaultConfig2);
+            sanitizeConfig(defaultConfig2, newConfig);
+            newConfig = _object_spread({}, defaultConfig2, newConfig);
         }
         sanitizeConfig(config2, newConfig);
         Object.assign(config2, newConfig);
@@ -7219,7 +7958,7 @@ var agent = function() {
         });
     };
     var makeContext = function makeContext(target, init) {
-        Object.assign(target, React67.createContext(init));
+        Object.assign(target, React78.createContext(init));
         target.Provider._context = target;
         target.Consumer._context = target;
         return target;
@@ -7228,12 +7967,12 @@ var agent = function() {
         var _arguments = arguments;
         var propsFn = is.fun(props) && props;
         var _ref = propsFn ? propsFn() : props, reset = _ref.reset, sort = _ref.sort, _ref_trail = _ref.trail, trail = _ref_trail === void 0 ? 0 : _ref_trail, _ref_expires = _ref.expires, expires = _ref_expires === void 0 ? true : _ref_expires, _ref_exitBeforeEnter = _ref.exitBeforeEnter, exitBeforeEnter = _ref_exitBeforeEnter === void 0 ? false : _ref_exitBeforeEnter, onDestroyed = _ref.onDestroyed, propsRef = _ref.ref, propsConfig = _ref.config;
-        var ref = (0, import_react25.useMemo)(function() {
+        var ref = (0, import_react26.useMemo)(function() {
             return propsFn || _arguments.length == 3 ? SpringRef() : void 0;
         }, []);
         var items = toArray(data);
         var transitions = [];
-        var usedTransitions = (0, import_react25.useRef)(null);
+        var usedTransitions = (0, import_react26.useRef)(null);
         var prevTransitions = reset ? null : usedTransitions.current;
         useIsomorphicLayoutEffect(function() {
             usedTransitions.current = transitions;
@@ -7307,8 +8046,8 @@ var agent = function() {
         var forceUpdate = useForceUpdate();
         var defaultProps4 = getDefaultProps(props);
         var changes = /* @__PURE__ */ new Map();
-        var exitingTransitions = (0, import_react25.useRef)(/* @__PURE__ */ new Map());
-        var forceChange = (0, import_react25.useRef)(false);
+        var exitingTransitions = (0, import_react26.useRef)(/* @__PURE__ */ new Map());
+        var forceChange = (0, import_react26.useRef)(false);
         each(transitions, function(t, i) {
             var key = t.key;
             var prevPhase = t.phase;
@@ -7407,7 +8146,7 @@ var agent = function() {
                 });
             }
         });
-        var context = (0, import_react25.useContext)(SpringContext);
+        var context = (0, import_react26.useContext)(SpringContext);
         var prevContext = usePrev(context);
         var hasContext = context !== prevContext && hasProps(context);
         useIsomorphicLayoutEffect(function() {
@@ -9323,7 +10062,7 @@ var agent = function() {
     };
     var useTicks = function useTicks(options) {
         var scale = options.scale, tickNumber = options.tickNumber, valueFormatter = options.valueFormatter, tickInterval = options.tickInterval, _options_tickPlacement = options.tickPlacement, tickPlacement = _options_tickPlacement === void 0 ? "extremities" : _options_tickPlacement, _options_tickLabelPlacement = options.tickLabelPlacement, tickLabelPlacement = _options_tickLabelPlacement === void 0 ? "middle" : _options_tickLabelPlacement;
-        return React68.useMemo(function() {
+        return React79.useMemo(function() {
             if (isBandScale(scale)) {
                 var domain2 = scale.domain();
                 if (scale.bandwidth() > 0) {
@@ -9552,9 +10291,9 @@ var agent = function() {
         };
     };
     var useGlobalId2 = function useGlobalId2(idOverride) {
-        var _React69_useState = _sliced_to_array(React69.useState(idOverride), 2), defaultId = _React69_useState[0], setDefaultId = _React69_useState[1];
+        var _React80_useState = _sliced_to_array(React80.useState(idOverride), 2), defaultId = _React80_useState[0], setDefaultId = _React80_useState[1];
         var id = idOverride || defaultId;
-        React69.useEffect(function() {
+        React80.useEffect(function() {
             if (defaultId == null) {
                 globalId2 += 1;
                 setDefaultId("mui-".concat(globalId2));
@@ -9575,7 +10314,7 @@ var agent = function() {
         var width2 = props.width, height2 = props.height, margin2 = props.margin, svgRef = props.svgRef, children = props.children;
         var drawingArea = useChartDimensions_default(width2, height2, margin2);
         var chartId = useId2();
-        var isPointInside = React71.useCallback(function(param, options) {
+        var isPointInside = React82.useCallback(function(param, options) {
             var x = param.x, y = param.y;
             if ((options === null || options === void 0 ? void 0 : options.targetElement) && (options === null || options === void 0 ? void 0 : options.targetElement.closest("[data-drawing-container]"))) {
                 return true;
@@ -9592,7 +10331,7 @@ var agent = function() {
         }, [
             drawingArea
         ]);
-        var value = React71.useMemo(function() {
+        var value = React82.useMemo(function() {
             return _extends1({
                 chartId: chartId !== null && chartId !== void 0 ? chartId : ""
             }, drawingArea, {
@@ -9603,7 +10342,7 @@ var agent = function() {
             drawingArea,
             isPointInside
         ]);
-        var refValue = React71.useMemo(function() {
+        var refValue = React82.useMemo(function() {
             return {
                 isInitialized: true,
                 data: svgRef
@@ -9611,9 +10350,9 @@ var agent = function() {
         }, [
             svgRef
         ]);
-        return /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(SvgContext.Provider, {
+        return /* @__PURE__ */ (0, import_jsx_runtime53.jsx)(SvgContext.Provider, {
             value: refValue,
-            children: /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(DrawingContext.Provider, {
+            children: /* @__PURE__ */ (0, import_jsx_runtime53.jsx)(DrawingContext.Provider, {
                 value: value,
                 children: children
             })
@@ -9621,8 +10360,8 @@ var agent = function() {
     };
     var useDrawingArea = // node_modules/@mui/x-charts/hooks/useDrawingArea.js
     function useDrawingArea() {
-        var _React72_useContext = React72.useContext(DrawingContext), left2 = _React72_useContext.left, top2 = _React72_useContext.top, width2 = _React72_useContext.width, height2 = _React72_useContext.height, bottom2 = _React72_useContext.bottom, right2 = _React72_useContext.right, isPointInside = _React72_useContext.isPointInside;
-        return React72.useMemo(function() {
+        var _React83_useContext = React83.useContext(DrawingContext), left2 = _React83_useContext.left, top2 = _React83_useContext.top, width2 = _React83_useContext.width, height2 = _React83_useContext.height, bottom2 = _React83_useContext.bottom, right2 = _React83_useContext.right, isPointInside = _React83_useContext.isPointInside;
+        return React83.useMemo(function() {
             return {
                 left: left2,
                 top: top2,
@@ -9967,7 +10706,7 @@ var agent = function() {
     };
     var PluginProvider = function PluginProvider(props) {
         var children = props.children, plugins = props.plugins;
-        var formattedSeries = React75.useMemo(function() {
+        var formattedSeries = React86.useMemo(function() {
             return {
                 isInitialized: true,
                 data: mergePlugins(plugins)
@@ -9975,13 +10714,13 @@ var agent = function() {
         }, [
             plugins
         ]);
-        return /* @__PURE__ */ (0, import_jsx_runtime45.jsx)(PluginContext.Provider, {
+        return /* @__PURE__ */ (0, import_jsx_runtime54.jsx)(PluginContext.Provider, {
             value: formattedSeries,
             children: children
         });
     };
     var useColorProcessor = function useColorProcessor(seriesType) {
-        var _React76_useContext = React76.useContext(PluginContext), isInitialized = _React76_useContext.isInitialized, data = _React76_useContext.data;
+        var _React87_useContext = React87.useContext(PluginContext), isInitialized = _React87_useContext.isInitialized, data = _React87_useContext.data;
         if (!isInitialized) {
             throw new Error([
                 "MUI X: Could not find the plugin context.",
@@ -9994,7 +10733,7 @@ var agent = function() {
         return data.colorProcessors[seriesType];
     };
     var useSeriesFormatter = function useSeriesFormatter(seriesType) {
-        var _React77_useContext = React77.useContext(PluginContext), isInitialized = _React77_useContext.isInitialized, data = _React77_useContext.data;
+        var _React88_useContext = React88.useContext(PluginContext), isInitialized = _React88_useContext.isInitialized, data = _React88_useContext.data;
         if (!isInitialized) {
             throw new Error([
                 "MUI X: Could not find the plugin context.",
@@ -10007,7 +10746,7 @@ var agent = function() {
         return data.seriesFormatters[seriesType];
     };
     var useXExtremumGetter = function useXExtremumGetter(seriesType) {
-        var _React78_useContext = React78.useContext(PluginContext), isInitialized = _React78_useContext.isInitialized, data = _React78_useContext.data;
+        var _React89_useContext = React89.useContext(PluginContext), isInitialized = _React89_useContext.isInitialized, data = _React89_useContext.data;
         if (!isInitialized) {
             throw new Error([
                 "MUI X: Could not find the plugin context.",
@@ -10020,7 +10759,7 @@ var agent = function() {
         return data.xExtremumGetters[seriesType];
     };
     var useYExtremumGetter = function useYExtremumGetter(seriesType) {
-        var _React79_useContext = React79.useContext(PluginContext), isInitialized = _React79_useContext.isInitialized, data = _React79_useContext.data;
+        var _React90_useContext = React90.useContext(PluginContext), isInitialized = _React90_useContext.isInitialized, data = _React90_useContext.data;
         if (!isInitialized) {
             throw new Error([
                 "MUI X: Could not find the plugin context.",
@@ -10035,8 +10774,8 @@ var agent = function() {
     var SeriesProvider = function SeriesProvider(props) {
         var series = props.series, dataset = props.dataset, tmp = props.colors, colors3 = tmp === void 0 ? blueberryTwilightPalette : tmp, children = props.children;
         var seriesFormatters = useSeriesFormatter();
-        var theme = useTheme4();
-        var formattedSeries = React80.useMemo(function() {
+        var theme = useTheme5();
+        var formattedSeries = React91.useMemo(function() {
             return {
                 isInitialized: true,
                 data: preprocessSeries({
@@ -10053,14 +10792,14 @@ var agent = function() {
             seriesFormatters,
             dataset
         ]);
-        return /* @__PURE__ */ (0, import_jsx_runtime46.jsx)(SeriesContext.Provider, {
+        return /* @__PURE__ */ (0, import_jsx_runtime55.jsx)(SeriesContext.Provider, {
             value: formattedSeries,
             children: children
         });
     };
     var useSeries = // node_modules/@mui/x-charts/hooks/useSeries.js
     function useSeries() {
-        var _React81_useContext = React81.useContext(SeriesContext), isInitialized = _React81_useContext.isInitialized, data = _React81_useContext.data;
+        var _React92_useContext = React92.useContext(SeriesContext), isInitialized = _React92_useContext.isInitialized, data = _React92_useContext.data;
         if (!isInitialized) {
             throw new Error([
                 "MUI X: Could not find the series ref context.",
@@ -10071,7 +10810,7 @@ var agent = function() {
     };
     var useBarSeries = function useBarSeries() {
         var series = useSeries();
-        return React81.useMemo(function() {
+        return React92.useMemo(function() {
             return series.bar;
         }, [
             series.bar
@@ -10083,7 +10822,7 @@ var agent = function() {
         var drawingArea = useDrawingArea();
         var xExtremumGetters = useXExtremumGetter();
         var yExtremumGetters = useYExtremumGetter();
-        var xValues = React83.useMemo(function() {
+        var xValues = React94.useMemo(function() {
             return computeAxisValue({
                 drawingArea: drawingArea,
                 formattedSeries: formattedSeries,
@@ -10097,7 +10836,7 @@ var agent = function() {
             xAxis,
             xExtremumGetters
         ]);
-        var yValues = React83.useMemo(function() {
+        var yValues = React94.useMemo(function() {
             return computeAxisValue({
                 drawingArea: drawingArea,
                 formattedSeries: formattedSeries,
@@ -10111,7 +10850,7 @@ var agent = function() {
             yAxis,
             yExtremumGetters
         ]);
-        var value = React83.useMemo(function() {
+        var value = React94.useMemo(function() {
             return {
                 isInitialized: true,
                 data: {
@@ -10125,7 +10864,7 @@ var agent = function() {
             xValues,
             yValues
         ]);
-        return /* @__PURE__ */ (0, import_jsx_runtime47.jsx)(CartesianContext.Provider, {
+        return /* @__PURE__ */ (0, import_jsx_runtime56.jsx)(CartesianContext.Provider, {
             value: value,
             children: children
         });
@@ -10156,8 +10895,8 @@ var agent = function() {
         for(var _len = arguments.length, refs = new Array(_len), _key = 0; _key < _len; _key++){
             refs[_key] = arguments[_key];
         }
-        var cleanupRef = React85.useRef(void 0);
-        var refEffect = React85.useCallback(function(instance2) {
+        var cleanupRef = React96.useRef(void 0);
+        var refEffect = React96.useCallback(function(instance2) {
             var cleanups = refs.map(function(ref) {
                 if (ref == null) {
                     return null;
@@ -10180,7 +10919,7 @@ var agent = function() {
                 });
             };
         }, refs);
-        return React85.useMemo(function() {
+        return React96.useMemo(function() {
             if (refs.every(function(ref) {
                 return ref == null;
             })) {
@@ -10315,33 +11054,33 @@ var agent = function() {
     };
     var InteractionProvider = function InteractionProvider(props) {
         var children = props.children;
-        var _React86_useReducer = _sliced_to_array(React86.useReducer(dataReducer, {
+        var _React97_useReducer = _sliced_to_array(React97.useReducer(dataReducer, {
             item: null,
             axis: {
                 x: null,
                 y: null
             },
             useVoronoiInteraction: false
-        }), 2), data = _React86_useReducer[0], dispatch = _React86_useReducer[1];
-        var value = React86.useMemo(function() {
+        }), 2), data = _React97_useReducer[0], dispatch = _React97_useReducer[1];
+        var value = React97.useMemo(function() {
             return _extends1({}, data, {
                 dispatch: dispatch
             });
         }, [
             data
         ]);
-        return /* @__PURE__ */ (0, import_jsx_runtime48.jsx)(InteractionContext.Provider, {
+        return /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(InteractionContext.Provider, {
             value: value,
             children: children
         });
     };
     var useControlled = function useControlled(param) {
         var controlled = param.controlled, defaultProp = param.default, name = param.name, _param_state = param.state, state = _param_state === void 0 ? "value" : _param_state;
-        var _React87_useRef = React87.useRef(controlled !== void 0), isControlled = _React87_useRef.current;
-        var _React87_useState = _sliced_to_array(React87.useState(defaultProp), 2), valueState = _React87_useState[0], setValue = _React87_useState[1];
+        var _React98_useRef = React98.useRef(controlled !== void 0), isControlled = _React98_useRef.current;
+        var _React98_useState = _sliced_to_array(React98.useState(defaultProp), 2), valueState = _React98_useState[0], setValue = _React98_useState[1];
         var value = isControlled ? controlled : valueState;
         if (false) {
-            React87.useEffect(function() {
+            React98.useEffect(function() {
                 if (isControlled !== (controlled !== void 0)) {
                     console.error([
                         "MUI: A component is changing the ".concat(isControlled ? "" : "un", "controlled ").concat(state, " state of ").concat(name, " to be ").concat(isControlled ? "un" : "", "controlled."),
@@ -10356,8 +11095,8 @@ var agent = function() {
                 name,
                 controlled
             ]);
-            var _React87_useRef1 = React87.useRef(defaultProp), defaultValue = _React87_useRef1.current;
-            React87.useEffect(function() {
+            var _React98_useRef1 = React98.useRef(defaultProp), defaultValue = _React98_useRef1.current;
+            React98.useEffect(function() {
                 if (!isControlled && !Object.is(defaultValue, defaultProp)) {
                     console.error([
                         "MUI: A component is changing the default ".concat(state, " state of an uncontrolled ").concat(name, " after being initialized. To suppress this warning opt to use a controlled ").concat(name, ".")
@@ -10367,7 +11106,7 @@ var agent = function() {
                 JSON.stringify(defaultProp)
             ]);
         }
-        var setValueIfUncontrolled = React87.useCallback(function(newValue) {
+        var setValueIfUncontrolled = React98.useCallback(function(newValue) {
             if (!isControlled) {
                 setValue(newValue);
             }
@@ -10386,7 +11125,7 @@ var agent = function() {
             state: "highlightedItem"
         }), 2), highlightedItem = _useControlled[0], setHighlightedItem = _useControlled[1];
         var series = useSeries();
-        var seriesById = React89.useMemo(function() {
+        var seriesById = React100.useMemo(function() {
             var map2 = /* @__PURE__ */ new Map();
             Object.keys(series).forEach(function(seriesType) {
                 var seriesData = series[seriesType];
@@ -10402,7 +11141,7 @@ var agent = function() {
         ]);
         var _seriesById_get;
         var highlightScope = highlightedItem && highlightedItem.seriesId ? (_seriesById_get = seriesById.get(highlightedItem.seriesId)) !== null && _seriesById_get !== void 0 ? _seriesById_get : void 0 : void 0;
-        var providerValue = React89.useMemo(function() {
+        var providerValue = React100.useMemo(function() {
             return {
                 isInitialized: true,
                 data: {
@@ -10426,13 +11165,13 @@ var agent = function() {
             setHighlightedItem,
             onHighlightChange
         ]);
-        return /* @__PURE__ */ (0, import_jsx_runtime49.jsx)(HighlightedContext.Provider, {
+        return /* @__PURE__ */ (0, import_jsx_runtime58.jsx)(HighlightedContext.Provider, {
             value: providerValue,
             children: children
         });
     };
     var useHighlighted = function useHighlighted() {
-        var _React90_useContext = React90.useContext(HighlightedContext), isInitialized = _React90_useContext.isInitialized, data = _React90_useContext.data;
+        var _React101_useContext = React101.useContext(HighlightedContext), isInitialized = _React101_useContext.isInitialized, data = _React101_useContext.data;
         if (!isInitialized) {
             throw new Error([
                 "MUI X: Could not find the highlighted ref context.",
@@ -10459,7 +11198,7 @@ var agent = function() {
     };
     var ZAxisContextProvider = function ZAxisContextProvider(props) {
         var inZAxis = props.zAxis, dataset = props.dataset, children = props.children;
-        var zAxis = React91.useMemo(function() {
+        var zAxis = React102.useMemo(function() {
             return inZAxis === null || inZAxis === void 0 ? void 0 : inZAxis.map(function(axisConfig) {
                 var dataKey = axisConfig.dataKey;
                 if (dataKey === void 0 || axisConfig.data !== void 0) {
@@ -10478,7 +11217,7 @@ var agent = function() {
             inZAxis,
             dataset
         ]);
-        var value = React91.useMemo(function() {
+        var value = React102.useMemo(function() {
             var _zAxis_map;
             var allZAxis = (_zAxis_map = zAxis === null || zAxis === void 0 ? void 0 : zAxis.map(function(axis, index) {
                 return _extends1({
@@ -10506,7 +11245,7 @@ var agent = function() {
         }, [
             zAxis
         ]);
-        return /* @__PURE__ */ (0, import_jsx_runtime50.jsx)(ZAxisContext.Provider, {
+        return /* @__PURE__ */ (0, import_jsx_runtime59.jsx)(ZAxisContext.Provider, {
             value: value,
             children: children
         });
@@ -10548,11 +11287,11 @@ var agent = function() {
             className: classes.root,
             ownerState: ownerState
         });
-        return /* @__PURE__ */ (0, import_jsx_runtime51.jsx)(Bar, _extends1({}, barProps));
+        return /* @__PURE__ */ (0, import_jsx_runtime60.jsx)(Bar, _extends1({}, barProps));
     };
     var useChartId = function useChartId() {
-        var chartId = React94.useContext(DrawingContext).chartId;
-        return React94.useMemo(function() {
+        var chartId = React105.useContext(DrawingContext).chartId;
+        return React105.useMemo(function() {
             return chartId;
         }, [
             chartId
@@ -10571,7 +11310,7 @@ var agent = function() {
         };
     };
     var useSvgRef = function useSvgRef() {
-        var _React95_useContext = React95.useContext(SvgContext), isInitialized = _React95_useContext.isInitialized, data = _React95_useContext.data;
+        var _React106_useContext = React106.useContext(SvgContext), isInitialized = _React106_useContext.isInitialized, data = _React106_useContext.data;
         if (!isInitialized) {
             throw new Error([
                 "MUI X: Could not find the svg ref context.",
@@ -10583,7 +11322,7 @@ var agent = function() {
     var BarClipRect = function BarClipRect(props) {
         var _props_style, _props_style1;
         var radiusData = props.ownerState;
-        return /* @__PURE__ */ (0, import_jsx_runtime52.jsx)(animated.rect, {
+        return /* @__PURE__ */ (0, import_jsx_runtime61.jsx)(animated.rect, {
             style: _extends1({}, props.style, {
                 clipPath: (props.ownerState.layout === "vertical" ? (_props_style = props.style) === null || _props_style === void 0 ? void 0 : _props_style.height : (_props_style1 = props.style) === null || _props_style1 === void 0 ? void 0 : _props_style1.width).to(function(value) {
                     return buildInset({
@@ -10601,9 +11340,9 @@ var agent = function() {
         if (!props.borderRadius || props.borderRadius <= 0) {
             return null;
         }
-        return /* @__PURE__ */ (0, import_jsx_runtime52.jsx)("clipPath", {
+        return /* @__PURE__ */ (0, import_jsx_runtime61.jsx)("clipPath", {
             id: maskId,
-            children: /* @__PURE__ */ (0, import_jsx_runtime52.jsx)(BarClipRect, {
+            children: /* @__PURE__ */ (0, import_jsx_runtime61.jsx)(BarClipRect, {
                 ownerState: rest,
                 style: style4
             })
@@ -10619,7 +11358,7 @@ var agent = function() {
             name: "MuiBarLabel"
         });
         var otherProps = _objectWithoutPropertiesLoose(props, _excluded4);
-        return /* @__PURE__ */ (0, import_jsx_runtime53.jsx)(BarLabelComponent, _extends1({}, otherProps));
+        return /* @__PURE__ */ (0, import_jsx_runtime62.jsx)(BarLabelComponent, _extends1({}, otherProps));
     };
     var BarLabelItem = function BarLabelItem(props) {
         var seriesId = props.seriesId, innerClasses = props.classes, color3 = props.color, style4 = props.style, dataIndex = props.dataIndex, barLabel = props.barLabel, slots = props.slots, slotProps = props.slotProps, height2 = props.height, width2 = props.width, value = props.value, other = _objectWithoutPropertiesLoose(props, _excluded5);
@@ -10661,7 +11400,7 @@ var agent = function() {
         if (!formattedLabelText) {
             return null;
         }
-        return /* @__PURE__ */ (0, import_jsx_runtime54.jsx)(Component, _extends1({}, barLabelProps, barLabelOwnerState, {
+        return /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(Component, _extends1({}, barLabelProps, barLabelOwnerState, {
             children: formattedLabelText
         }));
     };
@@ -10677,10 +11416,10 @@ var agent = function() {
             update: enterStyle,
             immediate: skipAnimation2
         });
-        return /* @__PURE__ */ (0, import_jsx_runtime55.jsx)(React99.Fragment, {
+        return /* @__PURE__ */ (0, import_jsx_runtime64.jsx)(React110.Fragment, {
             children: barLabelTransition(function(style4, param) {
                 var seriesId = param.seriesId, dataIndex = param.dataIndex, color3 = param.color, value = param.value, width2 = param.width, height2 = param.height;
-                return /* @__PURE__ */ (0, import_jsx_runtime55.jsx)(BarLabelItem, _extends1({
+                return /* @__PURE__ */ (0, import_jsx_runtime64.jsx)(BarLabelItem, _extends1({
                     seriesId: seriesId,
                     dataIndex: dataIndex,
                     value: value,
@@ -10716,7 +11455,7 @@ var agent = function() {
         var _window;
         var children = props.children, inSkipAnimation = props.skipAnimation;
         var isAnimationDisabledEnvironment = typeof window === "undefined" || !((_window = window) === null || _window === void 0 ? void 0 : _window.matchMedia);
-        var _React101_useState = _sliced_to_array(React101.useState(isAnimationDisabledEnvironment || void 0), 2), skipAnimation2 = _React101_useState[0], setSkipAnimation = _React101_useState[1];
+        var _React112_useState = _sliced_to_array(React112.useState(isAnimationDisabledEnvironment || void 0), 2), skipAnimation2 = _React112_useState[0], setSkipAnimation = _React112_useState[1];
         useIsomorphicLayoutEffect(function() {
             var _mql_addEventListener;
             if (isAnimationDisabledEnvironment) {
@@ -10737,7 +11476,7 @@ var agent = function() {
                 mql === null || mql === void 0 ? void 0 : (_mql_removeEventListener = mql.removeEventListener) === null || _mql_removeEventListener === void 0 ? void 0 : _mql_removeEventListener.call(mql, "change", handleMediaChange);
             };
         }, []);
-        var value = React101.useMemo(function() {
+        var value = React112.useMemo(function() {
             return {
                 isInitialized: true,
                 data: {
@@ -10750,13 +11489,13 @@ var agent = function() {
             skipAnimation2,
             inSkipAnimation
         ]);
-        return /* @__PURE__ */ (0, import_jsx_runtime56.jsx)(AnimationContext.Provider, {
+        return /* @__PURE__ */ (0, import_jsx_runtime65.jsx)(AnimationContext.Provider, {
             value: value,
             children: children
         });
     };
     var useSkipAnimation = function useSkipAnimation(skipAnimation2) {
-        var _React102_useContext = React102.useContext(AnimationContext), isInitialized = _React102_useContext.isInitialized, data = _React102_useContext.data;
+        var _React113_useContext = React113.useContext(AnimationContext), isInitialized = _React113_useContext.isInitialized, data = _React113_useContext.data;
         if (!isInitialized) {
             throw new Error([
                 "MUI X: Could not find the animation ref context.",
@@ -10805,11 +11544,11 @@ var agent = function() {
             update: enterStyle2,
             immediate: skipAnimation2
         });
-        return /* @__PURE__ */ (0, import_jsx_runtime57.jsxs)(React103.Fragment, {
+        return /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)(React114.Fragment, {
             children: [
                 !withoutBorderRadius && maskTransition(function(style4, param) {
                     var id = param.id, hasPositive = param.hasPositive, hasNegative = param.hasNegative, layout = param.layout;
-                    return /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(BarClipPath, {
+                    return /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(BarClipPath, {
                         maskId: id,
                         borderRadius: borderRadius2,
                         hasNegative: hasNegative,
@@ -10820,7 +11559,7 @@ var agent = function() {
                 }),
                 transition(function(style4, param) {
                     var seriesId = param.seriesId, dataIndex = param.dataIndex, color3 = param.color, maskId = param.maskId;
-                    var barElement = /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(BarElement, _extends1({
+                    var barElement = /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(BarElement, _extends1({
                         id: seriesId,
                         dataIndex: dataIndex,
                         color: color3
@@ -10837,12 +11576,12 @@ var agent = function() {
                     if (withoutBorderRadius) {
                         return barElement;
                     }
-                    return /* @__PURE__ */ (0, import_jsx_runtime57.jsx)("g", {
+                    return /* @__PURE__ */ (0, import_jsx_runtime66.jsx)("g", {
                         clipPath: "url(#".concat(maskId, ")"),
                         children: barElement
                     });
                 }),
-                barLabel && /* @__PURE__ */ (0, import_jsx_runtime57.jsx)(BarLabelPlot, _extends1({
+                barLabel && /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(BarLabelPlot, _extends1({
                     bars: completedData,
                     skipAnimation: skipAnimation2,
                     barLabel: barLabel
@@ -10867,7 +11606,7 @@ var agent = function() {
             return null;
         }
         var _obj;
-        return /* @__PURE__ */ (0, import_jsx_runtime59.jsx)("linearGradient", (_obj = {
+        return /* @__PURE__ */ (0, import_jsx_runtime68.jsx)("linearGradient", (_obj = {
             id: gradientId,
             x1: "0",
             x2: "0",
@@ -10879,14 +11618,14 @@ var agent = function() {
                 return null;
             }
             var offset2 = isReversed ? 1 - x / size : x / size;
-            return /* @__PURE__ */ (0, import_jsx_runtime59.jsxs)(React106.Fragment, {
+            return /* @__PURE__ */ (0, import_jsx_runtime68.jsxs)(React117.Fragment, {
                 children: [
-                    /* @__PURE__ */ (0, import_jsx_runtime59.jsx)("stop", {
+                    /* @__PURE__ */ (0, import_jsx_runtime68.jsx)("stop", {
                         offset: offset2,
                         stopColor: colorMap.colors[index],
                         stopOpacity: 1
                     }),
-                    /* @__PURE__ */ (0, import_jsx_runtime59.jsx)("stop", {
+                    /* @__PURE__ */ (0, import_jsx_runtime68.jsx)("stop", {
                         offset: offset2,
                         stopColor: colorMap.colors[index + 1],
                         stopOpacity: 1
@@ -10913,7 +11652,7 @@ var agent = function() {
         var numberOfPoints = Math.round(((_Math = Math).max.apply(_Math, _to_consumable_array(extremPositions)) - (_Math1 = Math).min.apply(_Math1, _to_consumable_array(extremPositions))) / PX_PRECISION);
         var keyPrefix = "".concat(extremValues[0], "-").concat(extremValues[1], "-");
         var _obj;
-        return /* @__PURE__ */ (0, import_jsx_runtime60.jsx)("linearGradient", (_obj = {
+        return /* @__PURE__ */ (0, import_jsx_runtime69.jsx)("linearGradient", (_obj = {
             id: gradientId,
             x1: "0",
             x2: "0",
@@ -10935,7 +11674,7 @@ var agent = function() {
             if (color3 === null) {
                 return null;
             }
-            return /* @__PURE__ */ (0, import_jsx_runtime60.jsx)("stop", {
+            return /* @__PURE__ */ (0, import_jsx_runtime69.jsx)("stop", {
                 offset: offset2,
                 stopColor: color3,
                 stopOpacity: 1
@@ -10943,8 +11682,8 @@ var agent = function() {
         })), _obj));
     };
     var useChartGradient = function useChartGradient() {
-        var chartId = React108.useContext(DrawingContext).chartId;
-        return React108.useCallback(function(axisId, direction) {
+        var chartId = React119.useContext(DrawingContext).chartId;
+        return React119.useCallback(function(axisId, direction) {
             return "".concat(chartId, "-gradient-").concat(direction, "-").concat(axisId);
         }, [
             chartId
@@ -10956,7 +11695,7 @@ var agent = function() {
         var svgWidth = left2 + width2 + right2;
         var getGradientId = useChartGradient();
         var _useCartesianContext = useCartesianContext(), xAxisIds = _useCartesianContext.xAxisIds, xAxis = _useCartesianContext.xAxis, yAxisIds = _useCartesianContext.yAxisIds, yAxis = _useCartesianContext.yAxis;
-        return /* @__PURE__ */ (0, import_jsx_runtime61.jsxs)("defs", {
+        return /* @__PURE__ */ (0, import_jsx_runtime70.jsxs)("defs", {
             children: [
                 yAxisIds.filter(function(axisId) {
                     return yAxis[axisId].colorMap !== void 0;
@@ -10964,7 +11703,7 @@ var agent = function() {
                     var gradientId = getGradientId(axisId, "y");
                     var _yAxis_axisId = yAxis[axisId], colorMap = _yAxis_axisId.colorMap, scale = _yAxis_axisId.scale, colorScale = _yAxis_axisId.colorScale, reverse = _yAxis_axisId.reverse;
                     if ((colorMap === null || colorMap === void 0 ? void 0 : colorMap.type) === "piecewise") {
-                        return /* @__PURE__ */ (0, import_jsx_runtime61.jsx)(ChartsPiecewiseGradient, {
+                        return /* @__PURE__ */ (0, import_jsx_runtime70.jsx)(ChartsPiecewiseGradient, {
                             isReversed: !reverse,
                             scale: scale,
                             colorMap: colorMap,
@@ -10974,7 +11713,7 @@ var agent = function() {
                         }, gradientId);
                     }
                     if ((colorMap === null || colorMap === void 0 ? void 0 : colorMap.type) === "continuous") {
-                        return /* @__PURE__ */ (0, import_jsx_runtime61.jsx)(ChartsContinuousGradient, {
+                        return /* @__PURE__ */ (0, import_jsx_runtime70.jsx)(ChartsContinuousGradient, {
                             isReversed: !reverse,
                             scale: scale,
                             colorScale: colorScale,
@@ -10992,7 +11731,7 @@ var agent = function() {
                     var gradientId = getGradientId(axisId, "x");
                     var _xAxis_axisId = xAxis[axisId], colorMap = _xAxis_axisId.colorMap, scale = _xAxis_axisId.scale, reverse = _xAxis_axisId.reverse, colorScale = _xAxis_axisId.colorScale;
                     if ((colorMap === null || colorMap === void 0 ? void 0 : colorMap.type) === "piecewise") {
-                        return /* @__PURE__ */ (0, import_jsx_runtime61.jsx)(ChartsPiecewiseGradient, {
+                        return /* @__PURE__ */ (0, import_jsx_runtime70.jsx)(ChartsPiecewiseGradient, {
                             isReversed: reverse,
                             scale: scale,
                             colorMap: colorMap,
@@ -11002,7 +11741,7 @@ var agent = function() {
                         }, gradientId);
                     }
                     if ((colorMap === null || colorMap === void 0 ? void 0 : colorMap.type) === "continuous") {
-                        return /* @__PURE__ */ (0, import_jsx_runtime61.jsx)(ChartsContinuousGradient, {
+                        return /* @__PURE__ */ (0, import_jsx_runtime70.jsx)(ChartsContinuousGradient, {
                             isReversed: reverse,
                             scale: scale,
                             colorScale: colorScale,
@@ -11070,7 +11809,7 @@ var agent = function() {
     var ChartsText = function ChartsText(props) {
         var x = props.x, y = props.y, styleProps = props.style, text = props.text, textProps = _objectWithoutPropertiesLoose(props, _excluded11);
         var _ref = styleProps !== null && styleProps !== void 0 ? styleProps : {}, angle = _ref.angle, textAnchor = _ref.textAnchor, dominantBaseline = _ref.dominantBaseline, style4 = _objectWithoutPropertiesLoose(_ref, _excluded23);
-        var wordsByLines = React115.useMemo(function() {
+        var wordsByLines = React126.useMemo(function() {
             return getWordsByLines({
                 style: style4,
                 needsComputation: text.includes("\n"),
@@ -11096,7 +11835,7 @@ var agent = function() {
         if (angle) {
             transforms.push("rotate(".concat(angle, ", ").concat(x, ", ").concat(y, ")"));
         }
-        return /* @__PURE__ */ (0, import_jsx_runtime64.jsx)("text", _extends1({}, textProps, {
+        return /* @__PURE__ */ (0, import_jsx_runtime73.jsx)("text", _extends1({}, textProps, {
             transform: transforms.length > 0 ? transforms.join(" ") : void 0,
             x: x,
             y: y,
@@ -11104,7 +11843,7 @@ var agent = function() {
             dominantBaseline: dominantBaseline,
             style: style4,
             children: wordsByLines.map(function(line2, index) {
-                return /* @__PURE__ */ (0, import_jsx_runtime64.jsx)("tspan", {
+                return /* @__PURE__ */ (0, import_jsx_runtime73.jsx)("tspan", {
                     x: x,
                     dy: "".concat(index === 0 ? startDy : wordsByLines[0].height, "px"),
                     dominantBaseline: dominantBaseline,
@@ -11140,7 +11879,7 @@ var agent = function() {
     };
     var useMounted = function useMounted() {
         var defer = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : false;
-        var _React116_useState = _sliced_to_array(React116.useState(false), 2), mountedState = _React116_useState[0], setMountedState = _React116_useState[1];
+        var _React127_useState = _sliced_to_array(React127.useState(false), 2), mountedState = _React127_useState[0], setMountedState = _React127_useState[1];
         useEnhancedEffect_default2(function() {
             if (!defer) {
                 setMountedState(true);
@@ -11148,7 +11887,7 @@ var agent = function() {
         }, [
             defer
         ]);
-        React116.useEffect(function() {
+        React127.useEffect(function() {
             if (defer) {
                 setMountedState(true);
             }
@@ -11215,7 +11954,7 @@ var agent = function() {
         });
         var defaultizedProps = _extends1({}, defaultProps2, themedProps);
         var position2 = defaultizedProps.position, disableLine = defaultizedProps.disableLine, disableTicks = defaultizedProps.disableTicks, tickLabelStyle = defaultizedProps.tickLabelStyle, label = defaultizedProps.label, labelStyle = defaultizedProps.labelStyle, tickFontSize = defaultizedProps.tickFontSize, labelFontSize = defaultizedProps.labelFontSize, tickSizeProp = defaultizedProps.tickSize, valueFormatter = defaultizedProps.valueFormatter, slots = defaultizedProps.slots, slotProps = defaultizedProps.slotProps, tickInterval = defaultizedProps.tickInterval, tickLabelInterval = defaultizedProps.tickLabelInterval, tickPlacement = defaultizedProps.tickPlacement, tickLabelPlacement = defaultizedProps.tickLabelPlacement, sx = defaultizedProps.sx;
-        var theme = useTheme4();
+        var theme = useTheme5();
         var classes = useUtilityClasses25(_extends1({}, defaultizedProps, {
             theme: theme
         }));
@@ -11278,12 +12017,12 @@ var agent = function() {
         if (ordinalAxis && domain.length === 0 || !ordinalAxis && domain.some(isInfinity)) {
             return null;
         }
-        return /* @__PURE__ */ (0, import_jsx_runtime65.jsxs)(XAxisRoot, {
+        return /* @__PURE__ */ (0, import_jsx_runtime74.jsxs)(XAxisRoot, {
             transform: "translate(0, ".concat(position2 === "bottom" ? top2 + height2 : top2, ")"),
             className: classes.root,
             sx: sx,
             children: [
-                !disableLine && /* @__PURE__ */ (0, import_jsx_runtime65.jsx)(Line, _extends1({
+                !disableLine && /* @__PURE__ */ (0, import_jsx_runtime74.jsx)(Line, _extends1({
                     x1: left2,
                     x2: left2 + width2,
                     className: classes.line
@@ -11304,15 +12043,15 @@ var agent = function() {
                     }, {
                         direction: "x"
                     });
-                    return /* @__PURE__ */ (0, import_jsx_runtime65.jsxs)("g", {
+                    return /* @__PURE__ */ (0, import_jsx_runtime74.jsxs)("g", {
                         transform: "translate(".concat(offset2, ", 0)"),
                         className: classes.tickContainer,
                         children: [
-                            !disableTicks && showTick && /* @__PURE__ */ (0, import_jsx_runtime65.jsx)(Tick, _extends1({
+                            !disableTicks && showTick && /* @__PURE__ */ (0, import_jsx_runtime74.jsx)(Tick, _extends1({
                                 y2: positionSign * tickSize,
                                 className: classes.tick
                             }, slotProps === null || slotProps === void 0 ? void 0 : slotProps.axisTick)),
-                            formattedValue !== void 0 && !skipLabel && showTickLabel && /* @__PURE__ */ (0, import_jsx_runtime65.jsx)(TickLabel, _extends1({
+                            formattedValue !== void 0 && !skipLabel && showTickLabel && /* @__PURE__ */ (0, import_jsx_runtime74.jsx)(TickLabel, _extends1({
                                 x: xTickLabel,
                                 y: yTickLabel
                             }, axisTickLabelProps, {
@@ -11321,9 +12060,9 @@ var agent = function() {
                         ]
                     }, index);
                 }),
-                label && /* @__PURE__ */ (0, import_jsx_runtime65.jsx)("g", {
+                label && /* @__PURE__ */ (0, import_jsx_runtime74.jsx)("g", {
                     className: classes.label,
-                    children: /* @__PURE__ */ (0, import_jsx_runtime65.jsx)(Label, _extends1({}, labelRefPoint, axisLabelProps, {
+                    children: /* @__PURE__ */ (0, import_jsx_runtime74.jsx)(Label, _extends1({}, labelRefPoint, axisLabelProps, {
                         text: label
                     }))
                 })
@@ -11340,7 +12079,7 @@ var agent = function() {
         });
         var defaultizedProps = _extends1({}, defaultProps3, themedProps);
         var position2 = defaultizedProps.position, disableLine = defaultizedProps.disableLine, disableTicks = defaultizedProps.disableTicks, tickFontSize = defaultizedProps.tickFontSize, label = defaultizedProps.label, labelFontSize = defaultizedProps.labelFontSize, labelStyle = defaultizedProps.labelStyle, tickLabelStyle = defaultizedProps.tickLabelStyle, tickSizeProp = defaultizedProps.tickSize, valueFormatter = defaultizedProps.valueFormatter, slots = defaultizedProps.slots, slotProps = defaultizedProps.slotProps, tickPlacement = defaultizedProps.tickPlacement, tickLabelPlacement = defaultizedProps.tickLabelPlacement, tickInterval = defaultizedProps.tickInterval, tickLabelInterval = defaultizedProps.tickLabelInterval, sx = defaultizedProps.sx;
-        var theme = useTheme4();
+        var theme = useTheme5();
         var isRtl = useRtl();
         var classes = useUtilityClasses26(_extends1({}, defaultizedProps, {
             theme: theme
@@ -11408,12 +12147,12 @@ var agent = function() {
         if (ordinalAxis && domain.length === 0 || !ordinalAxis && domain.some(isInfinity)) {
             return null;
         }
-        return /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)(YAxisRoot, {
+        return /* @__PURE__ */ (0, import_jsx_runtime75.jsxs)(YAxisRoot, {
             transform: "translate(".concat(position2 === "right" ? left2 + width2 : left2, ", 0)"),
             className: classes.root,
             sx: sx,
             children: [
-                !disableLine && /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(Line, _extends1({
+                !disableLine && /* @__PURE__ */ (0, import_jsx_runtime75.jsx)(Line, _extends1({
                     y1: top2,
                     y2: top2 + height2,
                     className: classes.line
@@ -11432,15 +12171,15 @@ var agent = function() {
                     if (!showLabel) {
                         return null;
                     }
-                    return /* @__PURE__ */ (0, import_jsx_runtime66.jsxs)("g", {
+                    return /* @__PURE__ */ (0, import_jsx_runtime75.jsxs)("g", {
                         transform: "translate(0, ".concat(offset2, ")"),
                         className: classes.tickContainer,
                         children: [
-                            !disableTicks && /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(Tick, _extends1({
+                            !disableTicks && /* @__PURE__ */ (0, import_jsx_runtime75.jsx)(Tick, _extends1({
                                 x2: positionSign * tickSize,
                                 className: classes.tick
                             }, slotProps === null || slotProps === void 0 ? void 0 : slotProps.axisTick)),
-                            formattedValue !== void 0 && !skipLabel && /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(TickLabel, _extends1({
+                            formattedValue !== void 0 && !skipLabel && /* @__PURE__ */ (0, import_jsx_runtime75.jsx)(TickLabel, _extends1({
                                 x: xTickLabel,
                                 y: yTickLabel,
                                 text: formattedValue.toString()
@@ -11448,9 +12187,9 @@ var agent = function() {
                         ]
                     }, index);
                 }),
-                label && /* @__PURE__ */ (0, import_jsx_runtime66.jsx)("g", {
+                label && /* @__PURE__ */ (0, import_jsx_runtime75.jsx)("g", {
                     className: classes.label,
-                    children: /* @__PURE__ */ (0, import_jsx_runtime66.jsx)(Label, _extends1({}, labelRefPoint, axisLabelProps, {
+                    children: /* @__PURE__ */ (0, import_jsx_runtime75.jsx)(Label, _extends1({}, labelRefPoint, axisLabelProps, {
                         text: label
                     }))
                 })
@@ -11500,8 +12239,8 @@ var agent = function() {
     };
     var useMouseTracker = function useMouseTracker() {
         var svgRef = useSvgRef();
-        var _React119_useState = _sliced_to_array(React119.useState(null), 2), mousePosition = _React119_useState[0], setMousePosition = _React119_useState[1];
-        React119.useEffect(function() {
+        var _React130_useState = _sliced_to_array(React130.useState(null), 2), mousePosition = _React130_useState[0], setMousePosition = _React130_useState[1];
+        React130.useEffect(function() {
             var element = svgRef.current;
             if (element === null) {
                 return function() {};
@@ -11569,27 +12308,27 @@ var agent = function() {
         var formattedValue = (_series_valueFormatter = series.valueFormatter) === null || _series_valueFormatter === void 0 ? void 0 : _series_valueFormatter.call(series, value, {
             dataIndex: itemData.dataIndex
         });
-        return /* @__PURE__ */ (0, import_jsx_runtime67.jsx)(ChartsTooltipPaper, {
+        return /* @__PURE__ */ (0, import_jsx_runtime76.jsx)(ChartsTooltipPaper, {
             sx: sx,
             className: classes.paper,
-            children: /* @__PURE__ */ (0, import_jsx_runtime67.jsx)(ChartsTooltipTable, {
+            children: /* @__PURE__ */ (0, import_jsx_runtime76.jsx)(ChartsTooltipTable, {
                 className: classes.table,
-                children: /* @__PURE__ */ (0, import_jsx_runtime67.jsx)("tbody", {
-                    children: /* @__PURE__ */ (0, import_jsx_runtime67.jsxs)(ChartsTooltipRow, {
+                children: /* @__PURE__ */ (0, import_jsx_runtime76.jsx)("tbody", {
+                    children: /* @__PURE__ */ (0, import_jsx_runtime76.jsxs)(ChartsTooltipRow, {
                         className: classes.row,
                         children: [
-                            /* @__PURE__ */ (0, import_jsx_runtime67.jsx)(ChartsTooltipCell, {
+                            /* @__PURE__ */ (0, import_jsx_runtime76.jsx)(ChartsTooltipCell, {
                                 className: clsx_default(classes.markCell, classes.cell),
-                                children: /* @__PURE__ */ (0, import_jsx_runtime67.jsx)(ChartsTooltipMark, {
+                                children: /* @__PURE__ */ (0, import_jsx_runtime76.jsx)(ChartsTooltipMark, {
                                     color: color3,
                                     className: classes.mark
                                 })
                             }),
-                            /* @__PURE__ */ (0, import_jsx_runtime67.jsx)(ChartsTooltipCell, {
+                            /* @__PURE__ */ (0, import_jsx_runtime76.jsx)(ChartsTooltipCell, {
                                 className: clsx_default(classes.labelCell, classes.cell),
                                 children: displayedLabel
                             }),
-                            /* @__PURE__ */ (0, import_jsx_runtime67.jsx)(ChartsTooltipCell, {
+                            /* @__PURE__ */ (0, import_jsx_runtime76.jsx)(ChartsTooltipCell, {
                                 className: clsx_default(classes.valueCell, classes.cell),
                                 children: formattedValue
                             })
@@ -11604,7 +12343,7 @@ var agent = function() {
         var content = props.content, itemData = props.itemData, sx = props.sx, classes = props.classes, contentProps = props.contentProps;
         var series = useSeries()[itemData.type].series[itemData.seriesId];
         var _useCartesianContext = useCartesianContext(), xAxis = _useCartesianContext.xAxis, yAxis = _useCartesianContext.yAxis, xAxisIds = _useCartesianContext.xAxisIds, yAxisIds = _useCartesianContext.yAxisIds;
-        var _React121_useContext = React121.useContext(ZAxisContext), zAxis = _React121_useContext.zAxis, zAxisIds = _React121_useContext.zAxisIds;
+        var _React132_useContext = React132.useContext(ZAxisContext), zAxis = _React132_useContext.zAxis, zAxisIds = _React132_useContext.zAxisIds;
         var colorProcessors = useColorProcessor();
         var _series_xAxisId, _ref;
         var xAxisId = (_ref = (_series_xAxisId = series.xAxisId) !== null && _series_xAxisId !== void 0 ? _series_xAxisId : series.xAxisKey) !== null && _ref !== void 0 ? _ref : xAxisIds[0];
@@ -11629,7 +12368,7 @@ var agent = function() {
             },
             ownerState: {}
         });
-        return /* @__PURE__ */ (0, import_jsx_runtime68.jsx)(Content, _extends1({}, chartTooltipContentProps));
+        return /* @__PURE__ */ (0, import_jsx_runtime77.jsx)(Content, _extends1({}, chartTooltipContentProps));
     };
     var isCartesianSeriesType = // node_modules/@mui/x-charts/internals/isCartesian.js
     function isCartesianSeriesType(seriesType) {
@@ -11647,17 +12386,17 @@ var agent = function() {
         var axisFormatter = (_axis_valueFormatter = axis.valueFormatter) !== null && _axis_valueFormatter !== void 0 ? _axis_valueFormatter : function(v) {
             return axis.scaleType === "utc" ? utcFormatter(v) : v.toLocaleString();
         };
-        return /* @__PURE__ */ (0, import_jsx_runtime69.jsx)(ChartsTooltipPaper, {
+        return /* @__PURE__ */ (0, import_jsx_runtime78.jsx)(ChartsTooltipPaper, {
             sx: sx,
             className: classes.paper,
-            children: /* @__PURE__ */ (0, import_jsx_runtime69.jsxs)(ChartsTooltipTable, {
+            children: /* @__PURE__ */ (0, import_jsx_runtime78.jsxs)(ChartsTooltipTable, {
                 className: classes.table,
                 children: [
-                    axisValue != null && !axis.hideTooltip && /* @__PURE__ */ (0, import_jsx_runtime69.jsx)("thead", {
-                        children: /* @__PURE__ */ (0, import_jsx_runtime69.jsx)(ChartsTooltipRow, {
-                            children: /* @__PURE__ */ (0, import_jsx_runtime69.jsx)(ChartsTooltipCell, {
+                    axisValue != null && !axis.hideTooltip && /* @__PURE__ */ (0, import_jsx_runtime78.jsx)("thead", {
+                        children: /* @__PURE__ */ (0, import_jsx_runtime78.jsx)(ChartsTooltipRow, {
+                            children: /* @__PURE__ */ (0, import_jsx_runtime78.jsx)(ChartsTooltipCell, {
                                 colSpan: 3,
-                                children: /* @__PURE__ */ (0, import_jsx_runtime69.jsx)(Typography_default, {
+                                children: /* @__PURE__ */ (0, import_jsx_runtime78.jsx)(Typography_default, {
                                     children: axisFormatter(axisValue, {
                                         location: "tooltip"
                                     })
@@ -11665,7 +12404,7 @@ var agent = function() {
                             })
                         })
                     }),
-                    /* @__PURE__ */ (0, import_jsx_runtime69.jsx)("tbody", {
+                    /* @__PURE__ */ (0, import_jsx_runtime78.jsx)("tbody", {
                         children: series.filter(isCartesianSeries).map(function(param) {
                             var id = param.id, label = param.label, valueFormatter = param.valueFormatter, data = param.data, getColor5 = param.getColor;
                             var _data_dataIndex;
@@ -11677,25 +12416,25 @@ var agent = function() {
                             }
                             var formattedLabel = getLabel(label, "tooltip");
                             var color3 = getColor5(dataIndex);
-                            return /* @__PURE__ */ (0, import_jsx_runtime69.jsxs)(ChartsTooltipRow, {
+                            return /* @__PURE__ */ (0, import_jsx_runtime78.jsxs)(ChartsTooltipRow, {
                                 className: classes.row,
                                 children: [
-                                    /* @__PURE__ */ (0, import_jsx_runtime69.jsx)(ChartsTooltipCell, {
+                                    /* @__PURE__ */ (0, import_jsx_runtime78.jsx)(ChartsTooltipCell, {
                                         className: clsx_default(classes.markCell, classes.cell),
-                                        children: color3 && /* @__PURE__ */ (0, import_jsx_runtime69.jsx)(ChartsTooltipMark, {
+                                        children: color3 && /* @__PURE__ */ (0, import_jsx_runtime78.jsx)(ChartsTooltipMark, {
                                             color: color3,
                                             className: classes.mark
                                         })
                                     }),
-                                    /* @__PURE__ */ (0, import_jsx_runtime69.jsx)(ChartsTooltipCell, {
+                                    /* @__PURE__ */ (0, import_jsx_runtime78.jsx)(ChartsTooltipCell, {
                                         className: clsx_default(classes.labelCell, classes.cell),
-                                        children: formattedLabel ? /* @__PURE__ */ (0, import_jsx_runtime69.jsx)(Typography_default, {
+                                        children: formattedLabel ? /* @__PURE__ */ (0, import_jsx_runtime78.jsx)(Typography_default, {
                                             children: formattedLabel
                                         }) : null
                                     }),
-                                    /* @__PURE__ */ (0, import_jsx_runtime69.jsx)(ChartsTooltipCell, {
+                                    /* @__PURE__ */ (0, import_jsx_runtime78.jsx)(ChartsTooltipCell, {
                                         className: clsx_default(classes.valueCell, classes.cell),
-                                        children: /* @__PURE__ */ (0, import_jsx_runtime69.jsx)(Typography_default, {
+                                        children: /* @__PURE__ */ (0, import_jsx_runtime78.jsx)(Typography_default, {
                                             children: formattedValue
                                         })
                                     })
@@ -11713,11 +12452,11 @@ var agent = function() {
         var dataIndex = isXaxis ? axisData.x && axisData.x.index : axisData.y && axisData.y.index;
         var axisValue = isXaxis ? axisData.x && axisData.x.value : axisData.y && axisData.y.value;
         var _useCartesianContext = useCartesianContext(), xAxisIds = _useCartesianContext.xAxisIds, xAxis = _useCartesianContext.xAxis, yAxisIds = _useCartesianContext.yAxisIds, yAxis = _useCartesianContext.yAxis;
-        var _React123_useContext = React123.useContext(ZAxisContext), zAxisIds = _React123_useContext.zAxisIds, zAxis = _React123_useContext.zAxis;
+        var _React134_useContext = React134.useContext(ZAxisContext), zAxisIds = _React134_useContext.zAxisIds, zAxis = _React134_useContext.zAxis;
         var series = useSeries();
         var colorProcessors = useColorProcessor();
         var USED_AXIS_ID = isXaxis ? xAxisIds[0] : yAxisIds[0];
-        var relevantSeries = React123.useMemo(function() {
+        var relevantSeries = React134.useMemo(function() {
             var rep = [];
             Object.keys(series).filter(isCartesianSeriesType).forEach(function(seriesType) {
                 series[seriesType].seriesOrder.forEach(function(seriesId) {
@@ -11757,7 +12496,7 @@ var agent = function() {
             zAxis,
             zAxisIds
         ]);
-        var relevantAxis = React123.useMemo(function() {
+        var relevantAxis = React134.useMemo(function() {
             return isXaxis ? xAxis[USED_AXIS_ID] : yAxis[USED_AXIS_ID];
         }, [
             USED_AXIS_ID,
@@ -11780,7 +12519,7 @@ var agent = function() {
             },
             ownerState: {}
         });
-        return /* @__PURE__ */ (0, import_jsx_runtime70.jsx)(Content, _extends1({}, chartTooltipContentProps));
+        return /* @__PURE__ */ (0, import_jsx_runtime79.jsx)(Content, _extends1({}, chartTooltipContentProps));
     };
     var ChartsTooltip = function ChartsTooltip(inProps) {
         var props = useThemeProps2({
@@ -11789,7 +12528,7 @@ var agent = function() {
         });
         var _props_trigger = props.trigger, trigger = _props_trigger === void 0 ? "axis" : _props_trigger, itemContent = props.itemContent, axisContent = props.axisContent, slots = props.slots, slotProps = props.slotProps;
         var mousePosition = useMouseTracker();
-        var _React124_useContext = React124.useContext(InteractionContext), item = _React124_useContext.item, axis = _React124_useContext.axis;
+        var _React135_useContext = React135.useContext(InteractionContext), item = _React135_useContext.item, axis = _React135_useContext.axis;
         var displayedData = trigger === "item" ? item : axis;
         var tooltipHasData = getTooltipHasData(trigger, displayedData);
         var popperOpen = mousePosition !== null && tooltipHasData;
@@ -11823,10 +12562,10 @@ var agent = function() {
             return null;
         }
         var _slots_itemContent, _slots_axisContent;
-        return /* @__PURE__ */ (0, import_jsx_runtime71.jsx)(NoSsr_default, {
-            children: popperOpen && /* @__PURE__ */ (0, import_jsx_runtime71.jsx)(PopperComponent, _extends1({}, popperProps, {
+        return /* @__PURE__ */ (0, import_jsx_runtime80.jsx)(NoSsr_default, {
+            children: popperOpen && /* @__PURE__ */ (0, import_jsx_runtime80.jsx)(PopperComponent, _extends1({}, popperProps, {
                 className: classes.root,
-                children: trigger === "item" ? /* @__PURE__ */ (0, import_jsx_runtime71.jsx)(ChartsItemTooltipContent, {
+                children: trigger === "item" ? /* @__PURE__ */ (0, import_jsx_runtime80.jsx)(ChartsItemTooltipContent, {
                     itemData: displayedData,
                     content: (_slots_itemContent = slots === null || slots === void 0 ? void 0 : slots.itemContent) !== null && _slots_itemContent !== void 0 ? _slots_itemContent : itemContent,
                     contentProps: slotProps === null || slotProps === void 0 ? void 0 : slotProps.itemContent,
@@ -11834,7 +12573,7 @@ var agent = function() {
                         mx: 2
                     },
                     classes: classes
-                }) : /* @__PURE__ */ (0, import_jsx_runtime71.jsx)(ChartsAxisTooltipContent, {
+                }) : /* @__PURE__ */ (0, import_jsx_runtime80.jsx)(ChartsAxisTooltipContent, {
                     axisData: displayedData,
                     content: (_slots_axisContent = slots === null || slots === void 0 ? void 0 : slots.axisContent) !== null && _slots_axisContent !== void 0 ? _slots_axisContent : axisContent,
                     contentProps: slotProps === null || slotProps === void 0 ? void 0 : slotProps.axisContent,
@@ -11857,7 +12596,7 @@ var agent = function() {
         var USED_Y_AXIS_ID = yAxisIds[0];
         var xScale = xAxis[USED_X_AXIS_ID].scale;
         var yScale = yAxis[USED_Y_AXIS_ID].scale;
-        var axis = React125.useContext(InteractionContext).axis;
+        var axis = React136.useContext(InteractionContext).axis;
         var getXPosition = getValueToPositionMapper(xScale);
         var getYPosition = getValueToPositionMapper(yScale);
         var axisX = axis.x;
@@ -11875,30 +12614,30 @@ var agent = function() {
                 ].join("\n"));
             }
         }
-        return /* @__PURE__ */ (0, import_jsx_runtime72.jsxs)(React125.Fragment, {
+        return /* @__PURE__ */ (0, import_jsx_runtime81.jsxs)(React136.Fragment, {
             children: [
-                isBandScaleX && xScale(axisX.value) !== void 0 && /* @__PURE__ */ (0, import_jsx_runtime72.jsx)(ChartsAxisHighlightPath, {
+                isBandScaleX && xScale(axisX.value) !== void 0 && /* @__PURE__ */ (0, import_jsx_runtime81.jsx)(ChartsAxisHighlightPath, {
                     d: "M ".concat(xScale(axisX.value) - (xScale.step() - xScale.bandwidth()) / 2, " ").concat(yScale.range()[0], " l ").concat(xScale.step(), " 0 l 0 ").concat(yScale.range()[1] - yScale.range()[0], " l ").concat(-xScale.step(), " 0 Z"),
                     className: classes.root,
                     ownerState: {
                         axisHighlight: "band"
                     }
                 }),
-                isBandScaleY && yScale(axisY.value) !== void 0 && /* @__PURE__ */ (0, import_jsx_runtime72.jsx)(ChartsAxisHighlightPath, {
+                isBandScaleY && yScale(axisY.value) !== void 0 && /* @__PURE__ */ (0, import_jsx_runtime81.jsx)(ChartsAxisHighlightPath, {
                     d: "M ".concat(xScale.range()[0], " ").concat(yScale(axisY.value) - (yScale.step() - yScale.bandwidth()) / 2, " l 0 ").concat(yScale.step(), " l ").concat(xScale.range()[1] - xScale.range()[0], " 0 l 0 ").concat(-yScale.step(), " Z"),
                     className: classes.root,
                     ownerState: {
                         axisHighlight: "band"
                     }
                 }),
-                xAxisHighlight === "line" && axis.x !== null && /* @__PURE__ */ (0, import_jsx_runtime72.jsx)(ChartsAxisHighlightPath, {
+                xAxisHighlight === "line" && axis.x !== null && /* @__PURE__ */ (0, import_jsx_runtime81.jsx)(ChartsAxisHighlightPath, {
                     d: "M ".concat(getXPosition(axis.x.value), " ").concat(yScale.range()[0], " L ").concat(getXPosition(axis.x.value), " ").concat(yScale.range()[1]),
                     className: classes.root,
                     ownerState: {
                         axisHighlight: "line"
                     }
                 }),
-                yAxisHighlight === "line" && axis.y !== null && /* @__PURE__ */ (0, import_jsx_runtime72.jsx)(ChartsAxisHighlightPath, {
+                yAxisHighlight === "line" && axis.y !== null && /* @__PURE__ */ (0, import_jsx_runtime81.jsx)(ChartsAxisHighlightPath, {
                     d: "M ".concat(xScale.range()[0], " ").concat(getYPosition(axis.y.value), " L ").concat(xScale.range()[1], " ").concat(getYPosition(axis.y.value)),
                     className: classes.root,
                     ownerState: {
@@ -11920,10 +12659,10 @@ var agent = function() {
             tickNumber: tickNumber,
             tickInterval: tickInterval
         });
-        return /* @__PURE__ */ (0, import_jsx_runtime73.jsx)(React126.Fragment, {
+        return /* @__PURE__ */ (0, import_jsx_runtime82.jsx)(React137.Fragment, {
             children: xTicks.map(function(param) {
                 var value = param.value, offset2 = param.offset;
-                return /* @__PURE__ */ (0, import_jsx_runtime73.jsx)(GridLine, {
+                return /* @__PURE__ */ (0, import_jsx_runtime82.jsx)(GridLine, {
                     y1: drawingArea.top,
                     y2: drawingArea.top + drawingArea.height,
                     x1: offset2,
@@ -11941,10 +12680,10 @@ var agent = function() {
             tickNumber: tickNumber,
             tickInterval: tickInterval
         });
-        return /* @__PURE__ */ (0, import_jsx_runtime74.jsx)(React127.Fragment, {
+        return /* @__PURE__ */ (0, import_jsx_runtime83.jsx)(React138.Fragment, {
             children: yTicks.map(function(param) {
                 var value = param.value, offset2 = param.offset;
-                return /* @__PURE__ */ (0, import_jsx_runtime74.jsx)(GridLine, {
+                return /* @__PURE__ */ (0, import_jsx_runtime83.jsx)(GridLine, {
                     y1: offset2,
                     y2: offset2,
                     x1: drawingArea.left,
@@ -11965,15 +12704,15 @@ var agent = function() {
         var classes = useUtilityClasses29(props);
         var horizontalAxis = yAxis[yAxisIds[0]];
         var verticalAxis = xAxis[xAxisIds[0]];
-        return /* @__PURE__ */ (0, import_jsx_runtime75.jsxs)(GridRoot, _extends1({}, other, {
+        return /* @__PURE__ */ (0, import_jsx_runtime84.jsxs)(GridRoot, _extends1({}, other, {
             className: classes.root,
             children: [
-                vertical && /* @__PURE__ */ (0, import_jsx_runtime75.jsx)(ChartsGridVertical, {
+                vertical && /* @__PURE__ */ (0, import_jsx_runtime84.jsx)(ChartsGridVertical, {
                     axis: verticalAxis,
                     drawingArea: drawingArea,
                     classes: classes
                 }),
-                horizontal && /* @__PURE__ */ (0, import_jsx_runtime75.jsx)(ChartsGridHorizontal, {
+                horizontal && /* @__PURE__ */ (0, import_jsx_runtime84.jsx)(ChartsGridHorizontal, {
                     axis: horizontalAxis,
                     drawingArea: drawingArea,
                     classes: classes
@@ -12516,7 +13255,7 @@ var agent = function() {
                 }
                 console.error(error);
             };
-            function noop4() {}
+            function noop6() {}
             exports.Children = {
                 map: mapChildren,
                 forEach: function forEach(children, forEachFunc, forEachContext) {
@@ -12634,7 +13373,7 @@ var agent = function() {
                 try {
                     var returnValue = scope(), onStartTransitionFinish = ReactSharedInternals.S;
                     null !== onStartTransitionFinish && onStartTransitionFinish(currentTransition, returnValue);
-                    "object" === (typeof returnValue === "undefined" ? "undefined" : _type_of(returnValue)) && null !== returnValue && "function" === typeof returnValue.then && returnValue.then(noop4, reportGlobalError);
+                    "object" === (typeof returnValue === "undefined" ? "undefined" : _type_of(returnValue)) && null !== returnValue && "function" === typeof returnValue.then && returnValue.then(noop6, reportGlobalError);
                 } catch (error) {
                     reportGlobalError(error);
                 } finally{
@@ -12716,7 +13455,7 @@ var agent = function() {
     var require_react_dom_production = __commonJS({
         "node_modules/react-dom/cjs/react-dom.production.js": function(exports) {
             "use strict";
-            var React130 = require_react();
+            var React141 = require_react();
             function formatProdErrorMessage(code) {
                 var url = "https://react.dev/errors/" + code;
                 if (1 < arguments.length) {
@@ -12725,20 +13464,20 @@ var agent = function() {
                 }
                 return "Minified React error #" + code + "; visit " + url + " for the full message or use the non-minified dev environment for full errors and additional helpful warnings.";
             }
-            function noop4() {}
+            function noop6() {}
             var Internals = {
                 d: {
-                    f: noop4,
+                    f: noop6,
                     r: function r() {
                         throw Error(formatProdErrorMessage(522));
                     },
-                    D: noop4,
-                    C: noop4,
-                    L: noop4,
-                    m: noop4,
-                    X: noop4,
-                    S: noop4,
-                    M: noop4
+                    D: noop6,
+                    C: noop6,
+                    L: noop6,
+                    m: noop6,
+                    X: noop6,
+                    S: noop6,
+                    M: noop6
                 },
                 p: 0,
                 findDOMNode: null
@@ -12754,7 +13493,7 @@ var agent = function() {
                     implementation: implementation
                 };
             }
-            var ReactSharedInternals = React130.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE;
+            var ReactSharedInternals = React141.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE;
             function getCrossOriginStringAs(as, input) {
                 if ("font" === as) return "";
                 if ("string" === typeof input) return "use-credentials" === input ? input : "";
@@ -12877,7 +13616,7 @@ var agent = function() {
         "node_modules/react-dom/cjs/react-dom-client.production.js": function(exports) {
             "use strict";
             var Scheduler = require_scheduler();
-            var React130 = require_react();
+            var React141 = require_react();
             var ReactDOM3 = require_react_dom();
             function formatProdErrorMessage(code) {
                 var url = "https://react.dev/errors/" + code;
@@ -13059,7 +13798,7 @@ var agent = function() {
                 return null;
             }
             var isArrayImpl = Array.isArray;
-            var ReactSharedInternals = React130.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE;
+            var ReactSharedInternals = React141.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE;
             var ReactDOMSharedInternals = ReactDOM3.__DOM_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE;
             var sharedNotPendingObject = {
                 pending: false,
@@ -19523,7 +20262,7 @@ var agent = function() {
                     if (suspendedState = {
                         stylesheets: null,
                         count: 0,
-                        unsuspend: noop4
+                        unsuspend: noop6
                     }, accumulateSuspenseyCommitOnFiber(finishedWork), suspendedCommitReason = waitForCommitToBeReady(), null !== suspendedCommitReason) {
                         root3.cancelPendingCommit = suspendedCommitReason(commitRoot.bind(null, root3, finishedWork, lanes, recoverableErrors, transitions, didIncludeRenderPhaseUpdate, spawnedLane, updatedLanes, suspendedRetryLanes, exitStatus, 1, completedRenderStartTime, completedRenderEndTime));
                         markRootSuspended(root3, lanes, spawnedLane, !didSkipSuspendedSiblings);
@@ -21889,7 +22628,7 @@ var agent = function() {
                 return "stylesheet" === resource.type && 0 === (resource.state.loading & 3) ? false : true;
             }
             var suspendedState = null;
-            function noop4() {}
+            function noop6() {}
             function suspendResource(hoistableRoot, resource, props) {
                 if (null === suspendedState) throw Error(formatProdErrorMessage(475));
                 var state = suspendedState;
@@ -22446,7 +23185,7 @@ var agent = function() {
                     0 === i && attemptExplicitHydrationTarget(target);
                 }
             };
-            var isomorphicReactPackageVersion$jscomp$inline_1785 = React130.version;
+            var isomorphicReactPackageVersion$jscomp$inline_1785 = React141.version;
             if ("19.1.0" !== isomorphicReactPackageVersion$jscomp$inline_1785) throw Error(formatProdErrorMessage(527, isomorphicReactPackageVersion$jscomp$inline_1785, "19.1.0"));
             ReactDOMSharedInternals.findDOMNode = function(componentOrElement) {
                 var fiber = componentOrElement._reactInternals;
@@ -25777,7 +26516,7 @@ var agent = function() {
                     var createSet = !(Set2 && 1 / setToArray(new Set2([
                         ,
                         -0
-                    ]))[1] == INFINITY) ? noop4 : function createSet(values4) {
+                    ]))[1] == INFINITY) ? noop6 : function createSet(values4) {
                         return new Set2(values4);
                     };
                     function createToPairs(keysFunc) {
@@ -26004,7 +26743,7 @@ var agent = function() {
                     function getAllKeysIn(object) {
                         return baseGetAllKeys(object, keysIn, getSymbolsIn);
                     }
-                    var getData = !metaMap ? noop4 : function getData(func) {
+                    var getData = !metaMap ? noop6 : function getData(func) {
                         return metaMap.get(func);
                     };
                     function getFuncName(func) {
@@ -27390,7 +28129,7 @@ var agent = function() {
                     function isElement2(value) {
                         return isObjectLike(value) && value.nodeType === 1 && !isPlainObject2(value);
                     }
-                    function isEmpty(value) {
+                    function isEmpty2(value) {
                         if (value == null) {
                             return true;
                         }
@@ -28228,7 +28967,7 @@ var agent = function() {
                         }
                         return this;
                     }
-                    function noop4() {}
+                    function noop6() {}
                     function nthArg(n) {
                         n = toInteger(n);
                         return baseRest(function(args) {
@@ -28534,7 +29273,7 @@ var agent = function() {
                     lodash.isBuffer = isBuffer;
                     lodash.isDate = isDate;
                     lodash.isElement = isElement2;
-                    lodash.isEmpty = isEmpty;
+                    lodash.isEmpty = isEmpty2;
                     lodash.isEqual = isEqual2;
                     lodash.isEqualWith = isEqualWith;
                     lodash.isError = isError;
@@ -28584,7 +29323,7 @@ var agent = function() {
                     lodash.multiply = multiply;
                     lodash.nth = nth;
                     lodash.noConflict = noConflict;
-                    lodash.noop = noop4;
+                    lodash.noop = noop6;
                     lodash.now = now;
                     lodash.pad = pad2;
                     lodash.padEnd = padEnd;
@@ -28932,7 +29671,7 @@ var agent = function() {
     // src/Providers/AgentInitialStateProvider.tsx
     var import_react = __toESM(require_react());
     var import_jsx_runtime = __toESM(require_jsx_runtime());
-    var AgentInitialStateContext = import_react.default.createContext(null);
+    var AgentInitialStateContext = (0, import_react.createContext)(null);
     var AgentInitialStateProvider = function(param) {
         var children = param.children;
         var _ref = _sliced_to_array((0, import_react.useState)({}), 2), state = _ref[0], setState = _ref[1];
@@ -28964,9 +29703,9 @@ var agent = function() {
         return event;
     };
     // src/Views/Agent/Elements/ElementsView.tsx
-    var import_react31 = __toESM(require_react());
+    var import_react32 = __toESM(require_react());
     // src/Views/Agent/Elements/ElementView.tsx
-    var import_react30 = __toESM(require_react());
+    var import_react31 = __toESM(require_react());
     // node_modules/@mui/material/colors/common.js
     var common = {
         black: "#000",
@@ -29112,7 +29851,7 @@ var agent = function() {
         }, _extends1.apply(null, arguments);
     }
     // node_modules/@emotion/react/dist/emotion-element-d59e098f.esm.js
-    var React3 = __toESM(require_react());
+    var React2 = __toESM(require_react());
     var import_react2 = __toESM(require_react());
     // node_modules/@emotion/sheet/dist/emotion-sheet.esm.js
     var isDevelopment = false;
@@ -29926,17 +30665,18 @@ var agent = function() {
     var labelPattern = /label:\s*([^\s;{]+)\s*(;|$)/g;
     var cursor;
     // node_modules/@emotion/use-insertion-effect-with-fallbacks/dist/emotion-use-insertion-effect-with-fallbacks.esm.js
-    var React2 = __toESM(require_react());
+    var React = __toESM(require_react());
     var isBrowser3 = typeof document !== "undefined";
     var syncFallback = function syncFallback2(create) {
         return create();
     };
-    var useInsertionEffect2 = React2["useInsertionEffect"] ? React2["useInsertionEffect"] : false;
+    var useInsertionEffect2 = React["useInsertionEffect"] ? React["useInsertionEffect"] : false;
     var useInsertionEffectAlwaysWithSyncFallback = !isBrowser3 ? syncFallback : useInsertionEffect2 || syncFallback;
+    var useInsertionEffectWithLayoutFallback = useInsertionEffect2 || React.useLayoutEffect;
     // node_modules/@emotion/react/dist/emotion-element-d59e098f.esm.js
     var isDevelopment3 = false;
     var isBrowser4 = typeof document !== "undefined";
-    var EmotionCacheContext = /* @__PURE__ */ React3.createContext(// we're doing this to avoid preconstruct's dead code elimination in this one case
+    var EmotionCacheContext = /* @__PURE__ */ React2.createContext(// we're doing this to avoid preconstruct's dead code elimination in this one case
     // because this module is primarily intended for the browser and node
     // but it's also required in react native and similar environments sometimes
     // and we could have a special build just for that
@@ -29960,7 +30700,7 @@ var agent = function() {
                     cache = createCache({
                         key: "css"
                     });
-                    return /* @__PURE__ */ React3.createElement(EmotionCacheContext.Provider, {
+                    return /* @__PURE__ */ React2.createElement(EmotionCacheContext.Provider, {
                         value: cache
                     }, func(props, cache));
                 } else {
@@ -29969,7 +30709,7 @@ var agent = function() {
             };
         };
     }
-    var ThemeContext = /* @__PURE__ */ React3.createContext({});
+    var ThemeContext = /* @__PURE__ */ React2.createContext({});
     var hasOwn = {}.hasOwnProperty;
     var typePropName = "__EMOTION_TYPE_PLEASE_DO_NOT_USE__";
     var createEmotionProps = function createEmotionProps2(type, props) {
@@ -29996,7 +30736,7 @@ var agent = function() {
                 serializedNames += " " + next2.name;
                 next2 = next2.next;
             }
-            return /* @__PURE__ */ React3.createElement("style", (_ref2 = {}, _ref2["data-emotion"] = cache.key + " " + serializedNames, _ref2.dangerouslySetInnerHTML = {
+            return /* @__PURE__ */ React2.createElement("style", (_ref2 = {}, _ref2["data-emotion"] = cache.key + " " + serializedNames, _ref2.dangerouslySetInnerHTML = {
                 __html: rules
             }, _ref2.nonce = cache.sheet.nonce, _ref2));
         }
@@ -30017,7 +30757,7 @@ var agent = function() {
         } else if (props.className != null) {
             className = props.className + " ";
         }
-        var serialized = serializeStyles(registeredStyles, void 0, React3.useContext(ThemeContext));
+        var serialized = serializeStyles(registeredStyles, void 0, React2.useContext(ThemeContext));
         className += cache.key + "-" + serialized.name;
         var newProps = {};
         for(var _key2 in props){
@@ -30029,21 +30769,21 @@ var agent = function() {
         if (ref) {
             newProps.ref = ref;
         }
-        return /* @__PURE__ */ React3.createElement(React3.Fragment, null, /* @__PURE__ */ React3.createElement(Insertion, {
+        return /* @__PURE__ */ React2.createElement(React2.Fragment, null, /* @__PURE__ */ React2.createElement(Insertion, {
             cache: cache,
             serialized: serialized,
             isStringTag: typeof WrappedComponent === "string"
-        }), /* @__PURE__ */ React3.createElement(WrappedComponent, newProps));
+        }), /* @__PURE__ */ React2.createElement(WrappedComponent, newProps));
     });
     var Emotion$1 = Emotion;
     // node_modules/@emotion/react/dist/emotion-react.esm.js
-    var React4 = __toESM(require_react());
+    var React3 = __toESM(require_react());
     var import_extends2 = __toESM(require_extends());
     var import_hoist_non_react_statics = __toESM(require_hoist_non_react_statics_cjs());
     var jsx2 = function jsx3(type, props) {
         var args = arguments;
         if (props == null || !hasOwn.call(props, "css")) {
-            return React4.createElement.apply(void 0, args);
+            return React3.createElement.apply(void 0, args);
         }
         var argsLength = args.length;
         var createElementArgArray = new Array(argsLength);
@@ -30052,14 +30792,94 @@ var agent = function() {
         for(var i = 2; i < argsLength; i++){
             createElementArgArray[i] = args[i];
         }
-        return React4.createElement.apply(null, createElementArgArray);
+        return React3.createElement.apply(null, createElementArgArray);
     };
-    (function(_jsx79) {
+    (function(_jsx88) {
         var JSX;
-        /* @__PURE__ */ (function(_JSX) {})(JSX || (JSX = _jsx79.JSX || (_jsx79.JSX = {})));
+        /* @__PURE__ */ (function(_JSX) {})(JSX || (JSX = _jsx88.JSX || (_jsx88.JSX = {})));
     })(jsx2 || (jsx2 = {}));
+    var Global = /* @__PURE__ */ withEmotionCache(function(props, cache) {
+        var styles2 = props.styles;
+        var serialized = serializeStyles([
+            styles2
+        ], void 0, React3.useContext(ThemeContext));
+        if (!isBrowser4) {
+            var _ref;
+            var serializedNames = serialized.name;
+            var serializedStyles = serialized.styles;
+            var next2 = serialized.next;
+            while(next2 !== void 0){
+                serializedNames += " " + next2.name;
+                serializedStyles += next2.styles;
+                next2 = next2.next;
+            }
+            var shouldCache = cache.compat === true;
+            var rules = cache.insert("", {
+                name: serializedNames,
+                styles: serializedStyles
+            }, cache.sheet, shouldCache);
+            if (shouldCache) {
+                return null;
+            }
+            return /* @__PURE__ */ React3.createElement("style", (_ref = {}, _ref["data-emotion"] = cache.key + "-global " + serializedNames, _ref.dangerouslySetInnerHTML = {
+                __html: rules
+            }, _ref.nonce = cache.sheet.nonce, _ref));
+        }
+        var sheetRef = React3.useRef();
+        useInsertionEffectWithLayoutFallback(function() {
+            var key = cache.key + "-global";
+            var sheet = new cache.sheet.constructor({
+                key: key,
+                nonce: cache.sheet.nonce,
+                container: cache.sheet.container,
+                speedy: cache.sheet.isSpeedy
+            });
+            var rehydrating = false;
+            var node2 = document.querySelector('style[data-emotion="' + key + " " + serialized.name + '"]');
+            if (cache.sheet.tags.length) {
+                sheet.before = cache.sheet.tags[0];
+            }
+            if (node2 !== null) {
+                rehydrating = true;
+                node2.setAttribute("data-emotion", key);
+                sheet.hydrate([
+                    node2
+                ]);
+            }
+            sheetRef.current = [
+                sheet,
+                rehydrating
+            ];
+            return function() {
+                sheet.flush();
+            };
+        }, [
+            cache
+        ]);
+        useInsertionEffectWithLayoutFallback(function() {
+            var sheetRefCurrent = sheetRef.current;
+            var sheet = sheetRefCurrent[0], rehydrating = sheetRefCurrent[1];
+            if (rehydrating) {
+                sheetRefCurrent[1] = false;
+                return;
+            }
+            if (serialized.next !== void 0) {
+                insertStyles(cache, serialized.next, true);
+            }
+            if (sheet.tags.length) {
+                var element = sheet.tags[sheet.tags.length - 1].nextElementSibling;
+                sheet.before = element;
+                sheet.flush();
+            }
+            cache.insert("", serialized, sheet, false);
+        }, [
+            cache,
+            serialized.name
+        ]);
+        return null;
+    });
     // node_modules/@emotion/styled/base/dist/emotion-styled-base.esm.js
-    var React5 = __toESM(require_react());
+    var React4 = __toESM(require_react());
     // node_modules/@emotion/is-prop-valid/dist/emotion-is-prop-valid.esm.js
     var reactPropsRegex = /^((children|dangerouslySetInnerHTML|key|ref|autoFocus|defaultValue|defaultChecked|innerHTML|suppressContentEditableWarning|suppressHydrationWarning|valueLink|abbr|accept|acceptCharset|accessKey|action|allow|allowUserMedia|allowPaymentRequest|allowFullScreen|allowTransparency|alt|async|autoComplete|autoPlay|capture|cellPadding|cellSpacing|challenge|charSet|checked|cite|classID|className|cols|colSpan|content|contentEditable|contextMenu|controls|controlsList|coords|crossOrigin|data|dateTime|decoding|default|defer|dir|disabled|disablePictureInPicture|disableRemotePlayback|download|draggable|encType|enterKeyHint|fetchpriority|fetchPriority|form|formAction|formEncType|formMethod|formNoValidate|formTarget|frameBorder|headers|height|hidden|high|href|hrefLang|htmlFor|httpEquiv|id|inputMode|integrity|is|keyParams|keyType|kind|label|lang|list|loading|loop|low|marginHeight|marginWidth|max|maxLength|media|mediaGroup|method|min|minLength|multiple|muted|name|nonce|noValidate|open|optimum|pattern|placeholder|playsInline|poster|preload|profile|radioGroup|readOnly|referrerPolicy|rel|required|reversed|role|rows|rowSpan|sandbox|scope|scoped|scrolling|seamless|selected|shape|size|sizes|slot|span|spellCheck|src|srcDoc|srcLang|srcSet|start|step|style|summary|tabIndex|target|title|translate|type|useMap|value|width|wmode|wrap|about|datatype|inlist|prefix|property|resource|typeof|vocab|autoCapitalize|autoCorrect|autoSave|color|incremental|fallback|inert|itemProp|itemScope|itemType|itemID|itemRef|on|option|results|security|unselectable|accentHeight|accumulate|additive|alignmentBaseline|allowReorder|alphabetic|amplitude|arabicForm|ascent|attributeName|attributeType|autoReverse|azimuth|baseFrequency|baselineShift|baseProfile|bbox|begin|bias|by|calcMode|capHeight|clip|clipPathUnits|clipPath|clipRule|colorInterpolation|colorInterpolationFilters|colorProfile|colorRendering|contentScriptType|contentStyleType|cursor|cx|cy|d|decelerate|descent|diffuseConstant|direction|display|divisor|dominantBaseline|dur|dx|dy|edgeMode|elevation|enableBackground|end|exponent|externalResourcesRequired|fill|fillOpacity|fillRule|filter|filterRes|filterUnits|floodColor|floodOpacity|focusable|fontFamily|fontSize|fontSizeAdjust|fontStretch|fontStyle|fontVariant|fontWeight|format|from|fr|fx|fy|g1|g2|glyphName|glyphOrientationHorizontal|glyphOrientationVertical|glyphRef|gradientTransform|gradientUnits|hanging|horizAdvX|horizOriginX|ideographic|imageRendering|in|in2|intercept|k|k1|k2|k3|k4|kernelMatrix|kernelUnitLength|kerning|keyPoints|keySplines|keyTimes|lengthAdjust|letterSpacing|lightingColor|limitingConeAngle|local|markerEnd|markerMid|markerStart|markerHeight|markerUnits|markerWidth|mask|maskContentUnits|maskUnits|mathematical|mode|numOctaves|offset|opacity|operator|order|orient|orientation|origin|overflow|overlinePosition|overlineThickness|panose1|paintOrder|pathLength|patternContentUnits|patternTransform|patternUnits|pointerEvents|points|pointsAtX|pointsAtY|pointsAtZ|preserveAlpha|preserveAspectRatio|primitiveUnits|r|radius|refX|refY|renderingIntent|repeatCount|repeatDur|requiredExtensions|requiredFeatures|restart|result|rotate|rx|ry|scale|seed|shapeRendering|slope|spacing|specularConstant|specularExponent|speed|spreadMethod|startOffset|stdDeviation|stemh|stemv|stitchTiles|stopColor|stopOpacity|strikethroughPosition|strikethroughThickness|string|stroke|strokeDasharray|strokeDashoffset|strokeLinecap|strokeLinejoin|strokeMiterlimit|strokeOpacity|strokeWidth|surfaceScale|systemLanguage|tableValues|targetX|targetY|textAnchor|textDecoration|textRendering|textLength|to|transform|u1|u2|underlinePosition|underlineThickness|unicode|unicodeBidi|unicodeRange|unitsPerEm|vAlphabetic|vHanging|vIdeographic|vMathematical|values|vectorEffect|version|vertAdvY|vertOriginX|vertOriginY|viewBox|viewTarget|visibility|widths|wordSpacing|writingMode|x|xHeight|x1|x2|xChannelSelector|xlinkActuate|xlinkArcrole|xlinkHref|xlinkRole|xlinkShow|xlinkTitle|xlinkType|xmlBase|xmlns|xmlnsXlink|xmlLang|xmlSpace|y|y1|y2|yChannelSelector|z|zoomAndPan|for|class|autofocus)|(([Dd][Aa][Tt][Aa]|[Aa][Rr][Ii][Aa]|x)-.*))$/;
     var isPropValid = /* @__PURE__ */ memoize(function(prop) {
@@ -30105,7 +30925,7 @@ var agent = function() {
                 serializedNames += " " + next2.name;
                 next2 = next2.next;
             }
-            return /* @__PURE__ */ React5.createElement("style", (_ref2 = {}, _ref2["data-emotion"] = cache.key + " " + serializedNames, _ref2.dangerouslySetInnerHTML = {
+            return /* @__PURE__ */ React4.createElement("style", (_ref2 = {}, _ref2["data-emotion"] = cache.key + " " + serializedNames, _ref2.dangerouslySetInnerHTML = {
                 __html: rules
             }, _ref2.nonce = cache.sheet.nonce, _ref2));
         }
@@ -30150,7 +30970,7 @@ var agent = function() {
                     for(var key in props){
                         mergedProps[key] = props[key];
                     }
-                    mergedProps.theme = React5.useContext(ThemeContext);
+                    mergedProps.theme = React4.useContext(ThemeContext);
                 }
                 if (typeof props.className === "string") {
                     className = getRegisteredStyles(cache.registered, classInterpolations, props.className);
@@ -30174,11 +30994,11 @@ var agent = function() {
                 if (ref) {
                     newProps.ref = ref;
                 }
-                return /* @__PURE__ */ React5.createElement(React5.Fragment, null, /* @__PURE__ */ React5.createElement(Insertion3, {
+                return /* @__PURE__ */ React4.createElement(React4.Fragment, null, /* @__PURE__ */ React4.createElement(Insertion3, {
                     cache: cache,
                     serialized: serialized,
                     isStringTag: typeof FinalTag === "string"
-                }), /* @__PURE__ */ React5.createElement(FinalTag, newProps));
+                }), /* @__PURE__ */ React4.createElement(FinalTag, newProps));
             });
             Styled.displayName = identifierName !== void 0 ? identifierName : "Styled(" + (typeof baseTag === "string" ? baseTag : baseTag.displayName || baseTag.name || "Component") + ")";
             Styled.defaultProps = tag.defaultProps;
@@ -30347,6 +31167,18 @@ var agent = function() {
     tags.forEach(function(tagName) {
         newStyled[tagName] = newStyled(tagName);
     });
+    // node_modules/@mui/styled-engine/GlobalStyles/GlobalStyles.js
+    var React5 = __toESM(require_react());
+    var import_jsx_runtime2 = __toESM(require_jsx_runtime());
+    false ? GlobalStyles.propTypes = {
+        defaultTheme: import_prop_types.default.object,
+        styles: import_prop_types.default.oneOfType([
+            import_prop_types.default.array,
+            import_prop_types.default.string,
+            import_prop_types.default.object,
+            import_prop_types.default.func
+        ])
+    } : void 0;
     var wrapper = [];
     // node_modules/@mui/utils/esm/deepmerge/deepmerge.js
     var React6 = __toESM(require_react());
@@ -31095,7 +31927,7 @@ var agent = function() {
     }
     var clsx_default = clsx;
     // node_modules/@mui/system/esm/createBox/createBox.js
-    var import_jsx_runtime2 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime3 = __toESM(require_jsx_runtime());
     // node_modules/@mui/utils/esm/generateUtilityClass/generateUtilityClass.js
     var globalStateClasses = {
         active: "active",
@@ -31241,6 +32073,10 @@ var agent = function() {
             return color3;
         }
     };
+    // node_modules/@mui/system/esm/ThemeProvider/ThemeProvider.js
+    var React23 = __toESM(require_react());
+    // node_modules/@mui/private-theming/ThemeProvider/ThemeProvider.js
+    var React20 = __toESM(require_react());
     // node_modules/@mui/utils/esm/isMuiElement/isMuiElement.js
     var React10 = __toESM(require_react());
     // node_modules/@mui/utils/esm/useId/useId.js
@@ -31318,22 +32154,52 @@ var agent = function() {
     var useSlotProps_default = useSlotProps;
     // node_modules/@mui/utils/esm/getReactElementRef/getReactElementRef.js
     var React17 = __toESM(require_react());
-    // node_modules/@mui/system/esm/RtlProvider/index.js
+    // node_modules/@mui/private-theming/useTheme/ThemeContext.js
     var React18 = __toESM(require_react());
-    var import_jsx_runtime3 = __toESM(require_jsx_runtime());
-    var RtlContext = /* @__PURE__ */ React18.createContext();
+    var ThemeContext2 = /* @__PURE__ */ React18.createContext(null);
+    if (false) {
+        ThemeContext2.displayName = "ThemeContext";
+    }
+    var ThemeContext_default = ThemeContext2;
+    // node_modules/@mui/private-theming/useTheme/useTheme.js
+    var React19 = __toESM(require_react());
+    // node_modules/@mui/private-theming/ThemeProvider/nested.js
+    var hasSymbol = typeof Symbol === "function" && Symbol.for;
+    var nested_default = hasSymbol ? Symbol.for("mui.nested") : "__THEME_NESTED__";
+    // node_modules/@mui/private-theming/ThemeProvider/ThemeProvider.js
+    var import_jsx_runtime4 = __toESM(require_jsx_runtime());
+    false ? ThemeProvider2.propTypes = {
+        /**
+     * Your component tree.
+     */ children: import_prop_types.default.node,
+        /**
+     * A theme object. You can provide a function to extend the outer theme.
+     */ theme: import_prop_types.default.oneOfType([
+            import_prop_types.default.object,
+            import_prop_types.default.func
+        ]).isRequired
+    } : void 0;
+    if (false) {
+        false ? ThemeProvider2.propTypes = exactProp(ThemeProvider2.propTypes) : void 0;
+    }
+    var ThemeProvider_default = ThemeProvider2;
+    // node_modules/@mui/system/esm/RtlProvider/index.js
+    var React21 = __toESM(require_react());
+    var import_jsx_runtime5 = __toESM(require_jsx_runtime());
+    var RtlContext = /* @__PURE__ */ React21.createContext();
     false ? RtlProvider.propTypes = {
         children: import_prop_types.default.node,
         value: import_prop_types.default.bool
     } : void 0;
     var useRtl = function() {
-        var value = React18.useContext(RtlContext);
+        var value = React21.useContext(RtlContext);
         return value !== null && value !== void 0 ? value : false;
     };
+    var RtlProvider_default = RtlProvider;
     // node_modules/@mui/system/esm/DefaultPropsProvider/DefaultPropsProvider.js
-    var React19 = __toESM(require_react());
-    var import_jsx_runtime4 = __toESM(require_jsx_runtime());
-    var PropsContext = /* @__PURE__ */ React19.createContext(void 0);
+    var React22 = __toESM(require_react());
+    var import_jsx_runtime6 = __toESM(require_jsx_runtime());
+    var PropsContext = /* @__PURE__ */ React22.createContext(void 0);
     false ? DefaultPropsProvider.propTypes = {
         // ┌────────────────────────────── Warning ──────────────────────────────┐
         // │ These PropTypes are generated from the TypeScript type definitions. │
@@ -31346,10 +32212,93 @@ var agent = function() {
      * @ignore
      */ value: import_prop_types.default.object
     } : void 0;
+    var DefaultPropsProvider_default = DefaultPropsProvider;
+    // node_modules/@mui/system/esm/ThemeProvider/ThemeProvider.js
+    var import_jsx_runtime7 = __toESM(require_jsx_runtime());
+    var EMPTY_THEME = {};
+    false ? ThemeProvider3.propTypes = {
+        // ┌────────────────────────────── Warning ──────────────────────────────┐
+        // │ These PropTypes are generated from the TypeScript type definitions. │
+        // │    To update them, edit the d.ts file and run `pnpm proptypes`.     │
+        // └─────────────────────────────────────────────────────────────────────┘
+        /**
+     * Your component tree.
+     */ children: import_prop_types.default.node,
+        /**
+     * A theme object. You can provide a function to extend the outer theme.
+     */ theme: import_prop_types.default.oneOfType([
+            import_prop_types.default.func,
+            import_prop_types.default.object
+        ]).isRequired,
+        /**
+     * The design system's unique id for getting the corresponded theme when there are multiple design systems.
+     */ themeId: import_prop_types.default.string
+    } : void 0;
+    if (false) {
+        false ? ThemeProvider3.propTypes = exactProp(ThemeProvider3.propTypes) : void 0;
+    }
+    var ThemeProvider_default2 = ThemeProvider3;
     // node_modules/@mui/system/esm/memoTheme.js
     var arg = {
         theme: void 0
     };
+    // node_modules/@mui/system/esm/cssVars/createCssVarsProvider.js
+    var React26 = __toESM(require_react());
+    // node_modules/@mui/system/esm/InitColorSchemeScript/InitColorSchemeScript.js
+    var React24 = __toESM(require_react());
+    var import_jsx_runtime8 = __toESM(require_jsx_runtime());
+    var DEFAULT_MODE_STORAGE_KEY = "mode";
+    var DEFAULT_COLOR_SCHEME_STORAGE_KEY = "color-scheme";
+    var DEFAULT_ATTRIBUTE = "data-color-scheme";
+    // node_modules/@mui/system/esm/cssVars/useCurrentColorScheme.js
+    var React25 = __toESM(require_react());
+    var localStorageManager = function(param) {
+        var key = param.key, storageWindow = param.storageWindow;
+        if (!storageWindow && typeof window !== "undefined") {
+            storageWindow = window;
+        }
+        return {
+            get: function get(defaultValue) {
+                if (typeof window === "undefined") {
+                    return void 0;
+                }
+                if (!storageWindow) {
+                    return defaultValue;
+                }
+                var value;
+                try {
+                    value = storageWindow.localStorage.getItem(key);
+                } catch (e) {}
+                return value || defaultValue;
+            },
+            set: function(value) {
+                if (storageWindow) {
+                    try {
+                        storageWindow.localStorage.setItem(key, value);
+                    } catch (e) {}
+                }
+            },
+            subscribe: function(handler) {
+                if (!storageWindow) {
+                    return noop;
+                }
+                var listener = function(event) {
+                    var value = event.newValue;
+                    if (event.key === key) {
+                        handler(value);
+                    }
+                };
+                storageWindow.addEventListener("storage", listener);
+                return function() {
+                    storageWindow.removeEventListener("storage", listener);
+                };
+            }
+        };
+    };
+    var localStorageManager_default = localStorageManager;
+    // node_modules/@mui/system/esm/cssVars/createCssVarsProvider.js
+    var import_jsx_runtime9 = __toESM(require_jsx_runtime());
+    var DISABLE_CSS_TRANSITION = "*{-webkit-transition:none!important;-moz-transition:none!important;-o-transition:none!important;-ms-transition:none!important;transition:none!important}";
     // node_modules/@mui/system/esm/cssVars/cssVarsParser.js
     var assignNestedKeys = function(obj, keys, value) {
         var arrayKeys = arguments.length > 3 && arguments[3] !== void 0 ? arguments[3] : [];
@@ -31417,7 +32366,7 @@ var agent = function() {
     };
     var prepareCssVars_default = prepareCssVars;
     // node_modules/@mui/system/esm/Grid/createGrid.js
-    var React20 = __toESM(require_react());
+    var React27 = __toESM(require_react());
     // node_modules/@mui/system/esm/Grid/traverseBreakpoints.js
     var filterBreakpointKeys = function(breakpointsKeys, responsiveKeys) {
         return breakpointsKeys.filter(function(key) {
@@ -31631,7 +32580,7 @@ var agent = function() {
         ];
     };
     // node_modules/@mui/system/esm/Grid/createGrid.js
-    var import_jsx_runtime5 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime10 = __toESM(require_jsx_runtime());
     var defaultTheme = createTheme_default();
     var defaultCreateStyledComponent = styled_default("div", {
         name: "MuiGrid",
@@ -31641,8 +32590,8 @@ var agent = function() {
         }
     });
     // node_modules/@mui/system/esm/Stack/createStack.js
-    var React21 = __toESM(require_react());
-    var import_jsx_runtime6 = __toESM(require_jsx_runtime());
+    var React28 = __toESM(require_react());
+    var import_jsx_runtime11 = __toESM(require_jsx_runtime());
     var defaultTheme2 = createTheme_default();
     var defaultCreateStyledComponent2 = styled_default("div", {
         name: "MuiStack",
@@ -31872,7 +32821,7 @@ var agent = function() {
         return createGetCssVar(cssVarPrefix);
     };
     // node_modules/@mui/material/styles/useTheme.js
-    var React22 = __toESM(require_react());
+    var React29 = __toESM(require_react());
     // node_modules/@mui/material/styles/defaultTheme.js
     var defaultTheme3 = createTheme2();
     var defaultTheme_default = defaultTheme3;
@@ -31889,21 +32838,70 @@ var agent = function() {
         rootShouldForwardProp: rootShouldForwardProp_default
     });
     var styled_default2 = styled3;
+    // node_modules/@mui/material/styles/ThemeProvider.js
+    var React33 = __toESM(require_react());
+    // node_modules/@mui/material/styles/ThemeProviderNoVars.js
+    var React30 = __toESM(require_react());
+    var import_jsx_runtime12 = __toESM(require_jsx_runtime());
+    // node_modules/@mui/material/styles/ThemeProviderWithVars.js
+    var React32 = __toESM(require_react());
+    // node_modules/@mui/material/InitColorSchemeScript/InitColorSchemeScript.js
+    var React31 = __toESM(require_react());
+    var import_jsx_runtime13 = __toESM(require_jsx_runtime());
+    var defaultConfig = {
+        attribute: "data-mui-color-scheme",
+        colorSchemeStorageKey: "mui-color-scheme",
+        defaultLightColorScheme: "light",
+        defaultDarkColorScheme: "dark",
+        modeStorageKey: "mui-mode"
+    };
+    // node_modules/@mui/material/styles/ThemeProviderWithVars.js
+    var import_jsx_runtime14 = __toESM(require_jsx_runtime());
+    var _createCssVarsProvider = createCssVarsProvider({
+        themeId: identifier_default,
+        // @ts-ignore ignore module augmentation tests
+        theme: function() {
+            return createTheme2({
+                cssVariables: true
+            });
+        },
+        colorSchemeStorageKey: defaultConfig.colorSchemeStorageKey,
+        modeStorageKey: defaultConfig.modeStorageKey,
+        defaultColorScheme: {
+            light: defaultConfig.defaultLightColorScheme,
+            dark: defaultConfig.defaultDarkColorScheme
+        },
+        resolveTheme: function(theme) {
+            var newTheme = _object_spread_props(_object_spread({}, theme), {
+                typography: createTypography(theme.palette, theme.typography)
+            });
+            newTheme.unstable_sx = function sx(props) {
+                return styleFunctionSx_default({
+                    sx: props,
+                    theme: this
+                });
+            };
+            return newTheme;
+        }
+    }), InternalCssVarsProvider = _createCssVarsProvider.CssVarsProvider, useColorScheme = _createCssVarsProvider.useColorScheme, deprecatedGetInitColorSchemeScript = _createCssVarsProvider.getInitColorSchemeScript;
+    var CssVarsProvider = InternalCssVarsProvider;
+    // node_modules/@mui/material/styles/ThemeProvider.js
+    var import_jsx_runtime15 = __toESM(require_jsx_runtime());
     // node_modules/@mui/material/utils/capitalize.js
     var capitalize_default = capitalize;
     // node_modules/@mui/material/utils/createSvgIcon.js
-    var React26 = __toESM(require_react());
+    var React37 = __toESM(require_react());
     // node_modules/@mui/material/SvgIcon/SvgIcon.js
-    var React25 = __toESM(require_react());
+    var React36 = __toESM(require_react());
     // node_modules/@mui/material/zero-styled/index.js
-    var React23 = __toESM(require_react());
-    var import_jsx_runtime7 = __toESM(require_jsx_runtime());
+    var React34 = __toESM(require_react());
+    var import_jsx_runtime16 = __toESM(require_jsx_runtime());
     // node_modules/@mui/material/utils/memoTheme.js
     var memoTheme = unstable_memoTheme;
     var memoTheme_default = memoTheme;
     // node_modules/@mui/material/DefaultPropsProvider/DefaultPropsProvider.js
-    var React24 = __toESM(require_react());
-    var import_jsx_runtime8 = __toESM(require_jsx_runtime());
+    var React35 = __toESM(require_react());
+    var import_jsx_runtime17 = __toESM(require_jsx_runtime());
     false ? DefaultPropsProvider.propTypes = {
         // ┌────────────────────────────── Warning ──────────────────────────────┐
         // │ These PropTypes are generated from the TypeScript type definitions. │
@@ -31929,7 +32927,7 @@ var agent = function() {
         "fontSizeLarge"
     ]);
     // node_modules/@mui/material/SvgIcon/SvgIcon.js
-    var import_jsx_runtime9 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime18 = __toESM(require_jsx_runtime());
     var useUtilityClasses = function(ownerState) {
         var color3 = ownerState.color, fontSize = ownerState.fontSize, classes = ownerState.classes;
         var slots = {
@@ -32052,7 +33050,7 @@ var agent = function() {
             ])
         };
     }));
-    var SvgIcon = /* @__PURE__ */ React25.forwardRef(function SvgIcon2(inProps, ref) {
+    var SvgIcon = /* @__PURE__ */ React36.forwardRef(function SvgIcon2(inProps, ref) {
         var props = useDefaultProps2({
             props: inProps,
             name: "MuiSvgIcon"
@@ -32068,7 +33066,7 @@ var agent = function() {
             "titleAccess",
             "viewBox"
         ]);
-        var hasSvgAsChild = /* @__PURE__ */ React25.isValidElement(children) && children.type === "svg";
+        var hasSvgAsChild = /* @__PURE__ */ React36.isValidElement(children) && children.type === "svg";
         var ownerState = _object_spread_props(_object_spread({}, props), {
             color: color3,
             component: component,
@@ -32083,7 +33081,7 @@ var agent = function() {
             more.viewBox = viewBox;
         }
         var classes = useUtilityClasses(ownerState);
-        return /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)(SvgIconRoot, _object_spread_props(_object_spread({
+        return /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(SvgIconRoot, _object_spread_props(_object_spread({
             as: component,
             className: clsx_default(classes.root, className),
             focusable: "false",
@@ -32095,7 +33093,7 @@ var agent = function() {
             ownerState: ownerState,
             children: [
                 hasSvgAsChild ? children.props.children : children,
-                titleAccess ? /* @__PURE__ */ (0, import_jsx_runtime9.jsx)("title", {
+                titleAccess ? /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("title", {
                     children: titleAccess
                 }) : null
             ]
@@ -32193,7 +33191,7 @@ var agent = function() {
     SvgIcon.muiName = "SvgIcon";
     var SvgIcon_default = SvgIcon;
     // node_modules/@mui/material/utils/createSvgIcon.js
-    var import_jsx_runtime10 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime19 = __toESM(require_jsx_runtime());
     // node_modules/@mui/material/utils/useId.js
     var useId_default = useId;
     // node_modules/@mui/material/utils/useEventCallback.js
@@ -32207,15 +33205,15 @@ var agent = function() {
         }, _setPrototypeOf(t, e);
     }
     // node_modules/react-transition-group/esm/Transition.js
-    var import_react7 = __toESM(require_react());
+    var import_react8 = __toESM(require_react());
     var import_react_dom = __toESM(require_react_dom());
     // node_modules/react-transition-group/esm/config.js
     var config_default = {
         disabled: false
     };
     // node_modules/react-transition-group/esm/TransitionGroupContext.js
-    var import_react6 = __toESM(require_react());
-    var TransitionGroupContext_default = import_react6.default.createContext(null);
+    var import_react7 = __toESM(require_react());
+    var TransitionGroupContext_default = import_react7.default.createContext(null);
     // node_modules/react-transition-group/esm/utils/reflow.js
     var forceReflow = function forceReflow2(node2) {
         return node2.scrollTop;
@@ -32454,12 +33452,12 @@ var agent = function() {
                 "nodeRef"
             ]);
             return(// allows for nested Transitions
-            /* @__PURE__ */ import_react7.default.createElement(TransitionGroupContext_default.Provider, {
+            /* @__PURE__ */ import_react8.default.createElement(TransitionGroupContext_default.Provider, {
                 value: null
-            }, typeof children === "function" ? children(status, childProps) : import_react7.default.cloneElement(import_react7.default.Children.only(children), childProps)));
+            }, typeof children === "function" ? children(status, childProps) : import_react8.default.cloneElement(import_react8.default.Children.only(children), childProps)));
         };
         return Transition2;
-    }(import_react7.default.Component);
+    }(import_react8.default.Component);
     Transition.contextType = TransitionGroupContext_default;
     Transition.propTypes = false ? {
         /**
@@ -32627,12 +33625,12 @@ var agent = function() {
         appear: false,
         enter: true,
         exit: true,
-        onEnter: noop,
-        onEntering: noop,
-        onEntered: noop,
-        onExit: noop,
-        onExiting: noop,
-        onExited: noop
+        onEnter: noop3,
+        onEntering: noop3,
+        onEntered: noop3,
+        onExit: noop3,
+        onExiting: noop3,
+        onExited: noop3
     };
     Transition.UNMOUNTED = UNMOUNTED;
     Transition.EXITED = EXITED;
@@ -32641,9 +33639,9 @@ var agent = function() {
     Transition.EXITING = EXITING;
     var Transition_default = Transition;
     // node_modules/react-transition-group/esm/TransitionGroup.js
-    var import_react9 = __toESM(require_react());
+    var import_react10 = __toESM(require_react());
     // node_modules/react-transition-group/esm/utils/ChildMapping.js
-    var import_react8 = __toESM(require_react());
+    var import_react9 = __toESM(require_react());
     // node_modules/react-transition-group/esm/TransitionGroup.js
     var values2 = Object.values || function(obj) {
         return Object.keys(obj).map(function(k) {
@@ -32717,16 +33715,16 @@ var agent = function() {
             delete props.enter;
             delete props.exit;
             if (Component === null) {
-                return /* @__PURE__ */ import_react9.default.createElement(TransitionGroupContext_default.Provider, {
+                return /* @__PURE__ */ import_react10.default.createElement(TransitionGroupContext_default.Provider, {
                     value: contextValue
                 }, children);
             }
-            return /* @__PURE__ */ import_react9.default.createElement(TransitionGroupContext_default.Provider, {
+            return /* @__PURE__ */ import_react10.default.createElement(TransitionGroupContext_default.Provider, {
                 value: contextValue
-            }, /* @__PURE__ */ import_react9.default.createElement(Component, props, children));
+            }, /* @__PURE__ */ import_react10.default.createElement(Component, props, children));
         };
         return TransitionGroup2;
-    }(import_react9.default.Component);
+    }(import_react10.default.Component);
     TransitionGroup.propTypes = false ? {
         /**
      * `<TransitionGroup>` renders a `<div>` by default. You can change this
@@ -32781,7 +33779,7 @@ var agent = function() {
         return node2.scrollTop;
     };
     // node_modules/@mui/material/Paper/Paper.js
-    var React30 = __toESM(require_react());
+    var React41 = __toESM(require_react());
     var paperClasses = generateUtilityClasses("MuiPaper", [
         "root",
         "rounded",
@@ -32814,7 +33812,7 @@ var agent = function() {
         "elevation24"
     ]);
     // node_modules/@mui/material/Paper/Paper.js
-    var import_jsx_runtime11 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime20 = __toESM(require_jsx_runtime());
     var useUtilityClasses2 = function(ownerState) {
         var square = ownerState.square, elevation = ownerState.elevation, variant = ownerState.variant, classes = ownerState.classes;
         var slots = {
@@ -32875,13 +33873,13 @@ var agent = function() {
             ]
         };
     }));
-    var Paper = /* @__PURE__ */ React30.forwardRef(function Paper2(inProps, ref) {
+    var Paper = /* @__PURE__ */ React41.forwardRef(function Paper2(inProps, ref) {
         var _theme_vars_overlays;
         var props = useDefaultProps2({
             props: inProps,
             name: "MuiPaper"
         });
-        var theme = useTheme4();
+        var theme = useTheme5();
         var className = props.className, _props_component = props.component, component = _props_component === void 0 ? "div" : _props_component, _props_elevation = props.elevation, elevation = _props_elevation === void 0 ? 1 : _props_elevation, _props_square = props.square, square = _props_square === void 0 ? false : _props_square, _props_variant = props.variant, variant = _props_variant === void 0 ? "elevation" : _props_variant, other = _object_without_properties(props, [
             "className",
             "component",
@@ -32904,7 +33902,7 @@ var agent = function() {
                 ].join("\n"));
             }
         }
-        return /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(PaperRoot, _object_spread_props(_object_spread({
+        return /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(PaperRoot, _object_spread_props(_object_spread({
             as: component,
             ownerState: ownerState,
             className: clsx_default(classes.root, className),
@@ -32979,9 +33977,9 @@ var agent = function() {
     } : void 0;
     var Paper_default = Paper;
     // node_modules/@mui/material/ButtonBase/ButtonBase.js
-    var React34 = __toESM(require_react());
+    var React45 = __toESM(require_react());
     // node_modules/@mui/material/useLazyRipple/useLazyRipple.js
-    var React31 = __toESM(require_react());
+    var React42 = __toESM(require_react());
     var LazyRipple = /*#__PURE__*/ function() {
         function _LazyRipple() {
             var _this = this;
@@ -33067,10 +34065,10 @@ var agent = function() {
                 key: "use",
                 value: function use() {
                     var ripple = useLazyRef(_LazyRipple.create).current;
-                    var _React31_useState = _sliced_to_array(React31.useState(false), 2), shouldMount = _React31_useState[0], setShouldMount = _React31_useState[1];
+                    var _React42_useState = _sliced_to_array(React42.useState(false), 2), shouldMount = _React42_useState[0], setShouldMount = _React42_useState[1];
                     ripple.shouldMount = shouldMount;
                     ripple.setShouldMount = setShouldMount;
-                    React31.useEffect(ripple.mountEffect, [
+                    React42.useEffect(ripple.mountEffect, [
                         shouldMount
                     ]);
                     return ripple;
@@ -33080,10 +34078,10 @@ var agent = function() {
         return _LazyRipple;
     }();
     // node_modules/@mui/material/ButtonBase/TouchRipple.js
-    var React33 = __toESM(require_react());
+    var React44 = __toESM(require_react());
     // node_modules/@mui/material/ButtonBase/Ripple.js
-    var React32 = __toESM(require_react());
-    var import_jsx_runtime12 = __toESM(require_jsx_runtime());
+    var React43 = __toESM(require_react());
+    var import_jsx_runtime21 = __toESM(require_jsx_runtime());
     false ? Ripple.propTypes = {
         /**
      * Override or extend the styles applied to the component.
@@ -33124,7 +34122,7 @@ var agent = function() {
     ]);
     var touchRippleClasses_default = touchRippleClasses;
     // node_modules/@mui/material/ButtonBase/TouchRipple.js
-    var import_jsx_runtime13 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime22 = __toESM(require_jsx_runtime());
     var DURATION = 550;
     var DELAY_RIPPLE = 80;
     var enterKeyframe = keyframes(_templateObject());
@@ -33160,7 +34158,7 @@ var agent = function() {
         var theme = param.theme;
         return theme.transitions.easing.easeInOut;
     });
-    var TouchRipple = /* @__PURE__ */ React33.forwardRef(function TouchRipple2(inProps, ref) {
+    var TouchRipple = /* @__PURE__ */ React44.forwardRef(function TouchRipple2(inProps, ref) {
         var props = useDefaultProps2({
             props: inProps,
             name: "MuiTouchRipple"
@@ -33170,10 +34168,10 @@ var agent = function() {
             "classes",
             "className"
         ]);
-        var _React33_useState = _sliced_to_array(React33.useState([]), 2), ripples = _React33_useState[0], setRipples = _React33_useState[1];
-        var nextKey2 = React33.useRef(0);
-        var rippleCallback = React33.useRef(null);
-        React33.useEffect(function() {
+        var _React44_useState = _sliced_to_array(React44.useState([]), 2), ripples = _React44_useState[0], setRipples = _React44_useState[1];
+        var nextKey2 = React44.useRef(0);
+        var rippleCallback = React44.useRef(null);
+        React44.useEffect(function() {
             if (rippleCallback.current) {
                 rippleCallback.current();
                 rippleCallback.current = null;
@@ -33181,15 +34179,15 @@ var agent = function() {
         }, [
             ripples
         ]);
-        var ignoringMouseDown = React33.useRef(false);
+        var ignoringMouseDown = React44.useRef(false);
         var startTimer = useTimeout();
-        var startTimerCommit = React33.useRef(null);
-        var container2 = React33.useRef(null);
-        var startCommit = React33.useCallback(function(params) {
+        var startTimerCommit = React44.useRef(null);
+        var container2 = React44.useRef(null);
+        var startCommit = React44.useCallback(function(params) {
             var pulsate2 = params.pulsate, rippleX = params.rippleX, rippleY = params.rippleY, rippleSize = params.rippleSize, cb = params.cb;
             setRipples(function(oldRipples) {
                 return _to_consumable_array(oldRipples).concat([
-                    /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(TouchRippleRipple, {
+                    /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(TouchRippleRipple, {
                         classes: {
                             ripple: clsx_default(classes.ripple, touchRippleClasses_default.ripple),
                             rippleVisible: clsx_default(classes.rippleVisible, touchRippleClasses_default.rippleVisible),
@@ -33211,7 +34209,7 @@ var agent = function() {
         }, [
             classes
         ]);
-        var start3 = React33.useCallback(function() {
+        var start3 = React44.useCallback(function() {
             var event = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {}, options = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : {}, cb = arguments.length > 2 && arguments[2] !== void 0 ? arguments[2] : function() {};
             var tmp = options.pulsate, pulsate2 = tmp === void 0 ? false : tmp, _options_center = options.center, center = _options_center === void 0 ? centerProp || options.pulsate : _options_center, _options_fakeElement = options.fakeElement, fakeElement = _options_fakeElement === void 0 ? false : _options_fakeElement;
             if ((event === null || event === void 0 ? void 0 : event.type) === "mousedown" && ignoringMouseDown.current) {
@@ -33281,14 +34279,14 @@ var agent = function() {
             startCommit,
             startTimer
         ]);
-        var pulsate = React33.useCallback(function() {
+        var pulsate = React44.useCallback(function() {
             start3({}, {
                 pulsate: true
             });
         }, [
             start3
         ]);
-        var stop2 = React33.useCallback(function(event, cb) {
+        var stop2 = React44.useCallback(function(event, cb) {
             startTimer.clear();
             if ((event === null || event === void 0 ? void 0 : event.type) === "touchend" && startTimerCommit.current) {
                 startTimerCommit.current();
@@ -33309,7 +34307,7 @@ var agent = function() {
         }, [
             startTimer
         ]);
-        React33.useImperativeHandle(ref, function() {
+        React44.useImperativeHandle(ref, function() {
             return {
                 pulsate: pulsate,
                 start: start3,
@@ -33320,11 +34318,11 @@ var agent = function() {
             start3,
             stop2
         ]);
-        return /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(TouchRippleRoot, _object_spread_props(_object_spread({
+        return /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(TouchRippleRoot, _object_spread_props(_object_spread({
             className: clsx_default(touchRippleClasses_default.root, classes.root, className),
             ref: container2
         }, other), {
-            children: /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(TransitionGroup_default, {
+            children: /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(TransitionGroup_default, {
                 component: null,
                 exit: true,
                 children: ripples
@@ -33351,7 +34349,7 @@ var agent = function() {
     ]);
     var buttonBaseClasses_default = buttonBaseClasses;
     // node_modules/@mui/material/ButtonBase/ButtonBase.js
-    var import_jsx_runtime14 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime23 = __toESM(require_jsx_runtime());
     var useUtilityClasses3 = function(ownerState) {
         var disabled = ownerState.disabled, focusVisible = ownerState.focusVisible, focusVisibleClassName = ownerState.focusVisibleClassName, classes = ownerState.classes;
         var slots = {
@@ -33411,7 +34409,7 @@ var agent = function() {
     }), _define_property(_obj, "@media print", {
         colorAdjust: "exact"
     }), _obj));
-    var ButtonBase = /* @__PURE__ */ React34.forwardRef(function ButtonBase2(inProps, ref) {
+    var ButtonBase = /* @__PURE__ */ React45.forwardRef(function ButtonBase2(inProps, ref) {
         var props = useDefaultProps2({
             props: inProps,
             name: "MuiButtonBase"
@@ -33447,14 +34445,14 @@ var agent = function() {
             "touchRippleRef",
             "type"
         ]);
-        var buttonRef = React34.useRef(null);
+        var buttonRef = React45.useRef(null);
         var ripple = useLazyRipple();
         var handleRippleRef = useForkRef_default(ripple.ref, touchRippleRef);
-        var _React34_useState = _sliced_to_array(React34.useState(false), 2), focusVisible = _React34_useState[0], setFocusVisible = _React34_useState[1];
+        var _React45_useState = _sliced_to_array(React45.useState(false), 2), focusVisible = _React45_useState[0], setFocusVisible = _React45_useState[1];
         if (disabled && focusVisible) {
             setFocusVisible(false);
         }
-        React34.useImperativeHandle(action, function() {
+        React45.useImperativeHandle(action, function() {
             return {
                 focusVisible: function() {
                     setFocusVisible(true);
@@ -33463,7 +34461,7 @@ var agent = function() {
             };
         }, []);
         var enableTouchRipple = ripple.shouldMount && !disableRipple && !disabled;
-        React34.useEffect(function() {
+        React45.useEffect(function() {
             if (focusVisible && focusRipple && !disableRipple) {
                 ripple.pulsate();
             }
@@ -33574,7 +34572,7 @@ var agent = function() {
             focusVisible: focusVisible
         });
         var classes = useUtilityClasses3(ownerState);
-        return /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(ButtonBaseRoot, _object_spread_props(_object_spread({
+        return /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)(ButtonBaseRoot, _object_spread_props(_object_spread({
             as: ComponentProp,
             className: clsx_default(classes.root, className),
             ownerState: ownerState,
@@ -33597,7 +34595,7 @@ var agent = function() {
         }, buttonProps, other), {
             children: [
                 children,
-                enableTouchRipple ? /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(TouchRipple_default, _object_spread({
+                enableTouchRipple ? /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(TouchRipple_default, _object_spread({
                     ref: handleRippleRef,
                     center: centerRipple
                 }, TouchRippleProps)) : null
@@ -33750,9 +34748,9 @@ var agent = function() {
     } : void 0;
     var ButtonBase_default = ButtonBase;
     // node_modules/@mui/material/IconButton/IconButton.js
-    var React36 = __toESM(require_react());
+    var React47 = __toESM(require_react());
     // node_modules/@mui/material/CircularProgress/CircularProgress.js
-    var React35 = __toESM(require_react());
+    var React46 = __toESM(require_react());
     var circularProgressClasses = generateUtilityClasses("MuiCircularProgress", [
         "root",
         "determinate",
@@ -33766,7 +34764,7 @@ var agent = function() {
         "circleDisableShrink"
     ]);
     // node_modules/@mui/material/CircularProgress/CircularProgress.js
-    var import_jsx_runtime15 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime24 = __toESM(require_jsx_runtime());
     var SIZE = 44;
     var circularRotateKeyframe = keyframes(_templateObject4());
     var circularDashKeyframe = keyframes(_templateObject5());
@@ -33892,7 +34890,7 @@ var agent = function() {
             ]
         };
     }));
-    var CircularProgress = /* @__PURE__ */ React35.forwardRef(function CircularProgress2(inProps, ref) {
+    var CircularProgress = /* @__PURE__ */ React46.forwardRef(function CircularProgress2(inProps, ref) {
         var props = useDefaultProps2({
             props: inProps,
             name: "MuiCircularProgress"
@@ -33926,7 +34924,7 @@ var agent = function() {
             circleStyle.strokeDashoffset = "".concat(((100 - value) / 100 * circumference).toFixed(3), "px");
             rootStyle.transform = "rotate(-90deg)";
         }
-        return /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(CircularProgressRoot, _object_spread_props(_object_spread({
+        return /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(CircularProgressRoot, _object_spread_props(_object_spread({
             className: clsx_default(classes.root, className),
             style: _object_spread({
                 width: size,
@@ -33936,11 +34934,11 @@ var agent = function() {
             ref: ref,
             role: "progressbar"
         }, rootProps, other), {
-            children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(CircularProgressSVG, {
+            children: /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(CircularProgressSVG, {
                 className: classes.svg,
                 ownerState: ownerState,
                 viewBox: "".concat(SIZE / 2, " ").concat(SIZE / 2, " ").concat(SIZE, " ").concat(SIZE),
-                children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(CircularProgressCircle, {
+                children: /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(CircularProgressCircle, {
                     className: classes.circle,
                     style: circleStyle,
                     ownerState: ownerState,
@@ -34054,7 +35052,7 @@ var agent = function() {
     ]);
     var iconButtonClasses_default = iconButtonClasses;
     // node_modules/@mui/material/IconButton/IconButton.js
-    var import_jsx_runtime16 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime25 = __toESM(require_jsx_runtime());
     var useUtilityClasses5 = function(ownerState) {
         var classes = ownerState.classes, disabled = ownerState.disabled, color3 = ownerState.color, edge = ownerState.edge, size = ownerState.size, loading = ownerState.loading;
         var slots = {
@@ -34240,7 +35238,7 @@ var agent = function() {
             ]
         };
     });
-    var IconButton = /* @__PURE__ */ React36.forwardRef(function IconButton2(inProps, ref) {
+    var IconButton = /* @__PURE__ */ React47.forwardRef(function IconButton2(inProps, ref) {
         var props = useDefaultProps2({
             props: inProps,
             name: "MuiIconButton"
@@ -34258,7 +35256,7 @@ var agent = function() {
             "loadingIndicator"
         ]);
         var loadingId = useId_default(idProp);
-        var loadingIndicator = loadingIndicatorProp !== null && loadingIndicatorProp !== void 0 ? loadingIndicatorProp : /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(CircularProgress_default, {
+        var loadingIndicator = loadingIndicatorProp !== null && loadingIndicatorProp !== void 0 ? loadingIndicatorProp : /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(CircularProgress_default, {
             "aria-labelledby": loadingId,
             color: "inherit",
             size: 16
@@ -34273,7 +35271,7 @@ var agent = function() {
             size: size
         });
         var classes = useUtilityClasses5(ownerState);
-        return /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(IconButtonRoot, _object_spread_props(_object_spread({
+        return /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)(IconButtonRoot, _object_spread_props(_object_spread({
             id: loading ? loadingId : idProp,
             className: clsx_default(classes.root, className),
             centerRipple: true,
@@ -34284,12 +35282,12 @@ var agent = function() {
             ownerState: ownerState,
             children: [
                 typeof loading === "boolean" && // use plain HTML span to minimize the runtime overhead
-                /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("span", {
+                /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("span", {
                     className: classes.loadingWrapper,
                     style: {
                         display: "contents"
                     },
-                    children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(IconButtonLoadingIndicator, {
+                    children: /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(IconButtonLoadingIndicator, {
                         className: classes.loadingIndicator,
                         ownerState: ownerState,
                         children: loading && loadingIndicator
@@ -34307,8 +35305,8 @@ var agent = function() {
         /**
      * The icon to display.
      */ children: chainPropTypes(import_prop_types.default.node, function(props) {
-            var found = React36.Children.toArray(props.children).some(function(child) {
-                return /* @__PURE__ */ React36.isValidElement(child) && child.props.onClick;
+            var found = React47.Children.toArray(props.children).some(function(child) {
+                return /* @__PURE__ */ React47.isValidElement(child) && child.props.onClick;
             });
             if (found) {
                 return new Error([
@@ -34409,7 +35407,7 @@ var agent = function() {
     } : void 0;
     var IconButton_default = IconButton;
     // node_modules/@mui/material/Typography/Typography.js
-    var React37 = __toESM(require_react());
+    var React48 = __toESM(require_react());
     var typographyClasses = generateUtilityClasses("MuiTypography", [
         "root",
         "h1",
@@ -34435,7 +35433,7 @@ var agent = function() {
         "paragraph"
     ]);
     // node_modules/@mui/material/Typography/Typography.js
-    var import_jsx_runtime17 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime26 = __toESM(require_jsx_runtime());
     var v6Colors = {
         primary: true,
         secondary: true,
@@ -34582,7 +35580,7 @@ var agent = function() {
         body2: "p",
         inherit: "p"
     };
-    var Typography = /* @__PURE__ */ React37.forwardRef(function Typography2(inProps, ref) {
+    var Typography = /* @__PURE__ */ React48.forwardRef(function Typography2(inProps, ref) {
         var _useDefaultProps2 = useDefaultProps2({
             props: inProps,
             name: "MuiTypography"
@@ -34616,7 +35614,7 @@ var agent = function() {
         });
         var Component = component || (paragraph ? "p" : variantMapping[variant] || defaultVariantMapping[variant]) || "span";
         var classes = useUtilityClasses6(ownerState);
-        return /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(TypographyRoot, _object_spread_props(_object_spread({
+        return /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(TypographyRoot, _object_spread_props(_object_spread({
             as: Component,
             ref: ref,
             className: clsx_default(classes.root, className)
@@ -34747,9 +35745,9 @@ var agent = function() {
     } : void 0;
     var Typography_default = Typography;
     // node_modules/@mui/material/Popper/Popper.js
-    var React40 = __toESM(require_react());
+    var React51 = __toESM(require_react());
     // node_modules/@mui/material/Popper/BasePopper.js
-    var React39 = __toESM(require_react());
+    var React50 = __toESM(require_react());
     // node_modules/@popperjs/core/lib/enums.js
     var top = "top";
     var bottom = "bottom";
@@ -34973,12 +35971,12 @@ var agent = function() {
         defaultModifiers: defaultModifiers
     });
     // node_modules/@mui/material/Portal/Portal.js
-    var React38 = __toESM(require_react());
+    var React49 = __toESM(require_react());
     var ReactDOM2 = __toESM(require_react_dom());
-    var Portal = /* @__PURE__ */ React38.forwardRef(function Portal2(props, forwardedRef) {
+    var Portal = /* @__PURE__ */ React49.forwardRef(function Portal2(props, forwardedRef) {
         var children = props.children, container2 = props.container, _props_disablePortal = props.disablePortal, disablePortal = _props_disablePortal === void 0 ? false : _props_disablePortal;
-        var _React38_useState = _sliced_to_array(React38.useState(null), 2), mountNode = _React38_useState[0], setMountNode = _React38_useState[1];
-        var handleRef = useForkRef(/* @__PURE__ */ React38.isValidElement(children) ? getReactElementRef(children) : null, forwardedRef);
+        var _React49_useState = _sliced_to_array(React49.useState(null), 2), mountNode = _React49_useState[0], setMountNode = _React49_useState[1];
+        var handleRef = useForkRef(/* @__PURE__ */ React49.isValidElement(children) ? getReactElementRef(children) : null, forwardedRef);
         useEnhancedEffect_default(function() {
             if (!disablePortal) {
                 setMountNode(getContainer(container2) || document.body);
@@ -35001,11 +35999,11 @@ var agent = function() {
             disablePortal
         ]);
         if (disablePortal) {
-            if (/* @__PURE__ */ React38.isValidElement(children)) {
+            if (/* @__PURE__ */ React49.isValidElement(children)) {
                 var newProps = {
                     ref: handleRef
                 };
-                return /* @__PURE__ */ React38.cloneElement(children, newProps);
+                return /* @__PURE__ */ React49.cloneElement(children, newProps);
             }
             return children;
         }
@@ -35045,7 +36043,7 @@ var agent = function() {
         "root"
     ]);
     // node_modules/@mui/material/Popper/BasePopper.js
-    var import_jsx_runtime18 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime27 = __toESM(require_jsx_runtime());
     var useUtilityClasses7 = function(ownerState) {
         var classes = ownerState.classes;
         var slots = {
@@ -35056,7 +36054,7 @@ var agent = function() {
         return composeClasses(slots, getPopperUtilityClass, classes);
     };
     var defaultPopperOptions = {};
-    var PopperTooltip = /* @__PURE__ */ React39.forwardRef(function PopperTooltip2(props, forwardedRef) {
+    var PopperTooltip = /* @__PURE__ */ React50.forwardRef(function PopperTooltip2(props, forwardedRef) {
         var anchorEl = props.anchorEl, children = props.children, direction = props.direction, disablePortal = props.disablePortal, modifiers = props.modifiers, open = props.open, initialPlacement = props.placement, popperOptions = props.popperOptions, popperRefProp = props.popperRef, _props_slotProps = props.slotProps, slotProps = _props_slotProps === void 0 ? {} : _props_slotProps, _props_slots = props.slots, slots = _props_slots === void 0 ? {} : _props_slots, TransitionProps = props.TransitionProps, // @ts-ignore internal logic
         ownerStateProp = props.ownerState, other = _object_without_properties(props, [
             "anchorEl",
@@ -35073,28 +36071,28 @@ var agent = function() {
             "TransitionProps",
             "ownerState"
         ]);
-        var tooltipRef = React39.useRef(null);
+        var tooltipRef = React50.useRef(null);
         var ownRef = useForkRef(tooltipRef, forwardedRef);
-        var popperRef = React39.useRef(null);
+        var popperRef = React50.useRef(null);
         var handlePopperRef = useForkRef(popperRef, popperRefProp);
-        var handlePopperRefRef = React39.useRef(handlePopperRef);
+        var handlePopperRefRef = React50.useRef(handlePopperRef);
         useEnhancedEffect_default(function() {
             handlePopperRefRef.current = handlePopperRef;
         }, [
             handlePopperRef
         ]);
-        React39.useImperativeHandle(popperRefProp, function() {
+        React50.useImperativeHandle(popperRefProp, function() {
             return popperRef.current;
         }, []);
         var rtlPlacement = flipPlacement(initialPlacement, direction);
-        var _React39_useState = _sliced_to_array(React39.useState(rtlPlacement), 2), placement = _React39_useState[0], setPlacement = _React39_useState[1];
-        var _React39_useState1 = _sliced_to_array(React39.useState(resolveAnchorEl(anchorEl)), 2), resolvedAnchorElement = _React39_useState1[0], setResolvedAnchorElement = _React39_useState1[1];
-        React39.useEffect(function() {
+        var _React50_useState = _sliced_to_array(React50.useState(rtlPlacement), 2), placement = _React50_useState[0], setPlacement = _React50_useState[1];
+        var _React50_useState1 = _sliced_to_array(React50.useState(resolveAnchorEl(anchorEl)), 2), resolvedAnchorElement = _React50_useState1[0], setResolvedAnchorElement = _React50_useState1[1];
+        React50.useEffect(function() {
             if (popperRef.current) {
                 popperRef.current.forceUpdate();
             }
         });
-        React39.useEffect(function() {
+        React50.useEffect(function() {
             if (anchorEl) {
                 setResolvedAnchorElement(resolveAnchorEl(anchorEl));
             }
@@ -35187,11 +36185,11 @@ var agent = function() {
             ownerState: props,
             className: classes.root
         });
-        return /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Root2, _object_spread_props(_object_spread({}, rootProps), {
+        return /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(Root2, _object_spread_props(_object_spread({}, rootProps), {
             children: typeof children === "function" ? children(childProps) : children
         }));
     });
-    var Popper = /* @__PURE__ */ React39.forwardRef(function Popper2(props, forwardedRef) {
+    var Popper = /* @__PURE__ */ React50.forwardRef(function Popper2(props, forwardedRef) {
         var anchorEl = props.anchorEl, children = props.children, containerProp = props.container, _props_direction = props.direction, direction = _props_direction === void 0 ? "ltr" : _props_direction, _props_disablePortal = props.disablePortal, disablePortal = _props_disablePortal === void 0 ? false : _props_disablePortal, _props_keepMounted = props.keepMounted, keepMounted = _props_keepMounted === void 0 ? false : _props_keepMounted, modifiers = props.modifiers, open = props.open, _props_placement = props.placement, placement = _props_placement === void 0 ? "bottom" : _props_placement, _props_popperOptions = props.popperOptions, popperOptions = _props_popperOptions === void 0 ? defaultPopperOptions : _props_popperOptions, popperRef = props.popperRef, style4 = props.style, _props_transition = props.transition, transition = _props_transition === void 0 ? false : _props_transition, _props_slotProps = props.slotProps, slotProps = _props_slotProps === void 0 ? {} : _props_slotProps, _props_slots = props.slots, slots = _props_slots === void 0 ? {} : _props_slots, other = _object_without_properties(props, [
             "anchorEl",
             "children",
@@ -35209,7 +36207,7 @@ var agent = function() {
             "slotProps",
             "slots"
         ]);
-        var _React39_useState = _sliced_to_array(React39.useState(true), 2), exited = _React39_useState[0], setExited = _React39_useState[1];
+        var _React50_useState = _sliced_to_array(React50.useState(true), 2), exited = _React50_useState[0], setExited = _React50_useState[1];
         var handleEnter = function() {
             setExited(false);
         };
@@ -35232,10 +36230,10 @@ var agent = function() {
             onEnter: handleEnter,
             onExited: handleExited
         } : void 0;
-        return /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Portal_default, {
+        return /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(Portal_default, {
             disablePortal: disablePortal,
             container: container2,
-            children: /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(PopperTooltip, _object_spread_props(_object_spread({
+            children: /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(PopperTooltip, _object_spread_props(_object_spread({
                 anchorEl: anchorEl,
                 direction: direction,
                 disablePortal: disablePortal,
@@ -35439,7 +36437,7 @@ var agent = function() {
     } : void 0;
     var BasePopper_default = Popper;
     // node_modules/@mui/material/Popper/Popper.js
-    var import_jsx_runtime19 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime28 = __toESM(require_jsx_runtime());
     var PopperRoot = styled_default2(BasePopper_default, {
         name: "MuiPopper",
         slot: "Root",
@@ -35447,7 +36445,7 @@ var agent = function() {
             return styles2.root;
         }
     })({});
-    var Popper3 = /* @__PURE__ */ React40.forwardRef(function Popper4(inProps, ref) {
+    var Popper3 = /* @__PURE__ */ React51.forwardRef(function Popper4(inProps, ref) {
         var isRtl = useRtl();
         var props = useDefaultProps2({
             props: inProps,
@@ -35484,7 +36482,7 @@ var agent = function() {
             popperRef: popperRef,
             transition: transition
         }, other);
-        return /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(PopperRoot, _object_spread_props(_object_spread({
+        return /* @__PURE__ */ (0, import_jsx_runtime28.jsx)(PopperRoot, _object_spread_props(_object_spread({
             as: component,
             direction: isRtl ? "rtl" : "ltr",
             slots: {
@@ -35680,10 +36678,10 @@ var agent = function() {
     } : void 0;
     var Popper_default = Popper3;
     // node_modules/@mui/material/Backdrop/Backdrop.js
-    var React42 = __toESM(require_react());
+    var React53 = __toESM(require_react());
     // node_modules/@mui/material/Fade/Fade.js
-    var React41 = __toESM(require_react());
-    var import_jsx_runtime20 = __toESM(require_jsx_runtime());
+    var React52 = __toESM(require_react());
+    var import_jsx_runtime29 = __toESM(require_jsx_runtime());
     var styles = {
         entering: {
             opacity: 1
@@ -35692,8 +36690,8 @@ var agent = function() {
             opacity: 1
         }
     };
-    var Fade = /* @__PURE__ */ React41.forwardRef(function Fade2(props, ref) {
-        var theme = useTheme4();
+    var Fade = /* @__PURE__ */ React52.forwardRef(function Fade2(props, ref) {
+        var theme = useTheme5();
         var defaultTimeout = {
             enter: theme.transitions.duration.enteringScreen,
             exit: theme.transitions.duration.leavingScreen
@@ -35716,7 +36714,7 @@ var agent = function() {
             "TransitionComponent"
         ]);
         var enableStrictModeCompat = true;
-        var nodeRef = React41.useRef(null);
+        var nodeRef = React52.useRef(null);
         var handleRef = useForkRef_default(nodeRef, getReactElementRef(children), ref);
         var normalizedTransitionCallback = function(callback) {
             return function(maybeIsAppearing) {
@@ -35768,7 +36766,7 @@ var agent = function() {
                 addEndListener(nodeRef.current, next2);
             }
         };
-        return /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(TransitionComponent, _object_spread_props(_object_spread({
+        return /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(TransitionComponent, _object_spread_props(_object_spread({
             appear: appear,
             in: inProp,
             nodeRef: enableStrictModeCompat ? nodeRef : void 0,
@@ -35785,7 +36783,7 @@ var agent = function() {
                 var ownerState = _param.ownerState, restChildProps = _object_without_properties(_param, [
                     "ownerState"
                 ]);
-                return /* @__PURE__ */ React41.cloneElement(children, _object_spread({
+                return /* @__PURE__ */ React52.cloneElement(children, _object_spread({
                     style: _object_spread({
                         opacity: 0,
                         visibility: state === "exited" && !inProp ? "hidden" : void 0
@@ -35869,7 +36867,7 @@ var agent = function() {
         "invisible"
     ]);
     // node_modules/@mui/material/Backdrop/Backdrop.js
-    var import_jsx_runtime21 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime30 = __toESM(require_jsx_runtime());
     var useUtilityClasses8 = function(ownerState) {
         var classes = ownerState.classes, invisible = ownerState.invisible;
         var slots = {
@@ -35912,7 +36910,7 @@ var agent = function() {
             }
         ]
     });
-    var Backdrop = /* @__PURE__ */ React42.forwardRef(function Backdrop2(inProps, ref) {
+    var Backdrop = /* @__PURE__ */ React53.forwardRef(function Backdrop2(inProps, ref) {
         var props = useDefaultProps2({
             props: inProps,
             name: "MuiBackdrop"
@@ -35955,11 +36953,11 @@ var agent = function() {
             externalForwardedProps: externalForwardedProps,
             ownerState: ownerState
         }), 2), TransitionSlot = _useSlot1[0], transitionProps = _useSlot1[1];
-        return /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(TransitionSlot, _object_spread_props(_object_spread({
+        return /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(TransitionSlot, _object_spread_props(_object_spread({
             in: open,
             timeout: transitionDuration
         }, other, transitionProps), {
-            children: /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(RootSlot, _object_spread_props(_object_spread({
+            children: /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(RootSlot, _object_spread_props(_object_spread({
                 "aria-hidden": true
             }, rootProps), {
                 classes: classes,
@@ -36064,7 +37062,7 @@ var agent = function() {
     } : void 0;
     var Backdrop_default = Backdrop;
     // node_modules/@mui/material/Badge/Badge.js
-    var React43 = __toESM(require_react());
+    var React54 = __toESM(require_react());
     var useBadge_default = useBadge;
     var badgeClasses = generateUtilityClasses("MuiBadge", [
         "root",
@@ -36096,7 +37094,7 @@ var agent = function() {
     ]);
     var badgeClasses_default = badgeClasses;
     // node_modules/@mui/material/Badge/Badge.js
-    var import_jsx_runtime22 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime31 = __toESM(require_jsx_runtime());
     var RADIUS_STANDARD = 10;
     var RADIUS_DOT = 4;
     var useUtilityClasses9 = function(ownerState) {
@@ -36319,7 +37317,7 @@ var agent = function() {
             ])
         };
     }));
-    var Badge = /* @__PURE__ */ React43.forwardRef(function Badge2(inProps, ref) {
+    var Badge = /* @__PURE__ */ React54.forwardRef(function Badge2(inProps, ref) {
         var props = useDefaultProps2({
             props: inProps,
             name: "MuiBadge"
@@ -36396,10 +37394,10 @@ var agent = function() {
             ownerState: ownerState,
             className: clsx_default(classes.badge, badgeSlotProps === null || badgeSlotProps === void 0 ? void 0 : badgeSlotProps.className)
         });
-        return /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)(RootSlot, _object_spread_props(_object_spread({}, rootProps), {
+        return /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)(RootSlot, _object_spread_props(_object_spread({}, rootProps), {
             children: [
                 children,
-                /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(BadgeSlot, _object_spread_props(_object_spread({}, badgeProps), {
+                /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(BadgeSlot, _object_spread_props(_object_spread({}, badgeProps), {
                     children: displayValue
                 }))
             ]
@@ -36588,7 +37586,7 @@ var agent = function() {
     } : void 0;
     var Box_default = Box;
     // node_modules/@mui/material/Button/Button.js
-    var React46 = __toESM(require_react());
+    var React57 = __toESM(require_react());
     var buttonClasses = generateUtilityClasses("MuiButton", [
         "root",
         "text",
@@ -36654,21 +37652,21 @@ var agent = function() {
     ]);
     var buttonClasses_default = buttonClasses;
     // node_modules/@mui/material/ButtonGroup/ButtonGroupContext.js
-    var React44 = __toESM(require_react());
-    var ButtonGroupContext = /* @__PURE__ */ React44.createContext({});
+    var React55 = __toESM(require_react());
+    var ButtonGroupContext = /* @__PURE__ */ React55.createContext({});
     if (false) {
         ButtonGroupContext.displayName = "ButtonGroupContext";
     }
     var ButtonGroupContext_default = ButtonGroupContext;
     // node_modules/@mui/material/ButtonGroup/ButtonGroupButtonContext.js
-    var React45 = __toESM(require_react());
-    var ButtonGroupButtonContext = /* @__PURE__ */ React45.createContext(void 0);
+    var React56 = __toESM(require_react());
+    var ButtonGroupButtonContext = /* @__PURE__ */ React56.createContext(void 0);
     if (false) {
         ButtonGroupButtonContext.displayName = "ButtonGroupButtonContext";
     }
     var ButtonGroupButtonContext_default = ButtonGroupButtonContext;
     // node_modules/@mui/material/Button/Button.js
-    var import_jsx_runtime23 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime32 = __toESM(require_jsx_runtime());
     var useUtilityClasses10 = function(ownerState) {
         var color3 = ownerState.color, disableElevation = ownerState.disableElevation, fullWidth = ownerState.fullWidth, size = ownerState.size, variant = ownerState.variant, loading = ownerState.loading, loadingPosition = ownerState.loadingPosition, classes = ownerState.classes;
         var slots = {
@@ -37196,9 +38194,9 @@ var agent = function() {
         width: "1em",
         height: "1em"
     });
-    var Button = /* @__PURE__ */ React46.forwardRef(function Button2(inProps, ref) {
-        var contextProps = React46.useContext(ButtonGroupContext_default);
-        var buttonGroupButtonContextPositionClassName = React46.useContext(ButtonGroupButtonContext_default);
+    var Button = /* @__PURE__ */ React57.forwardRef(function Button2(inProps, ref) {
+        var contextProps = React57.useContext(ButtonGroupContext_default);
+        var buttonGroupButtonContextPositionClassName = React57.useContext(ButtonGroupButtonContext_default);
         var resolvedProps = resolveProps(contextProps, inProps);
         var props = useDefaultProps2({
             props: resolvedProps,
@@ -37225,7 +38223,7 @@ var agent = function() {
             "variant"
         ]);
         var loadingId = useId_default(idProp);
-        var loadingIndicator = loadingIndicatorProp !== null && loadingIndicatorProp !== void 0 ? loadingIndicatorProp : /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(CircularProgress_default, {
+        var loadingIndicator = loadingIndicatorProp !== null && loadingIndicatorProp !== void 0 ? loadingIndicatorProp : /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(CircularProgress_default, {
             "aria-labelledby": loadingId,
             color: "inherit",
             size: 16
@@ -37245,36 +38243,36 @@ var agent = function() {
             variant: variant
         });
         var classes = useUtilityClasses10(ownerState);
-        var startIcon = (startIconProp || loading && loadingPosition === "start") && /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(ButtonStartIcon, {
+        var startIcon = (startIconProp || loading && loadingPosition === "start") && /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(ButtonStartIcon, {
             className: classes.startIcon,
             ownerState: ownerState,
-            children: startIconProp || /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(ButtonLoadingIconPlaceholder, {
+            children: startIconProp || /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(ButtonLoadingIconPlaceholder, {
                 className: classes.loadingIconPlaceholder,
                 ownerState: ownerState
             })
         });
-        var endIcon = (endIconProp || loading && loadingPosition === "end") && /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(ButtonEndIcon, {
+        var endIcon = (endIconProp || loading && loadingPosition === "end") && /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(ButtonEndIcon, {
             className: classes.endIcon,
             ownerState: ownerState,
-            children: endIconProp || /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(ButtonLoadingIconPlaceholder, {
+            children: endIconProp || /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(ButtonLoadingIconPlaceholder, {
                 className: classes.loadingIconPlaceholder,
                 ownerState: ownerState
             })
         });
         var positionClassName = buttonGroupButtonContextPositionClassName || "";
         var loader = typeof loading === "boolean" ? // use plain HTML span to minimize the runtime overhead
-        /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("span", {
+        /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("span", {
             className: classes.loadingWrapper,
             style: {
                 display: "contents"
             },
-            children: loading && /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(ButtonLoadingIndicator, {
+            children: loading && /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(ButtonLoadingIndicator, {
                 className: classes.loadingIndicator,
                 ownerState: ownerState,
                 children: loadingIndicator
             })
         }) : null;
-        return /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)(ButtonRoot, _object_spread_props(_object_spread({
+        return /* @__PURE__ */ (0, import_jsx_runtime32.jsxs)(ButtonRoot, _object_spread_props(_object_spread({
             ownerState: ownerState,
             className: clsx_default(contextProps.className, classes.root, className, positionClassName),
             component: component,
@@ -37435,7 +38433,7 @@ var agent = function() {
     } : void 0;
     var Button_default = Button;
     // node_modules/@mui/material/Dialog/Dialog.js
-    var React51 = __toESM(require_react());
+    var React62 = __toESM(require_react());
     var ModalManager = /*#__PURE__*/ function() {
         function ModalManager() {
             _class_call_check(this, ModalManager);
@@ -37529,10 +38527,10 @@ var agent = function() {
         return ModalManager;
     }();
     // node_modules/@mui/material/Modal/Modal.js
-    var React49 = __toESM(require_react());
+    var React60 = __toESM(require_react());
     // node_modules/@mui/material/Unstable_TrapFocus/FocusTrap.js
-    var React47 = __toESM(require_react());
-    var import_jsx_runtime24 = __toESM(require_jsx_runtime());
+    var React58 = __toESM(require_react());
+    var import_jsx_runtime33 = __toESM(require_jsx_runtime());
     var candidatesSelector = [
         "input",
         "select",
@@ -37596,8 +38594,8 @@ var agent = function() {
     }
     var FocusTrap_default = FocusTrap;
     // node_modules/@mui/material/Modal/useModal.js
-    var React48 = __toESM(require_react());
-    var noop2 = function() {};
+    var React59 = __toESM(require_react());
+    var noop4 = function() {};
     var manager = new ModalManager();
     var useModal_default = useModal;
     var modalClasses = generateUtilityClasses("MuiModal", [
@@ -37606,7 +38604,7 @@ var agent = function() {
         "backdrop"
     ]);
     // node_modules/@mui/material/Modal/Modal.js
-    var import_jsx_runtime25 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime34 = __toESM(require_jsx_runtime());
     var useUtilityClasses11 = function(ownerState) {
         var open = ownerState.open, exited = ownerState.exited, classes = ownerState.classes;
         var slots = {
@@ -37661,7 +38659,7 @@ var agent = function() {
     })({
         zIndex: -1
     });
-    var Modal = /* @__PURE__ */ React49.forwardRef(function Modal2(inProps, ref) {
+    var Modal = /* @__PURE__ */ React60.forwardRef(function Modal2(inProps, ref) {
         var props = useDefaultProps2({
             name: "MuiModal",
             props: inProps
@@ -37763,20 +38761,20 @@ var agent = function() {
         if (!keepMounted && !open && (!hasTransition || exited)) {
             return null;
         }
-        return /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(Portal_default, {
+        return /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(Portal_default, {
             ref: portalRef,
             container: container2,
             disablePortal: disablePortal,
-            children: /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)(RootSlot, _object_spread_props(_object_spread({}, rootProps), {
+            children: /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)(RootSlot, _object_spread_props(_object_spread({}, rootProps), {
                 children: [
-                    !hideBackdrop && BackdropComponent ? /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(BackdropSlot, _object_spread({}, backdropProps)) : null,
-                    /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(FocusTrap_default, {
+                    !hideBackdrop && BackdropComponent ? /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(BackdropSlot, _object_spread({}, backdropProps)) : null,
+                    /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(FocusTrap_default, {
                         disableEnforceFocus: disableEnforceFocus,
                         disableAutoFocus: disableAutoFocus,
                         disableRestoreFocus: disableRestoreFocus,
                         isEnabled: isTopModal,
                         open: open,
-                        children: /* @__PURE__ */ React49.cloneElement(children, childProps)
+                        children: /* @__PURE__ */ React60.cloneElement(children, childProps)
                     })
                 ]
             }))
@@ -37978,14 +38976,14 @@ var agent = function() {
     ]);
     var dialogClasses_default = dialogClasses;
     // node_modules/@mui/material/Dialog/DialogContext.js
-    var React50 = __toESM(require_react());
-    var DialogContext = /* @__PURE__ */ React50.createContext({});
+    var React61 = __toESM(require_react());
+    var DialogContext = /* @__PURE__ */ React61.createContext({});
     if (false) {
         DialogContext.displayName = "DialogContext";
     }
     var DialogContext_default = DialogContext;
     // node_modules/@mui/material/Dialog/Dialog.js
-    var import_jsx_runtime26 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime35 = __toESM(require_jsx_runtime());
     var DialogBackdrop = styled_default2(Backdrop_default, {
         name: "MuiDialog",
         slot: "Backdrop",
@@ -38181,12 +39179,12 @@ var agent = function() {
             ])
         };
     }));
-    var Dialog = /* @__PURE__ */ React51.forwardRef(function Dialog2(inProps, ref) {
+    var Dialog = /* @__PURE__ */ React62.forwardRef(function Dialog2(inProps, ref) {
         var props = useDefaultProps2({
             props: inProps,
             name: "MuiDialog"
         });
-        var theme = useTheme4();
+        var theme = useTheme5();
         var defaultTransitionDuration = {
             enter: theme.transitions.duration.enteringScreen,
             exit: theme.transitions.duration.leavingScreen
@@ -38224,7 +39222,7 @@ var agent = function() {
             scroll: scroll
         });
         var classes = useUtilityClasses12(ownerState);
-        var backdropClick = React51.useRef();
+        var backdropClick = React62.useRef();
         var handleMouseDown = function(event) {
             backdropClick.current = event.target === event.currentTarget;
         };
@@ -38244,7 +39242,7 @@ var agent = function() {
             }
         };
         var ariaLabelledby = useId(ariaLabelledbyProp);
-        var dialogContextValue = React51.useMemo(function() {
+        var dialogContextValue = React62.useMemo(function() {
             return {
                 titleId: ariaLabelledby
             };
@@ -38301,7 +39299,7 @@ var agent = function() {
                 role: "presentation"
             }
         }), 2), TransitionSlot = _useSlot4[0], transitionSlotProps = _useSlot4[1];
-        return /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(RootSlot, _object_spread_props(_object_spread({
+        return /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(RootSlot, _object_spread_props(_object_spread({
             closeAfterTransition: true,
             slots: {
                 backdrop: BackdropSlot
@@ -38317,11 +39315,11 @@ var agent = function() {
             open: open,
             onClick: handleBackdropClick
         }, rootSlotProps, other), {
-            children: /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(TransitionSlot, _object_spread_props(_object_spread({}, transitionSlotProps), {
-                children: /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(ContainerSlot, _object_spread_props(_object_spread({
+            children: /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(TransitionSlot, _object_spread_props(_object_spread({}, transitionSlotProps), {
+                children: /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(ContainerSlot, _object_spread_props(_object_spread({
                     onMouseDown: handleMouseDown
                 }, containerSlotProps), {
-                    children: /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(PaperSlot, _object_spread_props(_object_spread({
+                    children: /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(PaperSlot, _object_spread_props(_object_spread({
                         as: PaperComponent,
                         elevation: 24,
                         role: "dialog",
@@ -38329,7 +39327,7 @@ var agent = function() {
                         "aria-labelledby": ariaLabelledby,
                         "aria-modal": ariaModal
                     }, paperSlotProps), {
-                        children: /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(DialogContext_default.Provider, {
+                        children: /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(DialogContext_default.Provider, {
                             value: dialogContextValue,
                             children: children
                         })
@@ -38523,13 +39521,13 @@ var agent = function() {
     } : void 0;
     var Dialog_default = Dialog;
     // node_modules/@mui/material/DialogActions/DialogActions.js
-    var React52 = __toESM(require_react());
+    var React63 = __toESM(require_react());
     var dialogActionsClasses = generateUtilityClasses("MuiDialogActions", [
         "root",
         "spacing"
     ]);
     // node_modules/@mui/material/DialogActions/DialogActions.js
-    var import_jsx_runtime27 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime36 = __toESM(require_jsx_runtime());
     var useUtilityClasses13 = function(ownerState) {
         var classes = ownerState.classes, disableSpacing = ownerState.disableSpacing;
         var slots = {
@@ -38570,7 +39568,7 @@ var agent = function() {
             }
         ]
     });
-    var DialogActions = /* @__PURE__ */ React52.forwardRef(function DialogActions2(inProps, ref) {
+    var DialogActions = /* @__PURE__ */ React63.forwardRef(function DialogActions2(inProps, ref) {
         var props = useDefaultProps2({
             props: inProps,
             name: "MuiDialogActions"
@@ -38583,7 +39581,7 @@ var agent = function() {
             disableSpacing: disableSpacing
         });
         var classes = useUtilityClasses13(ownerState);
-        return /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(DialogActionsRoot, _object_spread({
+        return /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(DialogActionsRoot, _object_spread({
             className: clsx_default(classes.root, className),
             ownerState: ownerState,
             ref: ref
@@ -38621,7 +39619,7 @@ var agent = function() {
     } : void 0;
     var DialogActions_default = DialogActions;
     // node_modules/@mui/material/DialogContent/DialogContent.js
-    var React53 = __toESM(require_react());
+    var React64 = __toESM(require_react());
     var dialogContentClasses = generateUtilityClasses("MuiDialogContent", [
         "root",
         "dividers"
@@ -38631,7 +39629,7 @@ var agent = function() {
     ]);
     var dialogTitleClasses_default = dialogTitleClasses;
     // node_modules/@mui/material/DialogContent/DialogContent.js
-    var import_jsx_runtime28 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime37 = __toESM(require_jsx_runtime());
     var useUtilityClasses14 = function(ownerState) {
         var classes = ownerState.classes, dividers = ownerState.dividers;
         var slots = {
@@ -38684,7 +39682,7 @@ var agent = function() {
             ]
         };
     }));
-    var DialogContent = /* @__PURE__ */ React53.forwardRef(function DialogContent2(inProps, ref) {
+    var DialogContent = /* @__PURE__ */ React64.forwardRef(function DialogContent2(inProps, ref) {
         var props = useDefaultProps2({
             props: inProps,
             name: "MuiDialogContent"
@@ -38697,7 +39695,7 @@ var agent = function() {
             dividers: dividers
         });
         var classes = useUtilityClasses14(ownerState);
-        return /* @__PURE__ */ (0, import_jsx_runtime28.jsx)(DialogContentRoot, _object_spread({
+        return /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(DialogContentRoot, _object_spread({
             className: clsx_default(classes.root, className),
             ownerState: ownerState,
             ref: ref
@@ -38735,8 +39733,8 @@ var agent = function() {
     } : void 0;
     var DialogContent_default = DialogContent;
     // node_modules/@mui/material/DialogTitle/DialogTitle.js
-    var React54 = __toESM(require_react());
-    var import_jsx_runtime29 = __toESM(require_jsx_runtime());
+    var React65 = __toESM(require_react());
+    var import_jsx_runtime38 = __toESM(require_jsx_runtime());
     var useUtilityClasses15 = function(ownerState) {
         var classes = ownerState.classes;
         var slots = {
@@ -38756,7 +39754,7 @@ var agent = function() {
         padding: "16px 24px",
         flex: "0 0 auto"
     });
-    var DialogTitle = /* @__PURE__ */ React54.forwardRef(function DialogTitle2(inProps, ref) {
+    var DialogTitle = /* @__PURE__ */ React65.forwardRef(function DialogTitle2(inProps, ref) {
         var props = useDefaultProps2({
             props: inProps,
             name: "MuiDialogTitle"
@@ -38767,8 +39765,8 @@ var agent = function() {
         ]);
         var ownerState = props;
         var classes = useUtilityClasses15(ownerState);
-        var _React54_useContext = React54.useContext(DialogContext_default), _React54_useContext_titleId = _React54_useContext.titleId, titleId = _React54_useContext_titleId === void 0 ? idProp : _React54_useContext_titleId;
-        return /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(DialogTitleRoot, _object_spread({
+        var _React65_useContext = React65.useContext(DialogContext_default), _React65_useContext_titleId = _React65_useContext.titleId, titleId = _React65_useContext_titleId === void 0 ? idProp : _React65_useContext_titleId;
+        return /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(DialogTitleRoot, _object_spread({
             component: "h2",
             className: clsx_default(classes.root, className),
             ownerState: ownerState,
@@ -38827,7 +39825,7 @@ var agent = function() {
                 name: "MuiGrid2"
             });
         },
-        useTheme: useTheme4
+        useTheme: useTheme5
     });
     false ? Grid2.propTypes = {
         // ┌────────────────────────────── Warning ──────────────────────────────┐
@@ -38989,7 +39987,7 @@ var agent = function() {
     }
     var Grid2_default = Grid2;
     // node_modules/@mui/material/NoSsr/NoSsr.js
-    var React55 = __toESM(require_react());
+    var React66 = __toESM(require_react());
     false ? NoSsr.propTypes = {
         // ┌────────────────────────────── Warning ──────────────────────────────┐
         // │ These PropTypes are generated from the TypeScript type definitions. │
@@ -39097,10 +40095,10 @@ var agent = function() {
     } : void 0;
     var Stack_default = Stack;
     // node_modules/@mui/material/Table/Table.js
-    var React57 = __toESM(require_react());
+    var React68 = __toESM(require_react());
     // node_modules/@mui/material/Table/TableContext.js
-    var React56 = __toESM(require_react());
-    var TableContext = /* @__PURE__ */ React56.createContext();
+    var React67 = __toESM(require_react());
+    var TableContext = /* @__PURE__ */ React67.createContext();
     if (false) {
         TableContext.displayName = "TableContext";
     }
@@ -39110,7 +40108,7 @@ var agent = function() {
         "stickyHeader"
     ]);
     // node_modules/@mui/material/Table/Table.js
-    var import_jsx_runtime30 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime39 = __toESM(require_jsx_runtime());
     var useUtilityClasses16 = function(ownerState) {
         var classes = ownerState.classes, stickyHeader = ownerState.stickyHeader;
         var slots = {
@@ -39158,7 +40156,7 @@ var agent = function() {
         };
     }));
     var defaultComponent = "table";
-    var Table = /* @__PURE__ */ React57.forwardRef(function Table2(inProps, ref) {
+    var Table = /* @__PURE__ */ React68.forwardRef(function Table2(inProps, ref) {
         var props = useDefaultProps2({
             props: inProps,
             name: "MuiTable"
@@ -39177,7 +40175,7 @@ var agent = function() {
             stickyHeader: stickyHeader
         });
         var classes = useUtilityClasses16(ownerState);
-        var table = React57.useMemo(function() {
+        var table = React68.useMemo(function() {
             return {
                 padding: padding2,
                 size: size,
@@ -39188,9 +40186,9 @@ var agent = function() {
             size,
             stickyHeader
         ]);
-        return /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(TableContext_default.Provider, {
+        return /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(TableContext_default.Provider, {
             value: table,
-            children: /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(TableRoot, _object_spread({
+            children: /* @__PURE__ */ (0, import_jsx_runtime39.jsx)(TableRoot, _object_spread({
                 as: component,
                 role: component === defaultComponent ? null : "table",
                 ref: ref,
@@ -39253,10 +40251,10 @@ var agent = function() {
     } : void 0;
     var Table_default = Table;
     // node_modules/@mui/material/TableBody/TableBody.js
-    var React59 = __toESM(require_react());
+    var React70 = __toESM(require_react());
     // node_modules/@mui/material/Table/Tablelvl2Context.js
-    var React58 = __toESM(require_react());
-    var Tablelvl2Context = /* @__PURE__ */ React58.createContext();
+    var React69 = __toESM(require_react());
+    var Tablelvl2Context = /* @__PURE__ */ React69.createContext();
     if (false) {
         Tablelvl2Context.displayName = "Tablelvl2Context";
     }
@@ -39265,7 +40263,7 @@ var agent = function() {
         "root"
     ]);
     // node_modules/@mui/material/TableBody/TableBody.js
-    var import_jsx_runtime31 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime40 = __toESM(require_jsx_runtime());
     var useUtilityClasses17 = function(ownerState) {
         var classes = ownerState.classes;
         var slots = {
@@ -39288,7 +40286,7 @@ var agent = function() {
         variant: "body"
     };
     var defaultComponent2 = "tbody";
-    var TableBody = /* @__PURE__ */ React59.forwardRef(function TableBody2(inProps, ref) {
+    var TableBody = /* @__PURE__ */ React70.forwardRef(function TableBody2(inProps, ref) {
         var props = useDefaultProps2({
             props: inProps,
             name: "MuiTableBody"
@@ -39301,9 +40299,9 @@ var agent = function() {
             component: component
         });
         var classes = useUtilityClasses17(ownerState);
-        return /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(Tablelvl2Context_default.Provider, {
+        return /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(Tablelvl2Context_default.Provider, {
             value: tablelvl2,
-            children: /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(TableBodyRoot, _object_spread({
+            children: /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(TableBodyRoot, _object_spread({
                 className: clsx_default(classes.root, className),
                 as: component,
                 ref: ref,
@@ -39344,7 +40342,7 @@ var agent = function() {
     } : void 0;
     var TableBody_default = TableBody;
     // node_modules/@mui/material/TableCell/TableCell.js
-    var React60 = __toESM(require_react());
+    var React71 = __toESM(require_react());
     var tableCellClasses = generateUtilityClasses("MuiTableCell", [
         "root",
         "head",
@@ -39362,7 +40360,7 @@ var agent = function() {
     ]);
     var tableCellClasses_default = tableCellClasses;
     // node_modules/@mui/material/TableCell/TableCell.js
-    var import_jsx_runtime32 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime41 = __toESM(require_jsx_runtime());
     var useUtilityClasses18 = function(ownerState) {
         var classes = ownerState.classes, variant = ownerState.variant, align = ownerState.align, padding2 = ownerState.padding, size = ownerState.size, stickyHeader = ownerState.stickyHeader;
         var slots = {
@@ -39511,7 +40509,7 @@ var agent = function() {
             ]
         });
     }));
-    var TableCell = /* @__PURE__ */ React60.forwardRef(function TableCell2(inProps, ref) {
+    var TableCell = /* @__PURE__ */ React71.forwardRef(function TableCell2(inProps, ref) {
         var props = useDefaultProps2({
             props: inProps,
             name: "MuiTableCell"
@@ -39526,8 +40524,8 @@ var agent = function() {
             "sortDirection",
             "variant"
         ]);
-        var table = React60.useContext(TableContext_default);
-        var tablelvl23 = React60.useContext(Tablelvl2Context_default);
+        var table = React71.useContext(TableContext_default);
+        var tablelvl23 = React71.useContext(Tablelvl2Context_default);
         var isHeadCell = tablelvl23 && tablelvl23.variant === "head";
         var component;
         if (componentProp) {
@@ -39556,7 +40554,7 @@ var agent = function() {
         if (sortDirection) {
             ariaSort = sortDirection === "asc" ? "ascending" : "descending";
         }
-        return /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(TableCellRoot, _object_spread({
+        return /* @__PURE__ */ (0, import_jsx_runtime41.jsx)(TableCellRoot, _object_spread({
             as: component,
             ref: ref,
             className: clsx_default(classes.root, className),
@@ -39649,12 +40647,12 @@ var agent = function() {
     } : void 0;
     var TableCell_default = TableCell;
     // node_modules/@mui/material/TableContainer/TableContainer.js
-    var React61 = __toESM(require_react());
+    var React72 = __toESM(require_react());
     var tableContainerClasses = generateUtilityClasses("MuiTableContainer", [
         "root"
     ]);
     // node_modules/@mui/material/TableContainer/TableContainer.js
-    var import_jsx_runtime33 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime42 = __toESM(require_jsx_runtime());
     var useUtilityClasses19 = function(ownerState) {
         var classes = ownerState.classes;
         var slots = {
@@ -39674,7 +40672,7 @@ var agent = function() {
         width: "100%",
         overflowX: "auto"
     });
-    var TableContainer = /* @__PURE__ */ React61.forwardRef(function TableContainer2(inProps, ref) {
+    var TableContainer = /* @__PURE__ */ React72.forwardRef(function TableContainer2(inProps, ref) {
         var props = useDefaultProps2({
             props: inProps,
             name: "MuiTableContainer"
@@ -39687,7 +40685,7 @@ var agent = function() {
             component: component
         });
         var classes = useUtilityClasses19(ownerState);
-        return /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(TableContainerRoot, _object_spread({
+        return /* @__PURE__ */ (0, import_jsx_runtime42.jsx)(TableContainerRoot, _object_spread({
             ref: ref,
             as: component,
             className: clsx_default(classes.root, className),
@@ -39726,12 +40724,12 @@ var agent = function() {
     } : void 0;
     var TableContainer_default = TableContainer;
     // node_modules/@mui/material/TableHead/TableHead.js
-    var React62 = __toESM(require_react());
+    var React73 = __toESM(require_react());
     var tableHeadClasses = generateUtilityClasses("MuiTableHead", [
         "root"
     ]);
     // node_modules/@mui/material/TableHead/TableHead.js
-    var import_jsx_runtime34 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime43 = __toESM(require_jsx_runtime());
     var useUtilityClasses20 = function(ownerState) {
         var classes = ownerState.classes;
         var slots = {
@@ -39754,7 +40752,7 @@ var agent = function() {
         variant: "head"
     };
     var defaultComponent3 = "thead";
-    var TableHead = /* @__PURE__ */ React62.forwardRef(function TableHead2(inProps, ref) {
+    var TableHead = /* @__PURE__ */ React73.forwardRef(function TableHead2(inProps, ref) {
         var props = useDefaultProps2({
             props: inProps,
             name: "MuiTableHead"
@@ -39767,9 +40765,9 @@ var agent = function() {
             component: component
         });
         var classes = useUtilityClasses20(ownerState);
-        return /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(Tablelvl2Context_default.Provider, {
+        return /* @__PURE__ */ (0, import_jsx_runtime43.jsx)(Tablelvl2Context_default.Provider, {
             value: tablelvl22,
-            children: /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(TableHeadRoot, _object_spread({
+            children: /* @__PURE__ */ (0, import_jsx_runtime43.jsx)(TableHeadRoot, _object_spread({
                 as: component,
                 className: clsx_default(classes.root, className),
                 ref: ref,
@@ -39810,7 +40808,7 @@ var agent = function() {
     } : void 0;
     var TableHead_default = TableHead;
     // node_modules/@mui/material/TableRow/TableRow.js
-    var React63 = __toESM(require_react());
+    var React74 = __toESM(require_react());
     var tableRowClasses = generateUtilityClasses("MuiTableRow", [
         "root",
         "selected",
@@ -39820,7 +40818,7 @@ var agent = function() {
     ]);
     var tableRowClasses_default = tableRowClasses;
     // node_modules/@mui/material/TableRow/TableRow.js
-    var import_jsx_runtime35 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime44 = __toESM(require_jsx_runtime());
     var useUtilityClasses21 = function(ownerState) {
         var classes = ownerState.classes, selected = ownerState.selected, hover = ownerState.hover, head = ownerState.head, footer = ownerState.footer;
         var slots = {
@@ -39864,7 +40862,7 @@ var agent = function() {
         }), _obj;
     }));
     var defaultComponent4 = "tr";
-    var TableRow = /* @__PURE__ */ React63.forwardRef(function TableRow2(inProps, ref) {
+    var TableRow = /* @__PURE__ */ React74.forwardRef(function TableRow2(inProps, ref) {
         var props = useDefaultProps2({
             props: inProps,
             name: "MuiTableRow"
@@ -39875,7 +40873,7 @@ var agent = function() {
             "hover",
             "selected"
         ]);
-        var tablelvl23 = React63.useContext(Tablelvl2Context_default);
+        var tablelvl23 = React74.useContext(Tablelvl2Context_default);
         var ownerState = _object_spread_props(_object_spread({}, props), {
             component: component,
             hover: hover,
@@ -39884,7 +40882,7 @@ var agent = function() {
             footer: tablelvl23 && tablelvl23.variant === "footer"
         });
         var classes = useUtilityClasses21(ownerState);
-        return /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(TableRowRoot, _object_spread({
+        return /* @__PURE__ */ (0, import_jsx_runtime44.jsx)(TableRowRoot, _object_spread({
             as: component,
             ref: ref,
             className: clsx_default(classes.root, className),
@@ -39932,11 +40930,11 @@ var agent = function() {
     } : void 0;
     var TableRow_default = TableRow;
     // node_modules/@mui/material/TableSortLabel/TableSortLabel.js
-    var React65 = __toESM(require_react());
+    var React76 = __toESM(require_react());
     // node_modules/@mui/material/internal/svg-icons/ArrowDownward.js
-    var React64 = __toESM(require_react());
-    var import_jsx_runtime36 = __toESM(require_jsx_runtime());
-    var ArrowDownward_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime36.jsx)("path", {
+    var React75 = __toESM(require_react());
+    var import_jsx_runtime45 = __toESM(require_jsx_runtime());
+    var ArrowDownward_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime45.jsx)("path", {
         d: "M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
     }), "ArrowDownward");
     var tableSortLabelClasses = generateUtilityClasses("MuiTableSortLabel", [
@@ -39950,7 +40948,7 @@ var agent = function() {
     ]);
     var tableSortLabelClasses_default = tableSortLabelClasses;
     // node_modules/@mui/material/TableSortLabel/TableSortLabel.js
-    var import_jsx_runtime37 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime46 = __toESM(require_jsx_runtime());
     var useUtilityClasses22 = function(ownerState) {
         var classes = ownerState.classes, direction = ownerState.direction, active = ownerState.active;
         var slots = {
@@ -40043,7 +41041,7 @@ var agent = function() {
             ]
         };
     }));
-    var TableSortLabel = /* @__PURE__ */ React65.forwardRef(function TableSortLabel2(inProps, ref) {
+    var TableSortLabel = /* @__PURE__ */ React76.forwardRef(function TableSortLabel2(inProps, ref) {
         var props = useDefaultProps2({
             props: inProps,
             name: "MuiTableSortLabel"
@@ -40082,13 +41080,13 @@ var agent = function() {
             ownerState: ownerState,
             className: classes.icon
         }), 2), IconSlot = _useSlot1[0], iconProps = _useSlot1[1];
-        return /* @__PURE__ */ (0, import_jsx_runtime37.jsxs)(RootSlot, _object_spread_props(_object_spread({
+        return /* @__PURE__ */ (0, import_jsx_runtime46.jsxs)(RootSlot, _object_spread_props(_object_spread({
             disableRipple: true,
             component: "span"
         }, rootProps, other), {
             children: [
                 children,
-                hideSortIcon && !active ? null : /* @__PURE__ */ (0, import_jsx_runtime37.jsx)(IconSlot, _object_spread({
+                hideSortIcon && !active ? null : /* @__PURE__ */ (0, import_jsx_runtime46.jsx)(IconSlot, _object_spread({
                     as: IconComponent
                 }, iconProps))
             ]
@@ -40161,7 +41159,7 @@ var agent = function() {
     } : void 0;
     var TableSortLabel_default = TableSortLabel;
     // src/Services/Frame/Element.ts
-    var import_react10 = __toESM(require_react());
+    var import_react11 = __toESM(require_react());
     // src/Services/Core.ts
     var hexToRGBA = function(hex2, alpha2) {
         var sanitized = hex2.replace("#", "");
@@ -40209,7 +41207,7 @@ var agent = function() {
             el.style.outline = "";
             el.style.backgroundColor = "";
         };
-        (0, import_react10.useEffect)(function() {
+        (0, import_react11.useEffect)(function() {
             if (!node2) return;
             highlightElement(node2);
             return function() {
@@ -40224,10 +41222,10 @@ var agent = function() {
         };
     };
     // src/Components/Poppers/BasePopper.tsx
-    var import_jsx_runtime38 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime47 = __toESM(require_jsx_runtime());
     var BasePopper = function(param) {
         var anchor = param.anchor, children = param.children;
-        return /* @__PURE__ */ (0, import_jsx_runtime38.jsx)(Popper_default, {
+        return /* @__PURE__ */ (0, import_jsx_runtime47.jsx)(Popper_default, {
             sx: {
                 zIndex: 1700
             },
@@ -40251,18 +41249,18 @@ var agent = function() {
         });
     };
     // node_modules/@mui/icons-material/esm/Close.js
-    var import_jsx_runtime39 = __toESM(require_jsx_runtime());
-    var Close_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime39.jsx)("path", {
+    var import_jsx_runtime48 = __toESM(require_jsx_runtime());
+    var Close_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime48.jsx)("path", {
         d: "M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
     }), "Close");
     // src/Components/Modals/BaseModal.tsx
-    var import_jsx_runtime40 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime49 = __toESM(require_jsx_runtime());
     var BaseModal = function(props) {
         var sx = props.sx, children = props.children, title = props.title, modal = props.modal, setModal = props.setModal, maxWidth2 = props.maxWidth, onCancel = props.onCancel;
         var onClose = function() {
             return onCancel ? onCancel() : setModal(false);
         };
-        return /* @__PURE__ */ (0, import_jsx_runtime40.jsxs)(Dialog_default, {
+        return /* @__PURE__ */ (0, import_jsx_runtime49.jsxs)(Dialog_default, {
             sx: sx,
             open: modal,
             onClose: onClose,
@@ -40270,35 +41268,35 @@ var agent = function() {
             fullWidth: true,
             maxWidth: maxWidth2,
             children: [
-                /* @__PURE__ */ (0, import_jsx_runtime40.jsxs)(Box_default, {
+                /* @__PURE__ */ (0, import_jsx_runtime49.jsxs)(Box_default, {
                     sx: {
                         display: "flex",
                         alignItems: "center"
                     },
                     children: [
-                        /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(DialogTitle_default, {
+                        /* @__PURE__ */ (0, import_jsx_runtime49.jsx)(DialogTitle_default, {
                             children: title
                         }),
-                        /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(Box_default, {
+                        /* @__PURE__ */ (0, import_jsx_runtime49.jsx)(Box_default, {
                             sx: {
                                 flexGrow: 1
                             }
                         }),
-                        /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(IconButton_default, {
+                        /* @__PURE__ */ (0, import_jsx_runtime49.jsx)(IconButton_default, {
                             sx: {
                                 mr: 2
                             },
                             onClick: onClose,
-                            children: /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(Close_default, {})
+                            children: /* @__PURE__ */ (0, import_jsx_runtime49.jsx)(Close_default, {})
                         })
                     ]
                 }),
-                /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(DialogContent_default, {
+                /* @__PURE__ */ (0, import_jsx_runtime49.jsx)(DialogContent_default, {
                     dividers: true,
                     children: children
                 }),
-                /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(DialogActions_default, {
-                    children: /* @__PURE__ */ (0, import_jsx_runtime40.jsx)(Button_default, {
+                /* @__PURE__ */ (0, import_jsx_runtime49.jsx)(DialogActions_default, {
+                    children: /* @__PURE__ */ (0, import_jsx_runtime49.jsx)(Button_default, {
                         onClick: onClose,
                         children: "Cancel"
                     })
@@ -40307,18 +41305,18 @@ var agent = function() {
         });
     };
     // src/Components/Views/WidgetInfoRowsView.tsx
-    var import_react11 = __toESM(require_react());
-    var import_jsx_runtime41 = __toESM(require_jsx_runtime());
+    var import_react12 = __toESM(require_react());
+    var import_jsx_runtime50 = __toESM(require_jsx_runtime());
     var WidgetInfoRowsView = function(props) {
         var children = props.children, containerSx = props.containerSx;
-        return /* @__PURE__ */ (0, import_jsx_runtime41.jsx)(Grid2_default, {
+        return /* @__PURE__ */ (0, import_jsx_runtime50.jsx)(Grid2_default, {
             container: true,
             spacing: 1,
             sx: _object_spread({
                 mt: 2
             }, containerSx),
-            children: import_react11.Children.map(children, function(child, index) {
-                return child && /* @__PURE__ */ (0, import_jsx_runtime41.jsx)(Grid2_default, {
+            children: import_react12.Children.map(children, function(child, index) {
+                return child && /* @__PURE__ */ (0, import_jsx_runtime50.jsx)(Grid2_default, {
                     size: {
                         xs: 12
                     },
@@ -40328,16 +41326,16 @@ var agent = function() {
         });
     };
     // node_modules/@mui/icons-material/esm/ContentCopy.js
-    var import_jsx_runtime42 = __toESM(require_jsx_runtime());
-    var ContentCopy_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime42.jsx)("path", {
+    var import_jsx_runtime51 = __toESM(require_jsx_runtime());
+    var ContentCopy_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime51.jsx)("path", {
         d: "M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2m0 16H8V7h11z"
     }), "ContentCopy");
     // src/Components/Views/BaseInfoRowView.tsx
-    var import_react12 = __toESM(require_react());
-    var import_jsx_runtime43 = __toESM(require_jsx_runtime());
+    var import_react13 = __toESM(require_react());
+    var import_jsx_runtime52 = __toESM(require_jsx_runtime());
     var BaseInfoRowView = function(props) {
         var name = props.name, icon = props.icon, value = props.value, _props_noWrap = props.noWrap, noWrap = _props_noWrap === void 0 ? false : _props_noWrap, _props_allowCopy = props.allowCopy, allowCopy = _props_allowCopy === void 0 ? true : _props_allowCopy, _props_component = props.component, component = _props_component === void 0 ? false : _props_component, containerSx = props.containerSx;
-        var internalValue = (0, import_react12.useMemo)(function() {
+        var internalValue = (0, import_react13.useMemo)(function() {
             return value || "unknown";
         }, [
             value
@@ -40363,13 +41361,13 @@ var agent = function() {
                 return _ref.apply(this, arguments);
             };
         }();
-        return /* @__PURE__ */ (0, import_jsx_runtime43.jsxs)(Box_default, {
+        return /* @__PURE__ */ (0, import_jsx_runtime52.jsxs)(Box_default, {
             sx: _object_spread({
                 display: "flex",
                 alignItems: "center"
             }, containerSx),
             children: [
-                /* @__PURE__ */ (0, import_jsx_runtime43.jsxs)(Typography_default, {
+                /* @__PURE__ */ (0, import_jsx_runtime52.jsxs)(Typography_default, {
                     noWrap: noWrap,
                     sx: {
                         display: "flex",
@@ -40383,17 +41381,17 @@ var agent = function() {
                         icon
                     ]
                 }),
-                Boolean(value) && allowCopy && /* @__PURE__ */ (0, import_jsx_runtime43.jsx)(Box_default, {
+                Boolean(value) && allowCopy && /* @__PURE__ */ (0, import_jsx_runtime52.jsx)(Box_default, {
                     sx: {
                         display: "flex"
                     },
-                    children: /* @__PURE__ */ (0, import_jsx_runtime43.jsx)(IconButton_default, {
+                    children: /* @__PURE__ */ (0, import_jsx_runtime52.jsx)(IconButton_default, {
                         size: "small",
                         sx: {
                             ml: 1
                         },
                         onClick: onCopy,
-                        children: /* @__PURE__ */ (0, import_jsx_runtime43.jsx)(ContentCopy_default, {
+                        children: /* @__PURE__ */ (0, import_jsx_runtime52.jsx)(ContentCopy_default, {
                             fontSize: "small"
                         })
                     })
@@ -40402,9 +41400,9 @@ var agent = function() {
         });
     };
     // src/Components/Charts/Agent/Elements/ElementHistoryChartView.tsx
-    var import_react28 = __toESM(require_react());
+    var import_react29 = __toESM(require_react());
     // node_modules/@mui/x-charts/BarChart/BarPlot.js
-    var React103 = __toESM(require_react());
+    var React114 = __toESM(require_react());
     // node_modules/@react-spring/rafz/dist/react-spring_rafz.modern.mjs
     var updateQueue = makeQueue();
     var raf = function(fn2) {
@@ -40516,7 +41514,6 @@ var agent = function() {
         }
     }
     // node_modules/@react-spring/shared/dist/react-spring_shared.modern.mjs
-    var import_react13 = __toESM(require_react(), 1);
     var import_react14 = __toESM(require_react(), 1);
     var import_react15 = __toESM(require_react(), 1);
     var import_react16 = __toESM(require_react(), 1);
@@ -40524,6 +41521,7 @@ var agent = function() {
     var import_react18 = __toESM(require_react(), 1);
     var import_react19 = __toESM(require_react(), 1);
     var import_react20 = __toESM(require_react(), 1);
+    var import_react21 = __toESM(require_react(), 1);
     var __defProp2 = Object.defineProperty;
     var __export = function(target, all) {
         for(var name in all)__defProp2(target, name, {
@@ -40600,7 +41598,7 @@ var agent = function() {
     var to;
     var colors = null;
     var skipAnimation = false;
-    var willAdvance = noop3;
+    var willAdvance = noop5;
     var assign2 = function(globals) {
         if (globals.to) to = globals.to;
         if (globals.now) raf.now = globals.now;
@@ -41091,9 +42089,9 @@ var agent = function() {
     };
     var warnInterpolate = once(console.warn);
     var warnDirectCall = once(console.warn);
-    var useIsomorphicLayoutEffect = isSSR() ? import_react16.useEffect : import_react16.useLayoutEffect;
+    var useIsomorphicLayoutEffect = isSSR() ? import_react17.useEffect : import_react17.useLayoutEffect;
     var useIsMounted = function() {
-        var isMounted = (0, import_react15.useRef)(false);
+        var isMounted = (0, import_react16.useRef)(false);
         useIsomorphicLayoutEffect(function() {
             isMounted.current = true;
             return function() {
@@ -41103,14 +42101,14 @@ var agent = function() {
         return isMounted;
     };
     var useOnce = function(effect4) {
-        return (0, import_react18.useEffect)(effect4, emptyDeps);
+        return (0, import_react19.useEffect)(effect4, emptyDeps);
     };
     var emptyDeps = [];
     // node_modules/@react-spring/core/dist/react-spring_core.modern.mjs
-    var import_react22 = __toESM(require_react(), 1);
+    var import_react23 = __toESM(require_react(), 1);
     // node_modules/@react-spring/animated/dist/react-spring_animated.modern.mjs
-    var React66 = __toESM(require_react(), 1);
-    var import_react21 = __toESM(require_react(), 1);
+    var React77 = __toESM(require_react(), 1);
+    var import_react22 = __toESM(require_react(), 1);
     var $node = Symbol.for("Animated:node");
     var isAnimated = function(value) {
         return !!value && value[$node] === value;
@@ -41397,10 +42395,10 @@ var agent = function() {
         var hasInstance = // Function components must use "forwardRef" to avoid being
         // re-rendered on every animation frame.
         !is.fun(Component) || Component.prototype && Component.prototype.isReactComponent;
-        return (0, import_react21.forwardRef)(function(givenProps, givenRef) {
-            var instanceRef = (0, import_react21.useRef)(null);
+        return (0, import_react22.forwardRef)(function(givenProps, givenRef) {
+            var instanceRef = (0, import_react22.useRef)(null);
             var ref = hasInstance && // eslint-disable-next-line react-hooks/rules-of-hooks
-            (0, import_react21.useCallback)(function(value) {
+            (0, import_react22.useCallback)(function(value) {
                 instanceRef.current = updateRef(givenRef, value);
             }, [
                 givenRef
@@ -41418,7 +42416,7 @@ var agent = function() {
                 }
             };
             var observer = new PropsObserver(callback, deps);
-            var observerRef = (0, import_react21.useRef)();
+            var observerRef = (0, import_react22.useRef)();
             useIsomorphicLayoutEffect(function() {
                 observerRef.current = observer;
                 each(deps, function(dep) {
@@ -41433,7 +42431,7 @@ var agent = function() {
                     }
                 };
             });
-            (0, import_react21.useEffect)(callback, []);
+            (0, import_react22.useEffect)(callback, []);
             useOnce(function() {
                 return function() {
                     var observer2 = observerRef.current;
@@ -41443,7 +42441,7 @@ var agent = function() {
                 };
             });
             var usedProps = host2.getComponentProps(props.getValue());
-            return /* @__PURE__ */ React66.createElement(Component, _object_spread_props(_object_spread({}, usedProps), {
+            return /* @__PURE__ */ React77.createElement(Component, _object_spread_props(_object_spread({}, usedProps), {
                 ref: ref
             }));
         });
@@ -41504,12 +42502,12 @@ var agent = function() {
         return is.str(arg2) ? arg2 : arg2 && is.str(arg2.displayName) ? arg2.displayName : is.fun(arg2) && arg2.name || null;
     };
     // node_modules/@react-spring/core/dist/react-spring_core.modern.mjs
-    var React67 = __toESM(require_react(), 1);
-    var import_react23 = __toESM(require_react(), 1);
+    var React78 = __toESM(require_react(), 1);
     var import_react24 = __toESM(require_react(), 1);
-    var React210 = __toESM(require_react(), 1);
     var import_react25 = __toESM(require_react(), 1);
+    var React210 = __toESM(require_react(), 1);
     var import_react26 = __toESM(require_react(), 1);
+    var import_react27 = __toESM(require_react(), 1);
     var matchProp = function(value, key) {
         return value === true || !!(key && value && (is.fun(value) ? value(key) : toArray(value).includes(key)));
     };
@@ -42818,8 +43816,8 @@ var agent = function() {
                                 props: props,
                                 state: state,
                                 actions: {
-                                    pause: noop3,
-                                    resume: noop3,
+                                    pause: noop5,
+                                    resume: noop5,
                                     start: function start(props2, resolve) {
                                         if (cancel) {
                                             stopAsync(state, ctrl["_lastAsyncId"]);
@@ -42887,7 +43885,7 @@ var agent = function() {
         var children = _param.children, props = _object_without_properties(_param, [
             "children"
         ]);
-        var inherited = (0, import_react23.useContext)(ctx);
+        var inherited = (0, import_react24.useContext)(ctx);
         var pause = props.pause || !!inherited.pause, immediate = props.immediate || !!inherited.immediate;
         props = useMemoOne(function() {
             return {
@@ -42899,7 +43897,7 @@ var agent = function() {
             immediate
         ]);
         var Provider = ctx.Provider;
-        return /* @__PURE__ */ React67.createElement(Provider, {
+        return /* @__PURE__ */ React78.createElement(Provider, {
             value: props
         }, children);
     };
@@ -43483,7 +44481,7 @@ var agent = function() {
     });
     var animated = host.animated;
     // node_modules/@mui/x-charts/context/CartesianProvider/CartesianProvider.js
-    var React83 = __toESM(require_react());
+    var React94 = __toESM(require_react());
     // node_modules/d3-array/src/bisect.js
     var ascendingBisect = bisector(ascending);
     var bisectRight = ascendingBisect.right;
@@ -44471,7 +45469,7 @@ var agent = function() {
         return initInterpolator.apply(scale, arguments);
     }
     // node_modules/@mui/x-charts/hooks/useTicks.js
-    var React68 = __toESM(require_react());
+    var React79 = __toESM(require_react());
     var offsetRatio = {
         start: 0,
         extremities: 0,
@@ -44534,16 +45532,16 @@ var agent = function() {
     var DEFAULT_CATEGORY_GAP_RATIO = 0.2;
     var DEFAULT_BAR_GAP_RATIO = 0.1;
     // node_modules/@mui/x-charts/hooks/useDrawingArea.js
-    var React72 = __toESM(require_react());
+    var React83 = __toESM(require_react());
     // node_modules/@mui/x-charts/context/DrawingProvider.js
-    var React71 = __toESM(require_react());
+    var React82 = __toESM(require_react());
     // node_modules/@mui/x-charts/node_modules/@mui/utils/esm/useId/useId.js
-    var React69 = __toESM(require_react(), 1);
+    var React80 = __toESM(require_react(), 1);
     var globalId2 = 0;
-    var safeReact2 = _object_spread({}, React69);
+    var safeReact2 = _object_spread({}, React80);
     var maybeReactUseId2 = safeReact2.useId;
     // node_modules/@mui/x-charts/hooks/useChartDimensions.js
-    var React70 = __toESM(require_react());
+    var React81 = __toESM(require_react());
     // node_modules/@mui/x-charts/constants/index.js
     var DEFAULT_X_AXIS_KEY = "DEFAULT_X_AXIS_KEY";
     var DEFAULT_Y_AXIS_KEY = "DEFAULT_Y_AXIS_KEY";
@@ -44556,7 +45554,7 @@ var agent = function() {
     // node_modules/@mui/x-charts/hooks/useChartDimensions.js
     var useChartDimensions = function(width2, height2, margin2) {
         var defaultizedMargin = _extends1({}, DEFAULT_MARGINS, margin2);
-        var drawingArea = React70.useMemo(function() {
+        var drawingArea = React81.useMemo(function() {
             return {
                 left: defaultizedMargin.left,
                 top: defaultizedMargin.top,
@@ -44577,8 +45575,8 @@ var agent = function() {
     };
     var useChartDimensions_default = useChartDimensions;
     // node_modules/@mui/x-charts/context/DrawingProvider.js
-    var import_jsx_runtime44 = __toESM(require_jsx_runtime());
-    var DrawingContext = /* @__PURE__ */ React71.createContext({
+    var import_jsx_runtime53 = __toESM(require_jsx_runtime());
+    var DrawingContext = /* @__PURE__ */ React82.createContext({
         top: 0,
         left: 0,
         bottom: 0,
@@ -44593,7 +45591,7 @@ var agent = function() {
     if (false) {
         DrawingContext.displayName = "DrawingContext";
     }
-    var SvgContext = /* @__PURE__ */ React71.createContext({
+    var SvgContext = /* @__PURE__ */ React82.createContext({
         isInitialized: false,
         data: {
             current: null
@@ -44603,7 +45601,7 @@ var agent = function() {
         SvgContext.displayName = "SvgContext";
     }
     // node_modules/@mui/x-charts/hooks/useSeries.js
-    var React81 = __toESM(require_react());
+    var React92 = __toESM(require_react());
     // node_modules/@mui/x-charts/internals/defaultizeColor.js
     var DEFAULT_COLORS = [
         "#1f77b4",
@@ -44650,7 +45648,7 @@ var agent = function() {
         return formattedSeries;
     };
     // node_modules/@mui/x-charts/context/SeriesProvider/SeriesProvider.js
-    var React80 = __toESM(require_react());
+    var React91 = __toESM(require_react());
     // node_modules/@mui/x-charts/colorPalettes/colorPalettes.js
     var blueberryTwilightPaletteLight = [
         "#02B2AF",
@@ -44672,8 +45670,8 @@ var agent = function() {
         return mode === "dark" ? blueberryTwilightPaletteDark : blueberryTwilightPaletteLight;
     };
     // node_modules/@mui/x-charts/context/SeriesProvider/SeriesContext.js
-    var React73 = __toESM(require_react());
-    var SeriesContext = /* @__PURE__ */ React73.createContext({
+    var React84 = __toESM(require_react());
+    var SeriesContext = /* @__PURE__ */ React84.createContext({
         isInitialized: false,
         data: {}
     });
@@ -44681,10 +45679,10 @@ var agent = function() {
         SeriesContext.displayName = "SeriesContext";
     }
     // node_modules/@mui/x-charts/context/PluginProvider/PluginProvider.js
-    var React75 = __toESM(require_react());
+    var React86 = __toESM(require_react());
     // node_modules/@mui/x-charts/context/PluginProvider/PluginContext.js
-    var React74 = __toESM(require_react());
-    var PluginContext = /* @__PURE__ */ React74.createContext({
+    var React85 = __toESM(require_react());
+    var PluginContext = /* @__PURE__ */ React85.createContext({
         isInitialized: false,
         data: {
             colorProcessors: {},
@@ -45408,20 +46406,20 @@ var agent = function() {
         plugin4
     ];
     // node_modules/@mui/x-charts/context/PluginProvider/PluginProvider.js
-    var import_jsx_runtime45 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime54 = __toESM(require_jsx_runtime());
     // node_modules/@mui/x-charts/context/PluginProvider/useColorProcessor.js
-    var React76 = __toESM(require_react());
+    var React87 = __toESM(require_react());
     // node_modules/@mui/x-charts/context/PluginProvider/useSeriesFormatter.js
-    var React77 = __toESM(require_react());
+    var React88 = __toESM(require_react());
     // node_modules/@mui/x-charts/context/PluginProvider/useXExtremumGetter.js
-    var React78 = __toESM(require_react());
+    var React89 = __toESM(require_react());
     // node_modules/@mui/x-charts/context/PluginProvider/useYExtremumGetter.js
-    var React79 = __toESM(require_react());
+    var React90 = __toESM(require_react());
     // node_modules/@mui/x-charts/context/SeriesProvider/SeriesProvider.js
-    var import_jsx_runtime46 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime55 = __toESM(require_jsx_runtime());
     // node_modules/@mui/x-charts/context/CartesianProvider/CartesianContext.js
-    var React82 = __toESM(require_react());
-    var CartesianContext = /* @__PURE__ */ React82.createContext({
+    var React93 = __toESM(require_react());
+    var CartesianContext = /* @__PURE__ */ React93.createContext({
         isInitialized: false,
         data: {
             xAxis: {},
@@ -45434,17 +46432,17 @@ var agent = function() {
         CartesianContext.displayName = "CartesianContext";
     }
     // node_modules/@mui/x-charts/context/CartesianProvider/CartesianProvider.js
-    var import_jsx_runtime47 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime56 = __toESM(require_jsx_runtime());
     // node_modules/@mui/x-charts/context/CartesianProvider/useCartesianContext.js
-    var React84 = __toESM(require_react());
+    var React95 = __toESM(require_react());
     var useCartesianContext = function() {
-        var data = React84.useContext(CartesianContext).data;
+        var data = React95.useContext(CartesianContext).data;
         return data;
     };
     // node_modules/@mui/x-charts/BarChart/BarElement.js
-    var React93 = __toESM(require_react());
+    var React104 = __toESM(require_react());
     // node_modules/@mui/x-charts/node_modules/@mui/utils/esm/useForkRef/useForkRef.js
-    var React85 = __toESM(require_react(), 1);
+    var React96 = __toESM(require_react(), 1);
     var isHostComponent_default2 = isHostComponent2;
     var appendOwnerState_default2 = appendOwnerState2;
     var extractEventHandlers_default2 = extractEventHandlers2;
@@ -45488,11 +46486,11 @@ var agent = function() {
         selected: "selected"
     };
     // node_modules/@mui/x-charts/hooks/useInteractionItemProps.js
-    var React92 = __toESM(require_react());
+    var React103 = __toESM(require_react());
     // node_modules/@mui/x-charts/context/InteractionProvider.js
-    var React86 = __toESM(require_react());
-    var import_jsx_runtime48 = __toESM(require_jsx_runtime());
-    var InteractionContext = /* @__PURE__ */ React86.createContext({
+    var React97 = __toESM(require_react());
+    var import_jsx_runtime57 = __toESM(require_jsx_runtime());
+    var InteractionContext = /* @__PURE__ */ React97.createContext({
         item: null,
         axis: {
             x: null,
@@ -45548,12 +46546,12 @@ var agent = function() {
         }
     };
     // node_modules/@mui/x-charts/context/HighlightedProvider/HighlightedProvider.js
-    var React89 = __toESM(require_react());
+    var React100 = __toESM(require_react());
     // node_modules/@mui/x-charts/node_modules/@mui/utils/esm/useControlled/useControlled.js
-    var React87 = __toESM(require_react(), 1);
+    var React98 = __toESM(require_react(), 1);
     // node_modules/@mui/x-charts/context/HighlightedProvider/HighlightedContext.js
-    var React88 = __toESM(require_react());
-    var HighlightedContext = /* @__PURE__ */ React88.createContext({
+    var React99 = __toESM(require_react());
+    var HighlightedContext = /* @__PURE__ */ React99.createContext({
         isInitialized: false,
         data: {
             highlightedItem: null,
@@ -45601,7 +46599,7 @@ var agent = function() {
         };
     };
     // node_modules/@mui/x-charts/context/HighlightedProvider/HighlightedProvider.js
-    var import_jsx_runtime49 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime58 = __toESM(require_jsx_runtime());
     var _excluded = [
         "highlighted",
         "faded"
@@ -45635,11 +46633,11 @@ var agent = function() {
      */ onHighlightChange: import_prop_types.default.func
     } : void 0;
     // node_modules/@mui/x-charts/context/HighlightedProvider/useHighlighted.js
-    var React90 = __toESM(require_react());
+    var React101 = __toESM(require_react());
     // node_modules/@mui/x-charts/context/ZAxisContextProvider.js
-    var React91 = __toESM(require_react());
-    var import_jsx_runtime50 = __toESM(require_jsx_runtime());
-    var ZAxisContext = /* @__PURE__ */ React91.createContext({
+    var React102 = __toESM(require_react());
+    var import_jsx_runtime59 = __toESM(require_jsx_runtime());
+    var ZAxisContext = /* @__PURE__ */ React102.createContext({
         zAxis: {},
         zAxisIds: []
     });
@@ -45708,7 +46706,7 @@ var agent = function() {
     } : void 0;
     // node_modules/@mui/x-charts/hooks/useInteractionItemProps.js
     var useInteractionItemProps = function(skip) {
-        var _React92_useContext = React92.useContext(InteractionContext), dispatchInteraction = _React92_useContext.dispatch;
+        var _React103_useContext = React103.useContext(InteractionContext), dispatchInteraction = _React103_useContext.dispatch;
         var _useHighlighted = useHighlighted(), setHighlighted = _useHighlighted.setHighlighted, clearHighlighted = _useHighlighted.clearHighlighted;
         if (skip) {
             return function() {
@@ -45750,7 +46748,7 @@ var agent = function() {
         return getInteractionItemProps;
     };
     // node_modules/@mui/x-charts/BarChart/BarElement.js
-    var import_jsx_runtime51 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime60 = __toESM(require_jsx_runtime());
     var _excluded2 = [
         "id",
         "dataIndex",
@@ -45810,11 +46808,11 @@ var agent = function() {
      */ slots: import_prop_types.default.object
     } : void 0;
     // node_modules/@mui/x-charts/hooks/useChartId.js
-    var React94 = __toESM(require_react());
+    var React105 = __toESM(require_react());
     // node_modules/@mui/x-charts/hooks/useSvgRef.js
-    var React95 = __toESM(require_react());
+    var React106 = __toESM(require_react());
     // node_modules/@mui/x-charts/BarChart/BarClipPath.js
-    var React96 = __toESM(require_react());
+    var React107 = __toESM(require_react());
     // node_modules/@mui/x-charts/BarChart/getRadius.js
     var getRadius = function(corner, param) {
         var hasNegative = param.hasNegative, hasPositive = param.hasPositive, borderRadius2 = param.borderRadius, layout = param.layout;
@@ -45837,7 +46835,7 @@ var agent = function() {
         return 0;
     };
     // node_modules/@mui/x-charts/BarChart/BarClipPath.js
-    var import_jsx_runtime52 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime61 = __toESM(require_jsx_runtime());
     var _excluded3 = [
         "style",
         "maskId"
@@ -45846,9 +46844,9 @@ var agent = function() {
         return "inset(0px round ".concat(corners.topLeft, "px ").concat(corners.topRight, "px ").concat(corners.bottomRight, "px ").concat(corners.bottomLeft, "px)");
     };
     // node_modules/@mui/x-charts/BarChart/BarLabel/BarLabelPlot.js
-    var React99 = __toESM(require_react());
+    var React110 = __toESM(require_react());
     // node_modules/@mui/x-charts/BarChart/BarLabel/BarLabelItem.js
-    var React98 = __toESM(require_react());
+    var React109 = __toESM(require_react());
     var barLabelClasses = generateUtilityClasses2("MuiBarLabel", [
         "root",
         "highlighted",
@@ -45884,8 +46882,8 @@ var agent = function() {
         });
     };
     // node_modules/@mui/x-charts/BarChart/BarLabel/BarLabel.js
-    var React97 = __toESM(require_react());
-    var import_jsx_runtime53 = __toESM(require_jsx_runtime());
+    var React108 = __toESM(require_react());
+    var import_jsx_runtime62 = __toESM(require_jsx_runtime());
     var _excluded4 = [
         "seriesId",
         "dataIndex",
@@ -45934,7 +46932,7 @@ var agent = function() {
         ]).isRequired
     } : void 0;
     // node_modules/@mui/x-charts/BarChart/BarLabel/BarLabelItem.js
-    var import_jsx_runtime54 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime63 = __toESM(require_jsx_runtime());
     var _excluded5 = [
         "seriesId",
         "classes",
@@ -45994,7 +46992,7 @@ var agent = function() {
      */ width: import_prop_types.default.number.isRequired
     } : void 0;
     // node_modules/@mui/x-charts/BarChart/BarLabel/BarLabelPlot.js
-    var import_jsx_runtime55 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime64 = __toESM(require_jsx_runtime());
     var _excluded6 = [
         "bars",
         "skipAnimation"
@@ -46030,8 +47028,8 @@ var agent = function() {
         return axisId === axisDefaultKey ? "The first `".concat(axisIdName, "`") : "The ".concat(axisName, ' with id "').concat(axisId, '"');
     };
     // node_modules/@mui/x-charts/context/AnimationProvider/AnimationContext.js
-    var React100 = __toESM(require_react());
-    var AnimationContext = /* @__PURE__ */ React100.createContext({
+    var React111 = __toESM(require_react());
+    var AnimationContext = /* @__PURE__ */ React111.createContext({
         isInitialized: false,
         data: {
             skipAnimation: void 0
@@ -46041,12 +47039,12 @@ var agent = function() {
         AnimationContext.displayName = "AnimationContext";
     }
     // node_modules/@mui/x-charts/context/AnimationProvider/AnimationProvider.js
-    var React101 = __toESM(require_react());
-    var import_jsx_runtime56 = __toESM(require_jsx_runtime());
+    var React112 = __toESM(require_react());
+    var import_jsx_runtime65 = __toESM(require_jsx_runtime());
     // node_modules/@mui/x-charts/context/AnimationProvider/useSkipAnimation.js
-    var React102 = __toESM(require_react());
+    var React113 = __toESM(require_react());
     // node_modules/@mui/x-charts/BarChart/BarPlot.js
-    var import_jsx_runtime57 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime66 = __toESM(require_jsx_runtime());
     var _excluded7 = [
         "skipAnimation",
         "onItemClick",
@@ -46207,26 +47205,26 @@ var agent = function() {
      */ slots: import_prop_types.default.object
     } : void 0;
     // node_modules/@mui/x-charts/ResponsiveChartContainer/ResponsiveChartContainer.js
-    var React114 = __toESM(require_react());
+    var React125 = __toESM(require_react());
     // node_modules/@mui/x-charts/ChartContainer/ChartContainer.js
-    var React111 = __toESM(require_react());
+    var React122 = __toESM(require_react());
     // node_modules/@mui/x-charts/ChartsSurface/ChartsSurface.js
-    var React105 = __toESM(require_react());
+    var React116 = __toESM(require_react());
     // node_modules/@mui/x-charts/hooks/useAxisEvents.js
-    var React104 = __toESM(require_react());
+    var React115 = __toESM(require_react());
     var useAxisEvents = function(disableAxisListener) {
         var svgRef = useSvgRef();
         var drawingArea = useDrawingArea();
         var _useCartesianContext = useCartesianContext(), xAxis = _useCartesianContext.xAxis, yAxis = _useCartesianContext.yAxis, xAxisIds = _useCartesianContext.xAxisIds, yAxisIds = _useCartesianContext.yAxisIds;
-        var dispatch = React104.useContext(InteractionContext).dispatch;
+        var dispatch = React115.useContext(InteractionContext).dispatch;
         var usedXAxis = xAxisIds[0];
         var usedYAxis = yAxisIds[0];
-        var mousePosition = React104.useRef({
+        var mousePosition = React115.useRef({
             isInChart: false,
             x: -1,
             y: -1
         });
-        React104.useEffect(function() {
+        React115.useEffect(function() {
             var getNewAxisState = function getNewAxisState(axisConfig, mouseValue) {
                 var _Math, _Math1;
                 var scale = axisConfig.scale, axisData = axisConfig.data, reverse = axisConfig.reverse;
@@ -46348,7 +47346,7 @@ var agent = function() {
         ]);
     };
     // node_modules/@mui/x-charts/ChartsSurface/ChartsSurface.js
-    var import_jsx_runtime58 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime67 = __toESM(require_jsx_runtime());
     var _excluded8 = [
         "children",
         "width",
@@ -46369,7 +47367,7 @@ var agent = function() {
             touchAction: "none"
         };
     });
-    var ChartsSurface = /* @__PURE__ */ React105.forwardRef(function ChartsSurface2(inProps, ref) {
+    var ChartsSurface = /* @__PURE__ */ React116.forwardRef(function ChartsSurface2(inProps, ref) {
         var props = useThemeProps2({
             props: inProps,
             name: "MuiChartsSurface"
@@ -46382,7 +47380,7 @@ var agent = function() {
             y: 0
         }, viewBox);
         useAxisEvents(disableAxisListener);
-        return /* @__PURE__ */ (0, import_jsx_runtime58.jsxs)(ChartChartsSurfaceStyles, _extends1({
+        return /* @__PURE__ */ (0, import_jsx_runtime67.jsxs)(ChartChartsSurfaceStyles, _extends1({
             width: width2,
             height: height2,
             viewBox: "".concat(svgView.x, " ").concat(svgView.y, " ").concat(svgView.width, " ").concat(svgView.height),
@@ -46390,10 +47388,10 @@ var agent = function() {
             className: className
         }, other, {
             children: [
-                /* @__PURE__ */ (0, import_jsx_runtime58.jsx)("title", {
+                /* @__PURE__ */ (0, import_jsx_runtime67.jsx)("title", {
                     children: title
                 }),
-                /* @__PURE__ */ (0, import_jsx_runtime58.jsx)("desc", {
+                /* @__PURE__ */ (0, import_jsx_runtime67.jsx)("desc", {
                     children: desc
                 }),
                 children
@@ -46437,20 +47435,20 @@ var agent = function() {
      */ width: import_prop_types.default.number.isRequired
     } : void 0;
     // node_modules/@mui/x-charts/internals/components/ChartsAxesGradients/ChartsAxesGradients.js
-    var React108 = __toESM(require_react());
+    var React119 = __toESM(require_react());
     // node_modules/@mui/x-charts/internals/components/ChartsAxesGradients/ChartsPiecewiseGradient.js
-    var React106 = __toESM(require_react());
-    var import_jsx_runtime59 = __toESM(require_jsx_runtime());
+    var React117 = __toESM(require_react());
+    var import_jsx_runtime68 = __toESM(require_jsx_runtime());
     // node_modules/@mui/x-charts/internals/components/ChartsAxesGradients/ChartsContinuousGradient.js
-    var React107 = __toESM(require_react());
-    var import_jsx_runtime60 = __toESM(require_jsx_runtime());
+    var React118 = __toESM(require_react());
+    var import_jsx_runtime69 = __toESM(require_jsx_runtime());
     var PX_PRECISION = 10;
     // node_modules/@mui/x-charts/internals/components/ChartsAxesGradients/ChartsAxesGradients.js
-    var import_jsx_runtime61 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime70 = __toESM(require_jsx_runtime());
     // node_modules/@mui/x-charts/ChartContainer/useChartContainerProps.js
-    var React110 = __toESM(require_react());
+    var React121 = __toESM(require_react());
     // node_modules/@mui/x-charts/ChartContainer/useDefaultizeAxis.js
-    var React109 = __toESM(require_react());
+    var React120 = __toESM(require_react());
     var defaultizeAxis = function(inAxis, dataset, axisName) {
         var DEFAULT_AXIS_KEY = axisName === "x" ? DEFAULT_X_AXIS_KEY : DEFAULT_Y_AXIS_KEY;
         var _inAxis_map;
@@ -46482,13 +47480,13 @@ var agent = function() {
         });
     };
     var useDefaultizeAxis = function(inXAxis, inYAxis, dataset) {
-        var xAxis = React109.useMemo(function() {
+        var xAxis = React120.useMemo(function() {
             return defaultizeAxis(inXAxis, dataset, "x");
         }, [
             inXAxis,
             dataset
         ]);
-        var yAxis = React109.useMemo(function() {
+        var yAxis = React120.useMemo(function() {
             return defaultizeAxis(inYAxis, dataset, "y");
         }, [
             inYAxis,
@@ -46522,7 +47520,7 @@ var agent = function() {
     ];
     var useChartContainerProps = function(props, ref) {
         var width2 = props.width, height2 = props.height, series = props.series, margin2 = props.margin, xAxis = props.xAxis, yAxis = props.yAxis, zAxis = props.zAxis, colors3 = props.colors, dataset = props.dataset, sx = props.sx, title = props.title, desc = props.desc, disableAxisListener = props.disableAxisListener, highlightedItem = props.highlightedItem, onHighlightChange = props.onHighlightChange, plugins = props.plugins, children = props.children, skipAnimation2 = props.skipAnimation, other = _objectWithoutPropertiesLoose(props, _excluded9);
-        var svgRef = React110.useRef(null);
+        var svgRef = React121.useRef(null);
         var chartSurfaceRef = useForkRef2(ref, svgRef);
         var _useDefaultizeAxis = _sliced_to_array(useDefaultizeAxis(xAxis, yAxis, dataset), 2), defaultizedXAxis = _useDefaultizeAxis[0], defaultizedYAxis = _useDefaultizeAxis[1];
         var drawingProviderProps = {
@@ -46579,20 +47577,20 @@ var agent = function() {
         };
     };
     // node_modules/@mui/x-charts/ChartContainer/ChartContainer.js
-    var import_jsx_runtime62 = __toESM(require_jsx_runtime());
-    var ChartContainer = /* @__PURE__ */ React111.forwardRef(function ChartContainer2(props, ref) {
+    var import_jsx_runtime71 = __toESM(require_jsx_runtime());
+    var ChartContainer = /* @__PURE__ */ React122.forwardRef(function ChartContainer2(props, ref) {
         var _useChartContainerProps = useChartContainerProps(props, ref), children = _useChartContainerProps.children, drawingProviderProps = _useChartContainerProps.drawingProviderProps, seriesProviderProps = _useChartContainerProps.seriesProviderProps, cartesianProviderProps = _useChartContainerProps.cartesianProviderProps, zAxisContextProps = _useChartContainerProps.zAxisContextProps, highlightedProviderProps = _useChartContainerProps.highlightedProviderProps, chartsSurfaceProps = _useChartContainerProps.chartsSurfaceProps, pluginProviderProps = _useChartContainerProps.pluginProviderProps, animationProviderProps = _useChartContainerProps.animationProviderProps;
-        return /* @__PURE__ */ (0, import_jsx_runtime62.jsx)(DrawingProvider, _extends1({}, drawingProviderProps, {
-            children: /* @__PURE__ */ (0, import_jsx_runtime62.jsx)(PluginProvider, _extends1({}, pluginProviderProps, {
-                children: /* @__PURE__ */ (0, import_jsx_runtime62.jsx)(SeriesProvider, _extends1({}, seriesProviderProps, {
-                    children: /* @__PURE__ */ (0, import_jsx_runtime62.jsx)(CartesianProvider, _extends1({}, cartesianProviderProps, {
-                        children: /* @__PURE__ */ (0, import_jsx_runtime62.jsx)(ZAxisContextProvider, _extends1({}, zAxisContextProps, {
-                            children: /* @__PURE__ */ (0, import_jsx_runtime62.jsx)(InteractionProvider, {
-                                children: /* @__PURE__ */ (0, import_jsx_runtime62.jsx)(HighlightedProvider, _extends1({}, highlightedProviderProps, {
-                                    children: /* @__PURE__ */ (0, import_jsx_runtime62.jsxs)(ChartsSurface, _extends1({}, chartsSurfaceProps, {
+        return /* @__PURE__ */ (0, import_jsx_runtime71.jsx)(DrawingProvider, _extends1({}, drawingProviderProps, {
+            children: /* @__PURE__ */ (0, import_jsx_runtime71.jsx)(PluginProvider, _extends1({}, pluginProviderProps, {
+                children: /* @__PURE__ */ (0, import_jsx_runtime71.jsx)(SeriesProvider, _extends1({}, seriesProviderProps, {
+                    children: /* @__PURE__ */ (0, import_jsx_runtime71.jsx)(CartesianProvider, _extends1({}, cartesianProviderProps, {
+                        children: /* @__PURE__ */ (0, import_jsx_runtime71.jsx)(ZAxisContextProvider, _extends1({}, zAxisContextProps, {
+                            children: /* @__PURE__ */ (0, import_jsx_runtime71.jsx)(InteractionProvider, {
+                                children: /* @__PURE__ */ (0, import_jsx_runtime71.jsx)(HighlightedProvider, _extends1({}, highlightedProviderProps, {
+                                    children: /* @__PURE__ */ (0, import_jsx_runtime71.jsxs)(ChartsSurface, _extends1({}, chartsSurfaceProps, {
                                         children: [
-                                            /* @__PURE__ */ (0, import_jsx_runtime62.jsx)(ChartsAxesGradients, {}),
-                                            /* @__PURE__ */ (0, import_jsx_runtime62.jsx)(AnimationProvider, _extends1({}, animationProviderProps, {
+                                            /* @__PURE__ */ (0, import_jsx_runtime71.jsx)(ChartsAxesGradients, {}),
+                                            /* @__PURE__ */ (0, import_jsx_runtime71.jsx)(AnimationProvider, _extends1({}, animationProviderProps, {
                                                 children: children
                                             }))
                                         ]
@@ -47029,22 +48027,22 @@ var agent = function() {
         };
     });
     // node_modules/@mui/x-charts/ResponsiveChartContainer/useChartContainerDimensions.js
-    var React113 = __toESM(require_react());
+    var React124 = __toESM(require_react());
     // node_modules/@mui/x-charts/node_modules/@mui/utils/esm/useEnhancedEffect/useEnhancedEffect.js
-    var React112 = __toESM(require_react(), 1);
-    var useEnhancedEffect2 = typeof window !== "undefined" ? React112.useLayoutEffect : React112.useEffect;
+    var React123 = __toESM(require_react(), 1);
+    var useEnhancedEffect2 = typeof window !== "undefined" ? React123.useLayoutEffect : React123.useEffect;
     var useEnhancedEffect_default2 = useEnhancedEffect2;
     // node_modules/@mui/x-charts/ResponsiveChartContainer/useChartContainerDimensions.js
     var useChartContainerDimensions = function(inWidth, inHeight, resolveSizeBeforeRender) {
-        var stateRef = React113.useRef({
+        var stateRef = React124.useRef({
             displayError: false,
             initialCompute: true,
             computeRun: 0
         });
-        var rootRef = React113.useRef(null);
-        var _React113_useState = _sliced_to_array(React113.useState(0), 2), width2 = _React113_useState[0], setWidth = _React113_useState[1];
-        var _React113_useState1 = _sliced_to_array(React113.useState(0), 2), height2 = _React113_useState1[0], setHeight = _React113_useState1[1];
-        var computeSize = React113.useCallback(function() {
+        var rootRef = React124.useRef(null);
+        var _React124_useState = _sliced_to_array(React124.useState(0), 2), width2 = _React124_useState[0], setWidth = _React124_useState[1];
+        var _React124_useState1 = _sliced_to_array(React124.useState(0), 2), height2 = _React124_useState1[0], setHeight = _React124_useState1[1];
+        var computeSize = React124.useCallback(function() {
             var mainEl = rootRef === null || rootRef === void 0 ? void 0 : rootRef.current;
             if (!mainEl) {
                 return {};
@@ -47060,7 +48058,7 @@ var agent = function() {
                 height: newHeight
             };
         }, []);
-        React113.useEffect(function() {
+        React124.useEffect(function() {
             stateRef.current.displayError = true;
         }, []);
         useEnhancedEffect_default2(function() {
@@ -47188,11 +48186,11 @@ var agent = function() {
         };
     };
     // node_modules/@mui/x-charts/ResponsiveChartContainer/ResponsiveChartContainer.js
-    var import_jsx_runtime63 = __toESM(require_jsx_runtime());
-    var ResponsiveChartContainer = /* @__PURE__ */ React114.forwardRef(function ResponsiveChartContainer2(props, ref) {
+    var import_jsx_runtime72 = __toESM(require_jsx_runtime());
+    var ResponsiveChartContainer = /* @__PURE__ */ React125.forwardRef(function ResponsiveChartContainer2(props, ref) {
         var _useResponsiveChartContainerProps = useResponsiveChartContainerProps(props, ref), hasIntrinsicSize = _useResponsiveChartContainerProps.hasIntrinsicSize, chartContainerProps = _useResponsiveChartContainerProps.chartContainerProps, resizableChartContainerProps = _useResponsiveChartContainerProps.resizableChartContainerProps;
-        return /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(ResizableContainer, _extends1({}, resizableChartContainerProps, {
-            children: hasIntrinsicSize ? /* @__PURE__ */ (0, import_jsx_runtime63.jsx)(ChartContainer, _extends1({}, chartContainerProps)) : null
+        return /* @__PURE__ */ (0, import_jsx_runtime72.jsx)(ResizableContainer, _extends1({}, resizableChartContainerProps, {
+            children: hasIntrinsicSize ? /* @__PURE__ */ (0, import_jsx_runtime72.jsx)(ChartContainer, _extends1({}, chartContainerProps)) : null
         }));
     });
     false ? ResponsiveChartContainer.propTypes = {
@@ -47605,7 +48603,7 @@ var agent = function() {
         }))
     } : void 0;
     // node_modules/@mui/x-charts/ChartsXAxis/ChartsXAxis.js
-    var React117 = __toESM(require_react());
+    var React128 = __toESM(require_react());
     var axisClasses = generateUtilityClasses2("MuiChartsAxis", [
         "root",
         "line",
@@ -47644,7 +48642,7 @@ var agent = function() {
         }), _obj;
     });
     // node_modules/@mui/x-charts/ChartsText/ChartsText.js
-    var React115 = __toESM(require_react());
+    var React126 = __toESM(require_react());
     var stringCache = {
         widthCache: {},
         cacheCount: 0
@@ -47742,7 +48740,7 @@ var agent = function() {
         }
     };
     // node_modules/@mui/x-charts/ChartsText/ChartsText.js
-    var import_jsx_runtime64 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime73 = __toESM(require_jsx_runtime());
     var _excluded11 = [
         "x",
         "y",
@@ -47778,9 +48776,9 @@ var agent = function() {
     // node_modules/@mui/x-charts/internals/geometry.js
     var ANGLE_APPROX = 5;
     // node_modules/@mui/x-charts/hooks/useMounted.js
-    var React116 = __toESM(require_react());
+    var React127 = __toESM(require_react());
     // node_modules/@mui/x-charts/ChartsXAxis/ChartsXAxis.js
-    var import_jsx_runtime65 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime74 = __toESM(require_jsx_runtime());
     var _excluded12 = [
         "scale",
         "tickNumber",
@@ -47962,8 +48960,8 @@ var agent = function() {
      */ tickSize: import_prop_types.default.number
     } : void 0;
     // node_modules/@mui/x-charts/ChartsYAxis/ChartsYAxis.js
-    var React118 = __toESM(require_react());
-    var import_jsx_runtime66 = __toESM(require_jsx_runtime());
+    var React129 = __toESM(require_react());
+    var import_jsx_runtime75 = __toESM(require_jsx_runtime());
     var _excluded13 = [
         "scale",
         "tickNumber"
@@ -48146,13 +49144,13 @@ var agent = function() {
      */ tickSize: import_prop_types.default.number
     } : void 0;
     // node_modules/@mui/x-charts/ChartsTooltip/ChartsTooltip.js
-    var React124 = __toESM(require_react());
+    var React135 = __toESM(require_react());
     // node_modules/@mui/x-charts/ChartsTooltip/utils.js
-    var React119 = __toESM(require_react());
+    var React130 = __toESM(require_react());
     // node_modules/@mui/x-charts/ChartsTooltip/ChartsItemTooltipContent.js
-    var React121 = __toESM(require_react());
+    var React132 = __toESM(require_react());
     // node_modules/@mui/x-charts/ChartsTooltip/DefaultChartsItemTooltipContent.js
-    var React120 = __toESM(require_react());
+    var React131 = __toESM(require_react());
     var chartsTooltipClasses = generateUtilityClasses2("MuiChartsTooltip", [
         "root",
         "paper",
@@ -48259,7 +49257,7 @@ var agent = function() {
         };
     });
     // node_modules/@mui/x-charts/ChartsTooltip/DefaultChartsItemTooltipContent.js
-    var import_jsx_runtime67 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime76 = __toESM(require_jsx_runtime());
     false ? DefaultChartsItemTooltipContent.propTypes = {
         // ----------------------------- Warning --------------------------------
         // | These PropTypes are generated from the TypeScript type definitions |
@@ -48302,11 +49300,11 @@ var agent = function() {
         ])
     } : void 0;
     // node_modules/@mui/x-charts/ChartsTooltip/ChartsItemTooltipContent.js
-    var import_jsx_runtime68 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime77 = __toESM(require_jsx_runtime());
     // node_modules/@mui/x-charts/ChartsTooltip/ChartsAxisTooltipContent.js
-    var React123 = __toESM(require_react());
+    var React134 = __toESM(require_react());
     // node_modules/@mui/x-charts/ChartsTooltip/DefaultChartsAxisTooltipContent.js
-    var React122 = __toESM(require_react());
+    var React133 = __toESM(require_react());
     // node_modules/@mui/x-charts/internals/configInit.js
     var instance;
     var CartesianSeriesTypes = /*#__PURE__*/ function() {
@@ -48339,7 +49337,7 @@ var agent = function() {
     cartesianSeriesTypes.addType("line");
     cartesianSeriesTypes.addType("scatter");
     // node_modules/@mui/x-charts/ChartsTooltip/DefaultChartsAxisTooltipContent.js
-    var import_jsx_runtime69 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime78 = __toESM(require_jsx_runtime());
     false ? DefaultChartsAxisTooltipContent.propTypes = {
         // ----------------------------- Warning --------------------------------
         // | These PropTypes are generated from the TypeScript type definitions |
@@ -48395,9 +49393,9 @@ var agent = function() {
         ])
     } : void 0;
     // node_modules/@mui/x-charts/ChartsTooltip/ChartsAxisTooltipContent.js
-    var import_jsx_runtime70 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime79 = __toESM(require_jsx_runtime());
     // node_modules/@mui/x-charts/ChartsTooltip/ChartsTooltip.js
-    var import_jsx_runtime71 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime80 = __toESM(require_jsx_runtime());
     var useUtilityClasses27 = function(ownerState) {
         var classes = ownerState.classes;
         var slots = {
@@ -48481,8 +49479,8 @@ var agent = function() {
         ])
     } : void 0;
     // node_modules/@mui/x-charts/ChartsAxisHighlight/ChartsAxisHighlight.js
-    var React125 = __toESM(require_react());
-    var import_jsx_runtime72 = __toESM(require_jsx_runtime());
+    var React136 = __toESM(require_react());
+    var import_jsx_runtime81 = __toESM(require_jsx_runtime());
     var chartsAxisHighlightClasses = generateUtilityClasses2("MuiChartsAxisHighlight", [
         "root"
     ]);
@@ -48547,7 +49545,7 @@ var agent = function() {
         ])
     } : void 0;
     // node_modules/@mui/x-charts/ChartsGrid/ChartsGrid.js
-    var React128 = __toESM(require_react());
+    var React139 = __toESM(require_react());
     var chartsGridClasses = generateUtilityClasses2("MuiChartsGrid", [
         "root",
         "line",
@@ -48581,13 +49579,13 @@ var agent = function() {
         };
     });
     // node_modules/@mui/x-charts/ChartsGrid/ChartsVerticalGrid.js
-    var React126 = __toESM(require_react());
-    var import_jsx_runtime73 = __toESM(require_jsx_runtime());
+    var React137 = __toESM(require_react());
+    var import_jsx_runtime82 = __toESM(require_jsx_runtime());
     // node_modules/@mui/x-charts/ChartsGrid/ChartsHorizontalGrid.js
-    var React127 = __toESM(require_react());
-    var import_jsx_runtime74 = __toESM(require_jsx_runtime());
+    var React138 = __toESM(require_react());
+    var import_jsx_runtime83 = __toESM(require_jsx_runtime());
     // node_modules/@mui/x-charts/ChartsGrid/ChartsGrid.js
-    var import_jsx_runtime75 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime84 = __toESM(require_jsx_runtime());
     var _excluded14 = [
         "vertical",
         "horizontal"
@@ -48625,22 +49623,22 @@ var agent = function() {
      */ vertical: import_prop_types.default.bool
     } : void 0;
     // src/Components/Charts/BaseBarChart.tsx
-    var import_react27 = __toESM(require_react());
+    var import_react28 = __toESM(require_react());
     // src/Components/Charts/BaseBarChartLegend.tsx
-    var import_jsx_runtime76 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime85 = __toESM(require_jsx_runtime());
     var BaseBarChartLegend = function(param) {
         var yAxis = param.yAxis;
-        return /* @__PURE__ */ (0, import_jsx_runtime76.jsx)(Stack_default, {
+        return /* @__PURE__ */ (0, import_jsx_runtime85.jsx)(Stack_default, {
             spacing: 2,
             direction: "row",
             flexWrap: "wrap",
             justifyContent: "center",
             children: yAxis.map(function(axis, index) {
-                return /* @__PURE__ */ (0, import_jsx_runtime76.jsxs)(Box_default, {
+                return /* @__PURE__ */ (0, import_jsx_runtime85.jsxs)(Box_default, {
                     display: "flex",
                     alignItems: "center",
                     children: [
-                        /* @__PURE__ */ (0, import_jsx_runtime76.jsx)(Box_default, {
+                        /* @__PURE__ */ (0, import_jsx_runtime85.jsx)(Box_default, {
                             sx: {
                                 width: 12,
                                 height: 12,
@@ -48649,7 +49647,7 @@ var agent = function() {
                                 mr: 1
                             }
                         }),
-                        /* @__PURE__ */ (0, import_jsx_runtime76.jsx)(Typography_default, {
+                        /* @__PURE__ */ (0, import_jsx_runtime85.jsx)(Typography_default, {
                             variant: "body2",
                             children: axis.label
                         })
@@ -48659,16 +49657,16 @@ var agent = function() {
         });
     };
     // src/Components/Charts/BaseBarChart.tsx
-    var import_jsx_runtime77 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime86 = __toESM(require_jsx_runtime());
     var BaseBarChart = function(param) {
         var xAxis = param.xAxis, yAxis = param.yAxis, dataset = param.dataset;
-        return /* @__PURE__ */ (0, import_jsx_runtime77.jsxs)(import_react27.Fragment, {
+        return /* @__PURE__ */ (0, import_jsx_runtime86.jsxs)(import_react28.Fragment, {
             children: [
-                /* @__PURE__ */ (0, import_jsx_runtime77.jsx)(Box_default, {
+                /* @__PURE__ */ (0, import_jsx_runtime86.jsx)(Box_default, {
                     sx: {
                         height: 300
                     },
-                    children: /* @__PURE__ */ (0, import_jsx_runtime77.jsxs)(ResponsiveChartContainer, {
+                    children: /* @__PURE__ */ (0, import_jsx_runtime86.jsxs)(ResponsiveChartContainer, {
                         xAxis: xAxis,
                         margin: {
                             top: 20,
@@ -48683,14 +49681,14 @@ var agent = function() {
                         }),
                         dataset: dataset,
                         children: [
-                            /* @__PURE__ */ (0, import_jsx_runtime77.jsx)(BarPlot, {}),
-                            /* @__PURE__ */ (0, import_jsx_runtime77.jsx)(ChartsGrid, {
+                            /* @__PURE__ */ (0, import_jsx_runtime86.jsx)(BarPlot, {}),
+                            /* @__PURE__ */ (0, import_jsx_runtime86.jsx)(ChartsGrid, {
                                 vertical: true,
                                 horizontal: true
                             }),
-                            /* @__PURE__ */ (0, import_jsx_runtime77.jsx)(ChartsXAxis, {}),
-                            /* @__PURE__ */ (0, import_jsx_runtime77.jsx)(ChartsYAxis, {}),
-                            /* @__PURE__ */ (0, import_jsx_runtime77.jsx)(ChartsTooltip, {
+                            /* @__PURE__ */ (0, import_jsx_runtime86.jsx)(ChartsXAxis, {}),
+                            /* @__PURE__ */ (0, import_jsx_runtime86.jsx)(ChartsYAxis, {}),
+                            /* @__PURE__ */ (0, import_jsx_runtime86.jsx)(ChartsTooltip, {
                                 slotProps: {
                                     popper: {
                                         sx: {
@@ -48699,35 +49697,35 @@ var agent = function() {
                                     }
                                 }
                             }),
-                            /* @__PURE__ */ (0, import_jsx_runtime77.jsx)(ChartsAxisHighlight, {
+                            /* @__PURE__ */ (0, import_jsx_runtime86.jsx)(ChartsAxisHighlight, {
                                 x: "band"
                             })
                         ]
                     })
                 }),
-                /* @__PURE__ */ (0, import_jsx_runtime77.jsx)(BaseBarChartLegend, {
+                /* @__PURE__ */ (0, import_jsx_runtime86.jsx)(BaseBarChartLegend, {
                     yAxis: yAxis
                 })
             ]
         });
     };
     // src/Components/Charts/BaseChartView.tsx
-    var import_jsx_runtime78 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime87 = __toESM(require_jsx_runtime());
     var BaseChartView = function(param) {
         var title = param.title, children = param.children, childrenSx = param.childrenSx, containerSx = param.containerSx;
-        return /* @__PURE__ */ (0, import_jsx_runtime78.jsxs)(Paper_default, {
+        return /* @__PURE__ */ (0, import_jsx_runtime87.jsxs)(Paper_default, {
             sx: _object_spread({
                 width: "100%",
                 p: 2,
                 mt: 3
             }, containerSx),
             children: [
-                /* @__PURE__ */ (0, import_jsx_runtime78.jsx)(Box_default, {
+                /* @__PURE__ */ (0, import_jsx_runtime87.jsx)(Box_default, {
                     sx: {
                         display: "flex",
                         alignItems: "center"
                     },
-                    children: /* @__PURE__ */ (0, import_jsx_runtime78.jsx)(Typography_default, {
+                    children: /* @__PURE__ */ (0, import_jsx_runtime87.jsx)(Typography_default, {
                         sx: {
                             mr: 2
                         },
@@ -48735,7 +49733,7 @@ var agent = function() {
                         children: title
                     })
                 }),
-                /* @__PURE__ */ (0, import_jsx_runtime78.jsx)(Box_default, {
+                /* @__PURE__ */ (0, import_jsx_runtime87.jsx)(Box_default, {
                     sx: _object_spread({
                         height: "100%"
                     }, childrenSx),
@@ -48889,17 +49887,17 @@ var agent = function() {
         ]
     };
     // src/Components/Charts/Agent/Elements/ElementHistoryChartView.tsx
-    var import_jsx_runtime79 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime88 = __toESM(require_jsx_runtime());
     var ElementHistoryChartView = function(param) {
         var history2 = param.history;
-        var chartData = (0, import_react28.useMemo)(function() {
+        var chartData = (0, import_react29.useMemo)(function() {
             return history2.map(getActionsChartData);
         }, [
             history2
         ]);
-        return /* @__PURE__ */ (0, import_jsx_runtime79.jsx)(BaseChartView, {
+        return /* @__PURE__ */ (0, import_jsx_runtime88.jsx)(BaseChartView, {
             title: "Element history",
-            children: /* @__PURE__ */ (0, import_jsx_runtime79.jsx)(BaseBarChart, {
+            children: /* @__PURE__ */ (0, import_jsx_runtime88.jsx)(BaseBarChart, {
                 xAxis: [
                     {
                         dataKey: "createdAt",
@@ -48921,7 +49919,7 @@ var agent = function() {
     };
     // src/Services/Tables/Sorting.ts
     var import_lodash = __toESM(require_lodash());
-    var import_react29 = __toESM(require_react());
+    var import_react30 = __toESM(require_react());
     var getComparator = function(order2, orderBy) {
         return order2 === "desc" ? function(a, b) {
             return descendingComparator(a, b, orderBy);
@@ -48931,9 +49929,9 @@ var agent = function() {
     };
     var useTableSorting = function(param) {
         var items = param.items;
-        var _ref = _sliced_to_array((0, import_react29.useState)(null), 2), orderBy = _ref[0], setOrderBy = _ref[1];
-        var _ref1 = _sliced_to_array((0, import_react29.useState)("asc"), 2), orderDirection = _ref1[0], setOrderDirection = _ref1[1];
-        var sortedItems = (0, import_react29.useMemo)(function() {
+        var _ref = _sliced_to_array((0, import_react30.useState)(null), 2), orderBy = _ref[0], setOrderBy = _ref[1];
+        var _ref1 = _sliced_to_array((0, import_react30.useState)("asc"), 2), orderDirection = _ref1[0], setOrderDirection = _ref1[1];
+        var sortedItems = (0, import_react30.useMemo)(function() {
             return _to_consumable_array(items).sort(getComparator(orderDirection, orderBy));
         }, [
             orderBy,
@@ -48949,17 +49947,17 @@ var agent = function() {
         };
     };
     // src/Components/Tables/BaseTableCell.tsx
-    var import_jsx_runtime80 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime89 = __toESM(require_jsx_runtime());
     var BaseTableCell = function(param) {
         var text = param.text, icon = param.icon;
-        return /* @__PURE__ */ (0, import_jsx_runtime80.jsxs)(Box_default, {
+        return /* @__PURE__ */ (0, import_jsx_runtime89.jsxs)(Box_default, {
             sx: {
                 display: "flex",
                 alignItems: "center"
             },
             children: [
                 icon,
-                /* @__PURE__ */ (0, import_jsx_runtime80.jsx)(Typography_default, {
+                /* @__PURE__ */ (0, import_jsx_runtime89.jsx)(Typography_default, {
                     variant: "body2",
                     children: text
                 })
@@ -48967,112 +49965,112 @@ var agent = function() {
         });
     };
     // node_modules/@mui/icons-material/esm/MouseOutlined.js
-    var import_jsx_runtime81 = __toESM(require_jsx_runtime());
-    var MouseOutlined_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime81.jsx)("path", {
+    var import_jsx_runtime90 = __toESM(require_jsx_runtime());
+    var MouseOutlined_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime90.jsx)("path", {
         d: "M20 9c-.04-4.39-3.6-7.93-8-7.93S4.04 4.61 4 9v6c0 4.42 3.58 8 8 8s8-3.58 8-8zm-2 0h-5V3.16c2.81.47 4.96 2.9 5 5.84m-7-5.84V9H6c.04-2.94 2.19-5.37 5-5.84M18 15c0 3.31-2.69 6-6 6s-6-2.69-6-6v-4h12z"
     }), "MouseOutlined");
     // node_modules/@mui/icons-material/esm/EditOutlined.js
-    var import_jsx_runtime82 = __toESM(require_jsx_runtime());
-    var EditOutlined_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime82.jsx)("path", {
+    var import_jsx_runtime91 = __toESM(require_jsx_runtime());
+    var EditOutlined_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime91.jsx)("path", {
         d: "m14.06 9.02.92.92L5.92 19H5v-.92zM17.66 3c-.25 0-.51.1-.7.29l-1.83 1.83 3.75 3.75 1.83-1.83c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.2-.2-.45-.29-.71-.29m-3.6 3.19L3 17.25V21h3.75L17.81 9.94z"
     }), "EditOutlined");
     // node_modules/@mui/icons-material/esm/ToggleOn.js
-    var import_jsx_runtime83 = __toESM(require_jsx_runtime());
-    var ToggleOn_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime83.jsx)("path", {
+    var import_jsx_runtime92 = __toESM(require_jsx_runtime());
+    var ToggleOn_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime92.jsx)("path", {
         d: "M17 7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h10c2.76 0 5-2.24 5-5s-2.24-5-5-5m0 8c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3"
     }), "ToggleOn");
     // node_modules/@mui/icons-material/esm/DoNotTouchOutlined.js
-    var import_jsx_runtime84 = __toESM(require_jsx_runtime());
-    var DoNotTouchOutlined_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime84.jsx)("path", {
+    var import_jsx_runtime93 = __toESM(require_jsx_runtime());
+    var DoNotTouchOutlined_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime93.jsx)("path", {
         d: "M2.81 2.81 1.39 4.22 7 9.83v4.3l-2.6-1.48c-.17-.09-.34-.14-.54-.14-.26 0-.5.09-.7.26L2 13.88l6.8 7.18c.57.6 1.35.94 2.18.94H17c.62 0 1.18-.19 1.66-.52l1.12 1.12 1.41-1.41zM17 20h-6c-.39 0-.64-.23-.75-.36L6.87 16H9v-4.17l8.14 8.14c-.05.01-.09.03-.14.03m-3.17-9H14V3.25c0-.69.56-1.25 1.25-1.25s1.25.56 1.25 1.25V11h1V5.25c0-.69.56-1.25 1.25-1.25S20 4.56 20 5.25v11.92l-2-2V13h-2.17zm-.83-.83V2.25C13 1.56 12.44 1 11.75 1s-1.25.56-1.25 1.25v5.42zm-3.5-3.5V4.25C9.5 3.56 8.94 3 8.25 3c-.67 0-1.2.53-1.24 1.18z"
     }), "DoNotTouchOutlined");
     // node_modules/@mui/icons-material/esm/CheckBoxOutlined.js
-    var import_jsx_runtime85 = __toESM(require_jsx_runtime());
-    var CheckBoxOutlined_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime85.jsx)("path", {
+    var import_jsx_runtime94 = __toESM(require_jsx_runtime());
+    var CheckBoxOutlined_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime94.jsx)("path", {
         d: "M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2m0 16H5V5h14zM17.99 9l-1.41-1.42-6.59 6.59-2.58-2.57-1.42 1.41 4 3.99z"
     }), "CheckBoxOutlined");
     // node_modules/@mui/icons-material/esm/CheckBoxOutlineBlank.js
-    var import_jsx_runtime86 = __toESM(require_jsx_runtime());
-    var CheckBoxOutlineBlank_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime86.jsx)("path", {
+    var import_jsx_runtime95 = __toESM(require_jsx_runtime());
+    var CheckBoxOutlineBlank_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime95.jsx)("path", {
         d: "M19 5v14H5V5zm0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2"
     }), "CheckBoxOutlineBlank");
     // node_modules/@mui/icons-material/esm/VisibilityOutlined.js
-    var import_jsx_runtime87 = __toESM(require_jsx_runtime());
-    var VisibilityOutlined_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime87.jsx)("path", {
+    var import_jsx_runtime96 = __toESM(require_jsx_runtime());
+    var VisibilityOutlined_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime96.jsx)("path", {
         d: "M12 6c3.79 0 7.17 2.13 8.82 5.5C19.17 14.87 15.79 17 12 17s-7.17-2.13-8.82-5.5C4.83 8.13 8.21 6 12 6m0-2C7 4 2.73 7.11 1 11.5 2.73 15.89 7 19 12 19s9.27-3.11 11-7.5C21.27 7.11 17 4 12 4m0 5c1.38 0 2.5 1.12 2.5 2.5S13.38 14 12 14s-2.5-1.12-2.5-2.5S10.62 9 12 9m0-2c-2.48 0-4.5 2.02-4.5 4.5S9.52 16 12 16s4.5-2.02 4.5-4.5S14.48 7 12 7"
     }), "VisibilityOutlined");
     // node_modules/@mui/icons-material/esm/VisibilityOffOutlined.js
-    var import_jsx_runtime88 = __toESM(require_jsx_runtime());
-    var VisibilityOffOutlined_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime88.jsx)("path", {
+    var import_jsx_runtime97 = __toESM(require_jsx_runtime());
+    var VisibilityOffOutlined_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime97.jsx)("path", {
         d: "M12 6c3.79 0 7.17 2.13 8.82 5.5-.59 1.22-1.42 2.27-2.41 3.12l1.41 1.41c1.39-1.23 2.49-2.77 3.18-4.53C21.27 7.11 17 4 12 4c-1.27 0-2.49.2-3.64.57l1.65 1.65C10.66 6.09 11.32 6 12 6m-1.07 1.14L13 9.21c.57.25 1.03.71 1.28 1.28l2.07 2.07c.08-.34.14-.7.14-1.07C16.5 9.01 14.48 7 12 7c-.37 0-.72.05-1.07.14M2.01 3.87l2.68 2.68C3.06 7.83 1.77 9.53 1 11.5 2.73 15.89 7 19 12 19c1.52 0 2.98-.29 4.32-.82l3.42 3.42 1.41-1.41L3.42 2.45zm7.5 7.5 2.61 2.61c-.04.01-.08.02-.12.02-1.38 0-2.5-1.12-2.5-2.5 0-.05.01-.08.01-.13m-3.4-3.4 1.75 1.75c-.23.55-.36 1.15-.36 1.78 0 2.48 2.02 4.5 4.5 4.5.63 0 1.23-.13 1.77-.36l.98.98c-.88.24-1.8.38-2.75.38-3.79 0-7.17-2.13-8.82-5.5.7-1.43 1.72-2.61 2.93-3.53"
     }), "VisibilityOffOutlined");
     // src/Components/Tables/Agent/Elements/ActionCell.tsx
-    var import_jsx_runtime89 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime98 = __toESM(require_jsx_runtime());
     var _obj3;
     var MAP_ACTION_TYPE_TO_ICON = (_obj3 = {}, // input
-    _define_property(_obj3, "FILL" /* Fill */ , /* @__PURE__ */ (0, import_jsx_runtime89.jsx)(EditOutlined_default, {
+    _define_property(_obj3, "FILL" /* Fill */ , /* @__PURE__ */ (0, import_jsx_runtime98.jsx)(EditOutlined_default, {
         sx: {
             mr: 1.5
         },
         fontSize: "small"
-    })), _define_property(_obj3, "TYPE" /* Type */ , /* @__PURE__ */ (0, import_jsx_runtime89.jsx)(EditOutlined_default, {
+    })), _define_property(_obj3, "TYPE" /* Type */ , /* @__PURE__ */ (0, import_jsx_runtime98.jsx)(EditOutlined_default, {
         sx: {
             mr: 1.5
         },
         fontSize: "small"
-    })), _define_property(_obj3, "SELECT" /* Select */ , /* @__PURE__ */ (0, import_jsx_runtime89.jsx)(EditOutlined_default, {
+    })), _define_property(_obj3, "SELECT" /* Select */ , /* @__PURE__ */ (0, import_jsx_runtime98.jsx)(EditOutlined_default, {
         sx: {
             mr: 1.5
         },
         fontSize: "small"
     })), // action
-    _define_property(_obj3, "CLICK" /* Click */ , /* @__PURE__ */ (0, import_jsx_runtime89.jsx)(MouseOutlined_default, {
+    _define_property(_obj3, "CLICK" /* Click */ , /* @__PURE__ */ (0, import_jsx_runtime98.jsx)(MouseOutlined_default, {
         sx: {
             mr: 1.5
         },
         fontSize: "small"
-    })), _define_property(_obj3, "HOVER" /* Hover */ , /* @__PURE__ */ (0, import_jsx_runtime89.jsx)(MouseOutlined_default, {
+    })), _define_property(_obj3, "HOVER" /* Hover */ , /* @__PURE__ */ (0, import_jsx_runtime98.jsx)(MouseOutlined_default, {
         sx: {
             mr: 1.5
         },
         fontSize: "small"
     })), // assert
-    _define_property(_obj3, "TEXT" /* Text */ , /* @__PURE__ */ (0, import_jsx_runtime89.jsx)(VisibilityOutlined_default, {
+    _define_property(_obj3, "TEXT" /* Text */ , /* @__PURE__ */ (0, import_jsx_runtime98.jsx)(VisibilityOutlined_default, {
         sx: {
             mr: 1.5
         },
         fontSize: "small"
-    })), _define_property(_obj3, "VALUE" /* Value */ , /* @__PURE__ */ (0, import_jsx_runtime89.jsx)(VisibilityOutlined_default, {
+    })), _define_property(_obj3, "VALUE" /* Value */ , /* @__PURE__ */ (0, import_jsx_runtime98.jsx)(VisibilityOutlined_default, {
         sx: {
             mr: 1.5
         },
         fontSize: "small"
-    })), _define_property(_obj3, "HIDDEN" /* Hidden */ , /* @__PURE__ */ (0, import_jsx_runtime89.jsx)(VisibilityOffOutlined_default, {
+    })), _define_property(_obj3, "HIDDEN" /* Hidden */ , /* @__PURE__ */ (0, import_jsx_runtime98.jsx)(VisibilityOffOutlined_default, {
         sx: {
             mr: 1.5
         },
         fontSize: "small"
-    })), _define_property(_obj3, "VISIBLE" /* Visible */ , /* @__PURE__ */ (0, import_jsx_runtime89.jsx)(VisibilityOutlined_default, {
+    })), _define_property(_obj3, "VISIBLE" /* Visible */ , /* @__PURE__ */ (0, import_jsx_runtime98.jsx)(VisibilityOutlined_default, {
         sx: {
             mr: 1.5
         },
         fontSize: "small"
-    })), _define_property(_obj3, "CHECKED" /* Checked */ , /* @__PURE__ */ (0, import_jsx_runtime89.jsx)(CheckBoxOutlined_default, {
+    })), _define_property(_obj3, "CHECKED" /* Checked */ , /* @__PURE__ */ (0, import_jsx_runtime98.jsx)(CheckBoxOutlined_default, {
         sx: {
             mr: 1.5
         },
         fontSize: "small"
-    })), _define_property(_obj3, "ENABLED" /* Enabled */ , /* @__PURE__ */ (0, import_jsx_runtime89.jsx)(ToggleOn_default, {
+    })), _define_property(_obj3, "ENABLED" /* Enabled */ , /* @__PURE__ */ (0, import_jsx_runtime98.jsx)(ToggleOn_default, {
         sx: {
             mr: 1.5
         },
         fontSize: "small"
-    })), _define_property(_obj3, "DISABLED" /* Disabled */ , /* @__PURE__ */ (0, import_jsx_runtime89.jsx)(DoNotTouchOutlined_default, {
+    })), _define_property(_obj3, "DISABLED" /* Disabled */ , /* @__PURE__ */ (0, import_jsx_runtime98.jsx)(DoNotTouchOutlined_default, {
         sx: {
             mr: 1.5
         },
         fontSize: "small"
-    })), _define_property(_obj3, "UNCHECKED" /* Unchecked */ , /* @__PURE__ */ (0, import_jsx_runtime89.jsx)(CheckBoxOutlineBlank_default, {
+    })), _define_property(_obj3, "UNCHECKED" /* Unchecked */ , /* @__PURE__ */ (0, import_jsx_runtime98.jsx)(CheckBoxOutlineBlank_default, {
         sx: {
             mr: 1.5
         },
@@ -49080,16 +50078,16 @@ var agent = function() {
     })), _obj3);
     var ActionCell = function(param) {
         var type = param.type;
-        return /* @__PURE__ */ (0, import_jsx_runtime89.jsx)(BaseTableCell, {
+        return /* @__PURE__ */ (0, import_jsx_runtime98.jsx)(BaseTableCell, {
             text: normalizeActionType(type),
             icon: MAP_ACTION_TYPE_TO_ICON[type]
         });
     };
     // src/Components/Tables/BaseTableRow.tsx
-    var import_jsx_runtime90 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime99 = __toESM(require_jsx_runtime());
     var BaseTableRow = function(param) {
         var cells = param.cells;
-        return /* @__PURE__ */ (0, import_jsx_runtime90.jsx)(TableRow_default, {
+        return /* @__PURE__ */ (0, import_jsx_runtime99.jsx)(TableRow_default, {
             hover: true,
             sx: {
                 "&:last-child td, &:last-child th": {
@@ -49097,7 +50095,7 @@ var agent = function() {
                 }
             },
             children: cells.map(function(cell, index) {
-                return /* @__PURE__ */ (0, import_jsx_runtime90.jsx)(TableCell_default, {
+                return /* @__PURE__ */ (0, import_jsx_runtime99.jsx)(TableCell_default, {
                     align: cell.align || "left",
                     children: cell.value
                 }, index);
@@ -49105,13 +50103,13 @@ var agent = function() {
         });
     };
     // src/Components/Tables/Agent/Elements/ActionCoverageTableRow.tsx
-    var import_jsx_runtime91 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime100 = __toESM(require_jsx_runtime());
     var ActionCoverageTableRow = function(param) {
         var action = param.action;
-        return /* @__PURE__ */ (0, import_jsx_runtime91.jsx)(BaseTableRow, {
+        return /* @__PURE__ */ (0, import_jsx_runtime100.jsx)(BaseTableRow, {
             cells: [
                 {
-                    value: /* @__PURE__ */ (0, import_jsx_runtime91.jsx)(ActionCell, {
+                    value: /* @__PURE__ */ (0, import_jsx_runtime100.jsx)(ActionCell, {
                         type: action.type
                     })
                 },
@@ -49122,7 +50120,7 @@ var agent = function() {
         });
     };
     // src/Components/Tables/BaseTableHeader.tsx
-    var import_jsx_runtime92 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime101 = __toESM(require_jsx_runtime());
     var BaseTableHeader = function(props) {
         var cells = props.cells, orderBy = props.orderBy, setOrderBy = props.setOrderBy, orderDirection = props.orderDirection, setOrderDirection = props.setOrderDirection;
         var onOrder = function(key) {
@@ -49131,17 +50129,17 @@ var agent = function() {
                 setOrderDirection(orderDirection === "asc" ? "desc" : "asc");
             };
         };
-        return /* @__PURE__ */ (0, import_jsx_runtime92.jsx)(TableHead_default, {
-            children: /* @__PURE__ */ (0, import_jsx_runtime92.jsx)(TableRow_default, {
+        return /* @__PURE__ */ (0, import_jsx_runtime101.jsx)(TableHead_default, {
+            children: /* @__PURE__ */ (0, import_jsx_runtime101.jsx)(TableRow_default, {
                 children: cells.map(function(cell, index) {
-                    return /* @__PURE__ */ (0, import_jsx_runtime92.jsx)(TableCell_default, {
+                    return /* @__PURE__ */ (0, import_jsx_runtime101.jsx)(TableCell_default, {
                         align: cell.align || "left",
                         sx: {
                             whiteSpace: "nowrap",
                             pt: 2,
                             pb: 2
                         },
-                        children: cell.orderKey ? /* @__PURE__ */ (0, import_jsx_runtime92.jsx)(TableSortLabel_default, {
+                        children: cell.orderKey ? /* @__PURE__ */ (0, import_jsx_runtime101.jsx)(TableSortLabel_default, {
                             active: orderBy === cell.orderKey,
                             direction: orderDirection,
                             onClick: onOrder(cell.orderKey),
@@ -49153,10 +50151,10 @@ var agent = function() {
         });
     };
     // src/Components/Tables/Agent/Elements/ActionCoverageTableHeader.tsx
-    var import_jsx_runtime93 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime102 = __toESM(require_jsx_runtime());
     var ActionCoverageTableHeader = function(props) {
         var orderBy = props.orderBy, setOrderBy = props.setOrderBy, orderDirection = props.orderDirection, setOrderDirection = props.setOrderDirection;
-        return /* @__PURE__ */ (0, import_jsx_runtime93.jsx)(BaseTableHeader, {
+        return /* @__PURE__ */ (0, import_jsx_runtime102.jsx)(BaseTableHeader, {
             cells: [
                 {
                     value: "Action",
@@ -49174,19 +50172,19 @@ var agent = function() {
         });
     };
     // src/Components/Tables/BaseTable.tsx
-    var import_jsx_runtime94 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime103 = __toESM(require_jsx_runtime());
     var BaseTable = function(props) {
         var header = props.header, children = props.children, containerSx = props.containerSx;
-        return /* @__PURE__ */ (0, import_jsx_runtime94.jsx)(TableContainer_default, {
+        return /* @__PURE__ */ (0, import_jsx_runtime103.jsx)(TableContainer_default, {
             component: Paper_default,
             sx: _object_spread_props(_object_spread({}, containerSx), {
                 width: "100%"
             }),
-            children: /* @__PURE__ */ (0, import_jsx_runtime94.jsxs)(Table_default, {
+            children: /* @__PURE__ */ (0, import_jsx_runtime103.jsxs)(Table_default, {
                 size: "small",
                 children: [
                     header,
-                    /* @__PURE__ */ (0, import_jsx_runtime94.jsx)(TableBody_default, {
+                    /* @__PURE__ */ (0, import_jsx_runtime103.jsx)(TableBody_default, {
                         children: children
                     })
                 ]
@@ -49194,76 +50192,76 @@ var agent = function() {
         });
     };
     // src/Components/Tables/Agent/Elements/ActionCoverageTable.tsx
-    var import_jsx_runtime95 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime104 = __toESM(require_jsx_runtime());
     var ActionCoverageTable = function(param) {
         var actions = param.actions;
         var _useTableSorting = useTableSorting({
             items: actions
         }), sortedItems = _useTableSorting.sortedItems, orderBy = _useTableSorting.orderBy, setOrderBy = _useTableSorting.setOrderBy, orderDirection = _useTableSorting.orderDirection, setOrderDirection = _useTableSorting.setOrderDirection;
-        return /* @__PURE__ */ (0, import_jsx_runtime95.jsx)(BaseTable, {
+        return /* @__PURE__ */ (0, import_jsx_runtime104.jsx)(BaseTable, {
             containerSx: {
                 mt: 3
             },
-            header: /* @__PURE__ */ (0, import_jsx_runtime95.jsx)(ActionCoverageTableHeader, {
+            header: /* @__PURE__ */ (0, import_jsx_runtime104.jsx)(ActionCoverageTableHeader, {
                 orderBy: orderBy,
                 setOrderBy: setOrderBy,
                 orderDirection: orderDirection,
                 setOrderDirection: setOrderDirection
             }),
             children: sortedItems.map(function(action, index) {
-                return /* @__PURE__ */ (0, import_jsx_runtime95.jsx)(ActionCoverageTableRow, {
+                return /* @__PURE__ */ (0, import_jsx_runtime104.jsx)(ActionCoverageTableRow, {
                     action: action
                 }, index);
             })
         });
     };
     // src/Views/Agent/Elements/ElementDetailsView.tsx
-    var import_jsx_runtime96 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime105 = __toESM(require_jsx_runtime());
     var ElementDetailsView = function(param) {
         var element = param.element;
-        return /* @__PURE__ */ (0, import_jsx_runtime96.jsxs)(Box_default, {
+        return /* @__PURE__ */ (0, import_jsx_runtime105.jsxs)(Box_default, {
             children: [
-                /* @__PURE__ */ (0, import_jsx_runtime96.jsxs)(WidgetInfoRowsView, {
+                /* @__PURE__ */ (0, import_jsx_runtime105.jsxs)(WidgetInfoRowsView, {
                     containerSx: {
                         mt: 0
                     },
                     children: [
-                        /* @__PURE__ */ (0, import_jsx_runtime96.jsx)(BaseInfoRowView, {
+                        /* @__PURE__ */ (0, import_jsx_runtime105.jsx)(BaseInfoRowView, {
                             name: "Selector",
                             value: element.selector
                         }),
-                        /* @__PURE__ */ (0, import_jsx_runtime96.jsx)(BaseInfoRowView, {
+                        /* @__PURE__ */ (0, import_jsx_runtime105.jsx)(BaseInfoRowView, {
                             name: "Selector type",
                             value: element.selectorType
                         })
                     ]
                 }),
-                /* @__PURE__ */ (0, import_jsx_runtime96.jsx)(ActionCoverageTable, {
+                /* @__PURE__ */ (0, import_jsx_runtime105.jsx)(ActionCoverageTable, {
                     actions: element.actions
                 }),
-                /* @__PURE__ */ (0, import_jsx_runtime96.jsx)(ElementHistoryChartView, {
+                /* @__PURE__ */ (0, import_jsx_runtime105.jsx)(ElementHistoryChartView, {
                     history: element.history
                 })
             ]
         });
     };
     // src/Components/Modals/Agent/Elements/ElementDetailsModal.tsx
-    var import_jsx_runtime97 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime106 = __toESM(require_jsx_runtime());
     var ElementDetailsModal = function(param) {
         var sx = param.sx, modal = param.modal, setModal = param.setModal, element = param.element;
-        return /* @__PURE__ */ (0, import_jsx_runtime97.jsx)(BaseModal, {
+        return /* @__PURE__ */ (0, import_jsx_runtime106.jsx)(BaseModal, {
             sx: sx,
             title: "Element details",
             modal: modal,
             setModal: setModal,
             maxWidth: "md",
-            children: /* @__PURE__ */ (0, import_jsx_runtime97.jsx)(ElementDetailsView, {
+            children: /* @__PURE__ */ (0, import_jsx_runtime106.jsx)(ElementDetailsView, {
                 element: element
             })
         });
     };
     // src/Views/Agent/Elements/ElementView.tsx
-    var import_jsx_runtime98 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime107 = __toESM(require_jsx_runtime());
     var ElementView = function(param) {
         var element = param.element;
         var _state_settings;
@@ -49273,22 +50271,22 @@ var agent = function() {
             value: element.selector,
             settings: state.settings
         }), node2 = _useElement.node;
-        var _ref = _sliced_to_array((0, import_react30.useState)(false), 2), elementDetailsModal = _ref[0], setElementDetailsModal = _ref[1];
+        var _ref = _sliced_to_array((0, import_react31.useState)(false), 2), elementDetailsModal = _ref[0], setElementDetailsModal = _ref[1];
         if (!node2) return null;
         var onElementDetails = function() {
             return setElementDetailsModal(true);
         };
-        return /* @__PURE__ */ (0, import_jsx_runtime98.jsxs)(BasePopper, {
+        return /* @__PURE__ */ (0, import_jsx_runtime107.jsxs)(BasePopper, {
             anchor: node2,
             children: [
-                /* @__PURE__ */ (0, import_jsx_runtime98.jsx)(IconButton_default, {
+                /* @__PURE__ */ (0, import_jsx_runtime107.jsx)(IconButton_default, {
                     onClick: onElementDetails,
-                    children: /* @__PURE__ */ (0, import_jsx_runtime98.jsx)(Badge_default, {
+                    children: /* @__PURE__ */ (0, import_jsx_runtime107.jsx)(Badge_default, {
                         color: (_state_settings = state.settings) === null || _state_settings === void 0 ? void 0 : _state_settings.badgeColor,
                         badgeContent: element.actions.length
                     })
                 }),
-                /* @__PURE__ */ (0, import_jsx_runtime98.jsx)(ElementDetailsModal, {
+                /* @__PURE__ */ (0, import_jsx_runtime107.jsx)(ElementDetailsModal, {
                     sx: {
                         zIndex: 1900
                     },
@@ -49300,28 +50298,74 @@ var agent = function() {
         });
     };
     // src/Views/Agent/Elements/ElementsView.tsx
-    var import_jsx_runtime99 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime108 = __toESM(require_jsx_runtime());
     var ElementsView = function() {
         var _state_elements;
         var state = useAgentInitialState().state;
-        return /* @__PURE__ */ (0, import_jsx_runtime99.jsx)(import_react31.Fragment, {
+        return /* @__PURE__ */ (0, import_jsx_runtime108.jsx)(import_react32.Fragment, {
             children: state === null || state === void 0 ? void 0 : (_state_elements = state.elements) === null || _state_elements === void 0 ? void 0 : _state_elements.map(function(element, index) {
-                return /* @__PURE__ */ (0, import_jsx_runtime99.jsx)(ElementView, {
+                return /* @__PURE__ */ (0, import_jsx_runtime108.jsx)(ElementView, {
                     element: element
                 }, index);
             })
         });
     };
+    // src/Providers/AgentThemeProvider.tsx
+    var import_react34 = __toESM(require_react());
+    // src/Providers/ThemeProvider.tsx
+    var import_react33 = __toESM(require_react());
+    var import_jsx_runtime109 = __toESM(require_jsx_runtime());
+    var darkTheme = createTheme2({
+        palette: {
+            mode: "dark" /* Dark */ 
+        },
+        components: {
+            MuiPaper: {
+                defaultProps: {
+                    elevation: 5
+                }
+            }
+        }
+    });
+    var lightTheme = createTheme2({
+        palette: {
+            mode: "light" /* Light */ 
+        },
+        components: {
+            MuiPaper: {
+                defaultProps: {
+                    elevation: 2
+                }
+            }
+        }
+    });
+    var ThemeContext3 = (0, import_react33.createContext)(null);
+    // src/Providers/AgentThemeProvider.tsx
+    var import_jsx_runtime110 = __toESM(require_jsx_runtime());
+    var AgentThemeContext = (0, import_react34.createContext)(null);
+    var AgentThemeProvider = function(param) {
+        var children = param.children;
+        var state = useAgentInitialState().state;
+        return /* @__PURE__ */ (0, import_jsx_runtime110.jsx)(AgentThemeContext.Provider, {
+            value: null,
+            children: /* @__PURE__ */ (0, import_jsx_runtime110.jsx)(ThemeProvider4, {
+                theme: state.themeMode === "light" /* Light */  ? lightTheme : darkTheme,
+                children: children
+            })
+        });
+    };
     // src/agent.index.tsx
-    var import_jsx_runtime100 = __toESM(require_jsx_runtime());
+    var import_jsx_runtime111 = __toESM(require_jsx_runtime());
     var IndexAgent = function() {
-        return /* @__PURE__ */ (0, import_jsx_runtime100.jsx)(AgentInitialStateProvider, {
-            children: /* @__PURE__ */ (0, import_jsx_runtime100.jsx)(ElementsView, {})
+        return /* @__PURE__ */ (0, import_jsx_runtime111.jsx)(AgentInitialStateProvider, {
+            children: /* @__PURE__ */ (0, import_jsx_runtime111.jsx)(AgentThemeProvider, {
+                children: /* @__PURE__ */ (0, import_jsx_runtime111.jsx)(ElementsView, {})
+            })
         });
     };
     document.addEventListener("DOMContentLoaded", function() {
         watchFrameRoot(function() {
-            return /* @__PURE__ */ (0, import_jsx_runtime100.jsx)(IndexAgent, {});
+            return /* @__PURE__ */ (0, import_jsx_runtime111.jsx)(IndexAgent, {});
         });
     });
 }(); /*! Bundled license information:
@@ -49415,6 +50459,15 @@ lodash/lodash.js:
 @mui/styled-engine/index.js:
   (**
    * @mui/styled-engine v6.4.11
+   *
+   * @license MIT
+   * This source code is licensed under the MIT license found in the
+   * LICENSE file in the root directory of this source tree.
+   *)
+
+@mui/private-theming/index.js:
+  (**
+   * @mui/private-theming v6.4.9
    *
    * @license MIT
    * This source code is licensed under the MIT license found in the
