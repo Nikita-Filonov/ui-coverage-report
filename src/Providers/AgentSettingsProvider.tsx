@@ -1,11 +1,12 @@
 import { createContext, FC, PropsWithChildren, useContext, useState } from 'react';
 import { Color } from '../Models/Core';
-import { AgentSettings } from '../Models/Agent';
+import { AgentBadgeContentType, AgentSettings } from '../Models/Agent';
 import { loadFromStorage, saveIntoStorage, StorageKey } from '../Services/Storage';
 
 const DEFAULT_AGENT_SETTINGS: AgentSettings = {
   badgeColor: Color.Primary,
-  overlayColor: Color.Error
+  overlayColor: Color.Error,
+  badgeContentType: AgentBadgeContentType.TotalNumberOfActionTypes
 };
 
 export type AgentSettingsContextProps = {
