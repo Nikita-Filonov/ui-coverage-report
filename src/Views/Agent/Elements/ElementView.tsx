@@ -1,11 +1,11 @@
 import { FC, useState } from 'react';
-import { Badge } from '@mui/material';
 import { ElementCoverage } from '../../../Models/Coverage/Coverage';
 import { useElement } from '../../../Services/Frame/Element';
 import { BasePopper } from '../../../Components/Poppers/BasePopper';
 import { ElementDetailsModal } from '../../../Components/Modals/Agent/Elements/ElementDetailsModal';
 import IconButton from '@mui/material/IconButton';
 import { useAgentInitialState } from '../../../Providers/AgentInitialStateProvider';
+import { ElementBadge } from '../../../Components/Badges/Agent/Elements/ElementBadge';
 
 type Props = {
   element: ElementCoverage;
@@ -23,7 +23,7 @@ export const ElementView: FC<Props> = ({ element }) => {
   return (
     <BasePopper anchor={node}>
       <IconButton onClick={onElementDetails}>
-        <Badge color={state.settings?.badgeColor} badgeContent={element.actions.length} />
+        <ElementBadge actions={element.actions} settings={state.settings} />
       </IconButton>
       <ElementDetailsModal
         sx={{ zIndex: 1900 }}
