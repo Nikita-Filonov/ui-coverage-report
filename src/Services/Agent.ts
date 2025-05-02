@@ -5,6 +5,7 @@ import { useAgentFilters } from '../Providers/AgentFiltersProvider';
 import { useAgentSettings } from '../Providers/AgentSettingsProvider';
 import { useInitialState } from '../Providers/InitialStateProvider';
 import { useTheme } from '../Providers/ThemeProvider';
+import { SettingsManager } from './Config';
 
 type UseAgentActionsProps = {
   frameRef: RefObject<HTMLIFrameElement | null>;
@@ -29,10 +30,10 @@ export const useAgentActions = ({ frameRef }: UseAgentActionsProps) => {
 
   const onSyncAgent = () => {
     const elements = filterElementCoverageByActions({ elements: appCoverage.elements, actions: filters.actions });
-    postMessage({ settings, elements, themeMode });
+    postMessage({ type: SettingsManager.agentType, settings, elements, themeMode });
   };
 
-  const onClearAgent = () => postMessage({ settings, elements: [], themeMode });
+  const onClearAgent = () => postMessage({ type: SettingsManager.agentType, settings, elements: [], themeMode });
 
   return { onSyncAgent, onClearAgent };
 };

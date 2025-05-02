@@ -1,5 +1,6 @@
 import { createContext, FC, PropsWithChildren, useCallback, useContext, useEffect, useState } from 'react';
 import { AgentState } from '../Models/Agent';
+import { SettingsManager } from '../Services/Config';
 
 export type AgentInitialStateContextProps = {
   state: AgentState;
@@ -11,7 +12,7 @@ const AgentInitialStateProvider: FC<PropsWithChildren> = ({ children }) => {
   const [state, setState] = useState<AgentState>({});
 
   const listener = useCallback((event: MessageEvent<AgentState>) => {
-    if (event?.data) {
+    if (event?.data && event?.data?.type === SettingsManager.agentType) {
       setState(event.data);
     }
   }, []);

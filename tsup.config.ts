@@ -9,6 +9,7 @@ export default defineConfig({
   },
   define: {
     'process.env.NODE_ENV': '"production"',
+    'process.env.REACT_APP_AGENT_TYPE': JSON.stringify(process.env.REACT_APP_AGENT_TYPE || ''),
     'process.env.REACT_APP_REPOSITORY_URL': JSON.stringify(process.env.REACT_APP_REPOSITORY_URL || ''),
     'process.env.REACT_APP_API_DATE_FORMAT': JSON.stringify(process.env.REACT_APP_API_DATE_FORMAT || ''),
     'process.env.REACT_APP_API_TIME_FORMAT': JSON.stringify(process.env.REACT_APP_API_TIME_FORMAT || '')

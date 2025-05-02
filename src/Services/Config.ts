@@ -1,4 +1,6 @@
 export interface Config {
+  agentType: string;
+
   repositoryUrl: string;
 
   apiDateFormat: string;
@@ -7,6 +9,8 @@ export interface Config {
 
 export class SettingsManager {
   private static config: Config = {
+    agentType: '',
+
     repositoryUrl: '',
 
     apiDateFormat: '',
@@ -19,11 +23,17 @@ export class SettingsManager {
 
   private static getEnvConfig(): Config {
     return {
+      agentType: process.env.REACT_APP_AGENT_TYPE || '',
+
       repositoryUrl: process.env.REACT_APP_REPOSITORY_URL || '',
 
       apiDateFormat: process.env.REACT_APP_API_DATE_FORMAT || '',
       apiTimeFormat: process.env.REACT_APP_API_TIME_FORMAT || ''
     };
+  }
+
+  static get agentType(): string {
+    return this.config.agentType;
   }
 
   static get repositoryUrl(): string {

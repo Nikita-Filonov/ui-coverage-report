@@ -19,6 +19,7 @@ export interface AgentSettings {
 }
 
 export interface AgentState {
+  type?: string;
   settings?: AgentSettings;
   elements?: ElementCoverage[];
   themeMode?: ThemeMode;
