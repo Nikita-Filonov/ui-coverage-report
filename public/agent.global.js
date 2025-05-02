@@ -18503,12 +18503,55 @@ var agent = (() => {
 
   // src/Providers/AgentInitialStateProvider.tsx
   var import_react = __toESM(require_react());
+
+  // src/Services/Config.ts
+  var SettingsManager = class {
+    static setup() {
+      this.config = this.getEnvConfig();
+    }
+    static getEnvConfig() {
+      return {
+        agentType: "ui-coverage-report",
+        repositoryUrl: "https://raw.githubusercontent.com/Nikita-Filonov/ui-coverage-report",
+        apiDateFormat: "YYYY-MM-DD",
+        apiTimeFormat: "HH:mm"
+      };
+    }
+    static get agentType() {
+      return this.config.agentType;
+    }
+    static get repositoryUrl() {
+      return this.config.repositoryUrl;
+    }
+    static get apiDateFormat() {
+      return this.config.apiDateFormat;
+    }
+    static get apiTimeFormat() {
+      return this.config.apiTimeFormat;
+    }
+    static get apiDateTimeFormat() {
+      return `${this.apiDateFormat} ${this.apiTimeFormat}`;
+    }
+    static getStaticFileUrl(file) {
+      return `${this.repositoryUrl}/main/static/${file}`;
+    }
+  };
+  SettingsManager.config = {
+    agentType: "",
+    repositoryUrl: "",
+    apiDateFormat: "",
+    apiTimeFormat: ""
+  };
+  SettingsManager.setup();
+
+  // src/Providers/AgentInitialStateProvider.tsx
   var import_jsx_runtime = __toESM(require_jsx_runtime());
   var AgentInitialStateContext = (0, import_react.createContext)(null);
   var AgentInitialStateProvider = ({ children }) => {
     const [state, setState] = (0, import_react.useState)({});
     const listener = (0, import_react.useCallback)((event) => {
-      if (event == null ? void 0 : event.data) {
+      var _a;
+      if ((event == null ? void 0 : event.data) && ((_a = event == null ? void 0 : event.data) == null ? void 0 : _a.type) === SettingsManager.agentType) {
         setState(event.data);
       }
     }, []);
@@ -48196,43 +48239,6 @@ To suppress this warning, you need to explicitly provide the \`palette.${key}Cha
 
   // src/Services/Charts.ts
   var import_dayjs = __toESM(require_dayjs_min());
-
-  // src/Services/Config.ts
-  var SettingsManager = class {
-    static setup() {
-      this.config = this.getEnvConfig();
-    }
-    static getEnvConfig() {
-      return {
-        repositoryUrl: "https://raw.githubusercontent.com/Nikita-Filonov/ui-coverage-report",
-        apiDateFormat: "YYYY-MM-DD",
-        apiTimeFormat: "HH:mm"
-      };
-    }
-    static get repositoryUrl() {
-      return this.config.repositoryUrl;
-    }
-    static get apiDateFormat() {
-      return this.config.apiDateFormat;
-    }
-    static get apiTimeFormat() {
-      return this.config.apiTimeFormat;
-    }
-    static get apiDateTimeFormat() {
-      return `${this.apiDateFormat} ${this.apiTimeFormat}`;
-    }
-    static getStaticFileUrl(file) {
-      return `${this.repositoryUrl}/main/static/${file}`;
-    }
-  };
-  SettingsManager.config = {
-    repositoryUrl: "",
-    apiDateFormat: "",
-    apiTimeFormat: ""
-  };
-  SettingsManager.setup();
-
-  // src/Services/Charts.ts
   var dateTimeValueFormatter = (value) => (0, import_dayjs.default)(value).format(SettingsManager.apiDateTimeFormat);
 
   // src/Models/Actions.ts
