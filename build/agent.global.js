@@ -18503,12 +18503,55 @@ var agent = (() => {
 
   // src/Providers/AgentInitialStateProvider.tsx
   var import_react = __toESM(require_react());
+
+  // src/Services/Config.ts
+  var SettingsManager = class {
+    static setup() {
+      this.config = this.getEnvConfig();
+    }
+    static getEnvConfig() {
+      return {
+        agentType: "ui-coverage-report",
+        repositoryUrl: "https://raw.githubusercontent.com/Nikita-Filonov/ui-coverage-report",
+        apiDateFormat: "YYYY-MM-DD",
+        apiTimeFormat: "HH:mm"
+      };
+    }
+    static get agentType() {
+      return this.config.agentType;
+    }
+    static get repositoryUrl() {
+      return this.config.repositoryUrl;
+    }
+    static get apiDateFormat() {
+      return this.config.apiDateFormat;
+    }
+    static get apiTimeFormat() {
+      return this.config.apiTimeFormat;
+    }
+    static get apiDateTimeFormat() {
+      return `${this.apiDateFormat} ${this.apiTimeFormat}`;
+    }
+    static getStaticFileUrl(file) {
+      return `${this.repositoryUrl}/main/static/${file}`;
+    }
+  };
+  SettingsManager.config = {
+    agentType: "",
+    repositoryUrl: "",
+    apiDateFormat: "",
+    apiTimeFormat: ""
+  };
+  SettingsManager.setup();
+
+  // src/Providers/AgentInitialStateProvider.tsx
   var import_jsx_runtime = __toESM(require_jsx_runtime());
   var AgentInitialStateContext = (0, import_react.createContext)(null);
   var AgentInitialStateProvider = ({ children }) => {
     const [state, setState] = (0, import_react.useState)({});
     const listener = (0, import_react.useCallback)((event) => {
-      if (event == null ? void 0 : event.data) {
+      var _a;
+      if ((event == null ? void 0 : event.data) && ((_a = event == null ? void 0 : event.data) == null ? void 0 : _a.type) === SettingsManager.agentType) {
         setState(event.data);
       }
     }, []);
@@ -18685,6 +18728,9 @@ var agent = (() => {
   };
 
   // src/Services/Frame/Element.ts
+  var isVisualElement = (node2) => {
+    return node2 instanceof HTMLElement || node2 instanceof SVGElement;
+  };
   var getElementByXpath = (selector) => {
     return document.evaluate(selector, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
   };
@@ -18703,7 +18749,7 @@ var agent = (() => {
       default:
         return null;
     }
-    return node2 instanceof HTMLElement ? node2 : null;
+    return isVisualElement(node2) ? node2 : null;
   };
   var MAP_COLOR_TO_BORDER_COLOR = {
     ["info" /* Info */]: blue_default["300"],
@@ -20053,10 +20099,10 @@ var agent = (() => {
     }
     return React3.createElement.apply(null, createElementArgArray);
   };
-  (function(_jsx88) {
+  (function(_jsx92) {
     var JSX;
     /* @__PURE__ */ (function(_JSX) {
-    })(JSX || (JSX = _jsx88.JSX || (_jsx88.JSX = {})));
+    })(JSX || (JSX = _jsx92.JSX || (_jsx92.JSX = {})));
   })(jsx2 || (jsx2 = {}));
   var Global = /* @__PURE__ */ withEmotionCache(function(props, cache) {
     var styles2 = props.styles;
@@ -48196,43 +48242,6 @@ To suppress this warning, you need to explicitly provide the \`palette.${key}Cha
 
   // src/Services/Charts.ts
   var import_dayjs = __toESM(require_dayjs_min());
-
-  // src/Services/Config.ts
-  var SettingsManager = class {
-    static setup() {
-      this.config = this.getEnvConfig();
-    }
-    static getEnvConfig() {
-      return {
-        repositoryUrl: "https://raw.githubusercontent.com/Nikita-Filonov/ui-coverage-report",
-        apiDateFormat: "YYYY-MM-DD",
-        apiTimeFormat: "HH:mm"
-      };
-    }
-    static get repositoryUrl() {
-      return this.config.repositoryUrl;
-    }
-    static get apiDateFormat() {
-      return this.config.apiDateFormat;
-    }
-    static get apiTimeFormat() {
-      return this.config.apiTimeFormat;
-    }
-    static get apiDateTimeFormat() {
-      return `${this.apiDateFormat} ${this.apiTimeFormat}`;
-    }
-    static getStaticFileUrl(file) {
-      return `${this.repositoryUrl}/main/static/${file}`;
-    }
-  };
-  SettingsManager.config = {
-    repositoryUrl: "",
-    apiDateFormat: "",
-    apiTimeFormat: ""
-  };
-  SettingsManager.setup();
-
-  // src/Services/Charts.ts
   var dateTimeValueFormatter = (value) => (0, import_dayjs.default)(value).format(SettingsManager.apiDateTimeFormat);
 
   // src/Models/Actions.ts
@@ -48359,99 +48368,123 @@ To suppress this warning, you need to explicitly provide the \`palette.${key}Cha
     ] });
   };
 
-  // node_modules/@mui/icons-material/esm/MouseOutlined.js
-  var import_jsx_runtime90 = __toESM(require_jsx_runtime());
-  var MouseOutlined_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime90.jsx)("path", {
-    d: "M20 9c-.04-4.39-3.6-7.93-8-7.93S4.04 4.61 4 9v6c0 4.42 3.58 8 8 8s8-3.58 8-8zm-2 0h-5V3.16c2.81.47 4.96 2.9 5 5.84m-7-5.84V9H6c.04-2.94 2.19-5.37 5-5.84M18 15c0 3.31-2.69 6-6 6s-6-2.69-6-6v-4h12z"
-  }), "MouseOutlined");
-
-  // node_modules/@mui/icons-material/esm/EditOutlined.js
-  var import_jsx_runtime91 = __toESM(require_jsx_runtime());
-  var EditOutlined_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime91.jsx)("path", {
-    d: "m14.06 9.02.92.92L5.92 19H5v-.92zM17.66 3c-.25 0-.51.1-.7.29l-1.83 1.83 3.75 3.75 1.83-1.83c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.2-.2-.45-.29-.71-.29m-3.6 3.19L3 17.25V21h3.75L17.81 9.94z"
-  }), "EditOutlined");
-
   // node_modules/@mui/icons-material/esm/ToggleOn.js
-  var import_jsx_runtime92 = __toESM(require_jsx_runtime());
-  var ToggleOn_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime92.jsx)("path", {
+  var import_jsx_runtime90 = __toESM(require_jsx_runtime());
+  var ToggleOn_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime90.jsx)("path", {
     d: "M17 7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h10c2.76 0 5-2.24 5-5s-2.24-5-5-5m0 8c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3"
   }), "ToggleOn");
 
-  // node_modules/@mui/icons-material/esm/DoNotTouchOutlined.js
+  // node_modules/@mui/icons-material/esm/TextFields.js
+  var import_jsx_runtime91 = __toESM(require_jsx_runtime());
+  var TextFields_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime91.jsx)("path", {
+    d: "M2.5 4v3h5v12h3V7h5V4zm19 5h-9v3h3v7h3v-7h3z"
+  }), "TextFields");
+
+  // node_modules/@mui/icons-material/esm/EditOutlined.js
+  var import_jsx_runtime92 = __toESM(require_jsx_runtime());
+  var EditOutlined_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime92.jsx)("path", {
+    d: "m14.06 9.02.92.92L5.92 19H5v-.92zM17.66 3c-.25 0-.51.1-.7.29l-1.83 1.83 3.75 3.75 1.83-1.83c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.2-.2-.45-.29-.71-.29m-3.6 3.19L3 17.25V21h3.75L17.81 9.94z"
+  }), "EditOutlined");
+
+  // node_modules/@mui/icons-material/esm/MouseOutlined.js
   var import_jsx_runtime93 = __toESM(require_jsx_runtime());
-  var DoNotTouchOutlined_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime93.jsx)("path", {
-    d: "M2.81 2.81 1.39 4.22 7 9.83v4.3l-2.6-1.48c-.17-.09-.34-.14-.54-.14-.26 0-.5.09-.7.26L2 13.88l6.8 7.18c.57.6 1.35.94 2.18.94H17c.62 0 1.18-.19 1.66-.52l1.12 1.12 1.41-1.41zM17 20h-6c-.39 0-.64-.23-.75-.36L6.87 16H9v-4.17l8.14 8.14c-.05.01-.09.03-.14.03m-3.17-9H14V3.25c0-.69.56-1.25 1.25-1.25s1.25.56 1.25 1.25V11h1V5.25c0-.69.56-1.25 1.25-1.25S20 4.56 20 5.25v11.92l-2-2V13h-2.17zm-.83-.83V2.25C13 1.56 12.44 1 11.75 1s-1.25.56-1.25 1.25v5.42zm-3.5-3.5V4.25C9.5 3.56 8.94 3 8.25 3c-.67 0-1.2.53-1.24 1.18z"
-  }), "DoNotTouchOutlined");
+  var MouseOutlined_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime93.jsx)("path", {
+    d: "M20 9c-.04-4.39-3.6-7.93-8-7.93S4.04 4.61 4 9v6c0 4.42 3.58 8 8 8s8-3.58 8-8zm-2 0h-5V3.16c2.81.47 4.96 2.9 5 5.84m-7-5.84V9H6c.04-2.94 2.19-5.37 5-5.84M18 15c0 3.31-2.69 6-6 6s-6-2.69-6-6v-4h12z"
+  }), "MouseOutlined");
+
+  // node_modules/@mui/icons-material/esm/LabelOutlined.js
+  var import_jsx_runtime94 = __toESM(require_jsx_runtime());
+  var LabelOutlined_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime94.jsx)("path", {
+    d: "M17.63 5.84C17.27 5.33 16.67 5 16 5L5 5.01C3.9 5.01 3 5.9 3 7v10c0 1.1.9 1.99 2 1.99L16 19c.67 0 1.27-.33 1.63-.84L22 12zM16 17H5V7h11l3.55 5z"
+  }), "LabelOutlined");
 
   // node_modules/@mui/icons-material/esm/CheckBoxOutlined.js
-  var import_jsx_runtime94 = __toESM(require_jsx_runtime());
-  var CheckBoxOutlined_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime94.jsx)("path", {
+  var import_jsx_runtime95 = __toESM(require_jsx_runtime());
+  var CheckBoxOutlined_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime95.jsx)("path", {
     d: "M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2m0 16H5V5h14zM17.99 9l-1.41-1.42-6.59 6.59-2.58-2.57-1.42 1.41 4 3.99z"
   }), "CheckBoxOutlined");
 
-  // node_modules/@mui/icons-material/esm/CheckBoxOutlineBlank.js
-  var import_jsx_runtime95 = __toESM(require_jsx_runtime());
-  var CheckBoxOutlineBlank_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime95.jsx)("path", {
-    d: "M19 5v14H5V5zm0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2"
-  }), "CheckBoxOutlineBlank");
+  // node_modules/@mui/icons-material/esm/PanToolAltOutlined.js
+  var import_jsx_runtime96 = __toESM(require_jsx_runtime());
+  var PanToolAltOutlined_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime96.jsx)("path", {
+    d: "m18.89 11.77-3.8-1.67c-.13-.06-.28-.1-.44-.1H14V5.5C14 4.12 12.88 3 11.5 3S9 4.12 9 5.5v8.15l-1.87-.4c-.19-.03-1.02-.15-1.73.56L4 15.22l5.12 5.19c.37.38.88.59 1.41.59h6.55c.98 0 1.81-.7 1.97-1.67l.92-5.44c.15-.86-.29-1.72-1.08-2.12M17.08 19h-6.55l-3.7-3.78 4.17.89V5.5c0-.28.22-.5.5-.5s.5.22.5.5v6.18h1.76L18 13.56z"
+  }), "PanToolAltOutlined");
 
   // node_modules/@mui/icons-material/esm/VisibilityOutlined.js
-  var import_jsx_runtime96 = __toESM(require_jsx_runtime());
-  var VisibilityOutlined_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime96.jsx)("path", {
+  var import_jsx_runtime97 = __toESM(require_jsx_runtime());
+  var VisibilityOutlined_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime97.jsx)("path", {
     d: "M12 6c3.79 0 7.17 2.13 8.82 5.5C19.17 14.87 15.79 17 12 17s-7.17-2.13-8.82-5.5C4.83 8.13 8.21 6 12 6m0-2C7 4 2.73 7.11 1 11.5 2.73 15.89 7 19 12 19s9.27-3.11 11-7.5C21.27 7.11 17 4 12 4m0 5c1.38 0 2.5 1.12 2.5 2.5S13.38 14 12 14s-2.5-1.12-2.5-2.5S10.62 9 12 9m0-2c-2.48 0-4.5 2.02-4.5 4.5S9.52 16 12 16s4.5-2.02 4.5-4.5S14.48 7 12 7"
   }), "VisibilityOutlined");
 
+  // node_modules/@mui/icons-material/esm/DoNotTouchOutlined.js
+  var import_jsx_runtime98 = __toESM(require_jsx_runtime());
+  var DoNotTouchOutlined_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime98.jsx)("path", {
+    d: "M2.81 2.81 1.39 4.22 7 9.83v4.3l-2.6-1.48c-.17-.09-.34-.14-.54-.14-.26 0-.5.09-.7.26L2 13.88l6.8 7.18c.57.6 1.35.94 2.18.94H17c.62 0 1.18-.19 1.66-.52l1.12 1.12 1.41-1.41zM17 20h-6c-.39 0-.64-.23-.75-.36L6.87 16H9v-4.17l8.14 8.14c-.05.01-.09.03-.14.03m-3.17-9H14V3.25c0-.69.56-1.25 1.25-1.25s1.25.56 1.25 1.25V11h1V5.25c0-.69.56-1.25 1.25-1.25S20 4.56 20 5.25v11.92l-2-2V13h-2.17zm-.83-.83V2.25C13 1.56 12.44 1 11.75 1s-1.25.56-1.25 1.25v5.42zm-3.5-3.5V4.25C9.5 3.56 8.94 3 8.25 3c-.67 0-1.2.53-1.24 1.18z"
+  }), "DoNotTouchOutlined");
+
+  // node_modules/@mui/icons-material/esm/CheckBoxOutlineBlank.js
+  var import_jsx_runtime99 = __toESM(require_jsx_runtime());
+  var CheckBoxOutlineBlank_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime99.jsx)("path", {
+    d: "M19 5v14H5V5zm0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2"
+  }), "CheckBoxOutlineBlank");
+
   // node_modules/@mui/icons-material/esm/VisibilityOffOutlined.js
-  var import_jsx_runtime97 = __toESM(require_jsx_runtime());
-  var VisibilityOffOutlined_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime97.jsx)("path", {
+  var import_jsx_runtime100 = __toESM(require_jsx_runtime());
+  var VisibilityOffOutlined_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime100.jsx)("path", {
     d: "M12 6c3.79 0 7.17 2.13 8.82 5.5-.59 1.22-1.42 2.27-2.41 3.12l1.41 1.41c1.39-1.23 2.49-2.77 3.18-4.53C21.27 7.11 17 4 12 4c-1.27 0-2.49.2-3.64.57l1.65 1.65C10.66 6.09 11.32 6 12 6m-1.07 1.14L13 9.21c.57.25 1.03.71 1.28 1.28l2.07 2.07c.08-.34.14-.7.14-1.07C16.5 9.01 14.48 7 12 7c-.37 0-.72.05-1.07.14M2.01 3.87l2.68 2.68C3.06 7.83 1.77 9.53 1 11.5 2.73 15.89 7 19 12 19c1.52 0 2.98-.29 4.32-.82l3.42 3.42 1.41-1.41L3.42 2.45zm7.5 7.5 2.61 2.61c-.04.01-.08.02-.12.02-1.38 0-2.5-1.12-2.5-2.5 0-.05.01-.08.01-.13m-3.4-3.4 1.75 1.75c-.23.55-.36 1.15-.36 1.78 0 2.48 2.02 4.5 4.5 4.5.63 0 1.23-.13 1.77-.36l.98.98c-.88.24-1.8.38-2.75.38-3.79 0-7.17-2.13-8.82-5.5.7-1.43 1.72-2.61 2.93-3.53"
   }), "VisibilityOffOutlined");
 
+  // node_modules/@mui/icons-material/esm/ArrowDropDownCircleOutlined.js
+  var import_jsx_runtime101 = __toESM(require_jsx_runtime());
+  var ArrowDropDownCircleOutlined_default = createSvgIcon(/* @__PURE__ */ (0, import_jsx_runtime101.jsx)("path", {
+    d: "M12 4c4.41 0 8 3.59 8 8s-3.59 8-8 8-8-3.59-8-8 3.59-8 8-8m0-2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m0 13-4-4h8z"
+  }), "ArrowDropDownCircleOutlined");
+
   // src/Components/Tables/Agent/Elements/ActionCell.tsx
-  var import_jsx_runtime98 = __toESM(require_jsx_runtime());
+  var import_jsx_runtime102 = __toESM(require_jsx_runtime());
   var MAP_ACTION_TYPE_TO_ICON = {
     // input
-    ["FILL" /* Fill */]: /* @__PURE__ */ (0, import_jsx_runtime98.jsx)(EditOutlined_default, { sx: { mr: 1.5 }, fontSize: "small" }),
-    ["TYPE" /* Type */]: /* @__PURE__ */ (0, import_jsx_runtime98.jsx)(EditOutlined_default, { sx: { mr: 1.5 }, fontSize: "small" }),
-    ["SELECT" /* Select */]: /* @__PURE__ */ (0, import_jsx_runtime98.jsx)(EditOutlined_default, { sx: { mr: 1.5 }, fontSize: "small" }),
+    ["FILL" /* Fill */]: /* @__PURE__ */ (0, import_jsx_runtime102.jsx)(EditOutlined_default, { sx: { mr: 1.5 }, fontSize: "small" }),
+    ["TYPE" /* Type */]: /* @__PURE__ */ (0, import_jsx_runtime102.jsx)(EditOutlined_default, { sx: { mr: 1.5 }, fontSize: "small" }),
+    ["SELECT" /* Select */]: /* @__PURE__ */ (0, import_jsx_runtime102.jsx)(ArrowDropDownCircleOutlined_default, { sx: { mr: 1.5 }, fontSize: "small" }),
     // action
-    ["CLICK" /* Click */]: /* @__PURE__ */ (0, import_jsx_runtime98.jsx)(MouseOutlined_default, { sx: { mr: 1.5 }, fontSize: "small" }),
-    ["HOVER" /* Hover */]: /* @__PURE__ */ (0, import_jsx_runtime98.jsx)(MouseOutlined_default, { sx: { mr: 1.5 }, fontSize: "small" }),
+    ["CLICK" /* Click */]: /* @__PURE__ */ (0, import_jsx_runtime102.jsx)(MouseOutlined_default, { sx: { mr: 1.5 }, fontSize: "small" }),
+    ["HOVER" /* Hover */]: /* @__PURE__ */ (0, import_jsx_runtime102.jsx)(PanToolAltOutlined_default, { sx: { mr: 1.5 }, fontSize: "small" }),
     // assert
-    ["TEXT" /* Text */]: /* @__PURE__ */ (0, import_jsx_runtime98.jsx)(VisibilityOutlined_default, { sx: { mr: 1.5 }, fontSize: "small" }),
-    ["VALUE" /* Value */]: /* @__PURE__ */ (0, import_jsx_runtime98.jsx)(VisibilityOutlined_default, { sx: { mr: 1.5 }, fontSize: "small" }),
-    ["HIDDEN" /* Hidden */]: /* @__PURE__ */ (0, import_jsx_runtime98.jsx)(VisibilityOffOutlined_default, { sx: { mr: 1.5 }, fontSize: "small" }),
-    ["VISIBLE" /* Visible */]: /* @__PURE__ */ (0, import_jsx_runtime98.jsx)(VisibilityOutlined_default, { sx: { mr: 1.5 }, fontSize: "small" }),
-    ["CHECKED" /* Checked */]: /* @__PURE__ */ (0, import_jsx_runtime98.jsx)(CheckBoxOutlined_default, { sx: { mr: 1.5 }, fontSize: "small" }),
-    ["ENABLED" /* Enabled */]: /* @__PURE__ */ (0, import_jsx_runtime98.jsx)(ToggleOn_default, { sx: { mr: 1.5 }, fontSize: "small" }),
-    ["DISABLED" /* Disabled */]: /* @__PURE__ */ (0, import_jsx_runtime98.jsx)(DoNotTouchOutlined_default, { sx: { mr: 1.5 }, fontSize: "small" }),
-    ["UNCHECKED" /* Unchecked */]: /* @__PURE__ */ (0, import_jsx_runtime98.jsx)(CheckBoxOutlineBlank_default, { sx: { mr: 1.5 }, fontSize: "small" })
+    ["TEXT" /* Text */]: /* @__PURE__ */ (0, import_jsx_runtime102.jsx)(TextFields_default, { sx: { mr: 1.5 }, fontSize: "small" }),
+    ["VALUE" /* Value */]: /* @__PURE__ */ (0, import_jsx_runtime102.jsx)(LabelOutlined_default, { sx: { mr: 1.5 }, fontSize: "small" }),
+    ["HIDDEN" /* Hidden */]: /* @__PURE__ */ (0, import_jsx_runtime102.jsx)(VisibilityOffOutlined_default, { sx: { mr: 1.5 }, fontSize: "small" }),
+    ["VISIBLE" /* Visible */]: /* @__PURE__ */ (0, import_jsx_runtime102.jsx)(VisibilityOutlined_default, { sx: { mr: 1.5 }, fontSize: "small" }),
+    ["CHECKED" /* Checked */]: /* @__PURE__ */ (0, import_jsx_runtime102.jsx)(CheckBoxOutlined_default, { sx: { mr: 1.5 }, fontSize: "small" }),
+    ["ENABLED" /* Enabled */]: /* @__PURE__ */ (0, import_jsx_runtime102.jsx)(ToggleOn_default, { sx: { mr: 1.5 }, fontSize: "small" }),
+    ["DISABLED" /* Disabled */]: /* @__PURE__ */ (0, import_jsx_runtime102.jsx)(DoNotTouchOutlined_default, { sx: { mr: 1.5 }, fontSize: "small" }),
+    ["UNCHECKED" /* Unchecked */]: /* @__PURE__ */ (0, import_jsx_runtime102.jsx)(CheckBoxOutlineBlank_default, { sx: { mr: 1.5 }, fontSize: "small" })
   };
   var ActionCell = ({ type }) => {
-    return /* @__PURE__ */ (0, import_jsx_runtime98.jsx)(BaseTableCell, { text: normalizeActionType(type), icon: MAP_ACTION_TYPE_TO_ICON[type] });
+    return /* @__PURE__ */ (0, import_jsx_runtime102.jsx)(BaseTableCell, { text: normalizeActionType(type), icon: MAP_ACTION_TYPE_TO_ICON[type] });
   };
 
   // src/Components/Tables/BaseTableRow.tsx
-  var import_jsx_runtime99 = __toESM(require_jsx_runtime());
+  var import_jsx_runtime103 = __toESM(require_jsx_runtime());
   var BaseTableRow = ({ cells }) => {
-    return /* @__PURE__ */ (0, import_jsx_runtime99.jsx)(TableRow_default, { hover: true, sx: { "&:last-child td, &:last-child th": { border: 0 } }, children: cells.map((cell, index) => /* @__PURE__ */ (0, import_jsx_runtime99.jsx)(TableCell_default, { align: cell.align || "left", children: cell.value }, index)) });
+    return /* @__PURE__ */ (0, import_jsx_runtime103.jsx)(TableRow_default, { hover: true, sx: { "&:last-child td, &:last-child th": { border: 0 } }, children: cells.map((cell, index) => /* @__PURE__ */ (0, import_jsx_runtime103.jsx)(TableCell_default, { align: cell.align || "left", children: cell.value }, index)) });
   };
 
   // src/Components/Tables/Agent/Elements/ActionCoverageTableRow.tsx
-  var import_jsx_runtime100 = __toESM(require_jsx_runtime());
+  var import_jsx_runtime104 = __toESM(require_jsx_runtime());
   var ActionCoverageTableRow = ({ action }) => {
-    return /* @__PURE__ */ (0, import_jsx_runtime100.jsx)(BaseTableRow, { cells: [{ value: /* @__PURE__ */ (0, import_jsx_runtime100.jsx)(ActionCell, { type: action.type }) }, { value: action.count }] });
+    return /* @__PURE__ */ (0, import_jsx_runtime104.jsx)(BaseTableRow, { cells: [{ value: /* @__PURE__ */ (0, import_jsx_runtime104.jsx)(ActionCell, { type: action.type }) }, { value: action.count }] });
   };
 
   // src/Components/Tables/BaseTableHeader.tsx
-  var import_jsx_runtime101 = __toESM(require_jsx_runtime());
+  var import_jsx_runtime105 = __toESM(require_jsx_runtime());
   var BaseTableHeader = (props) => {
     const { cells, orderBy, setOrderBy, orderDirection, setOrderDirection } = props;
     const onOrder = (key) => () => {
       setOrderBy(key);
       setOrderDirection(orderDirection === "asc" ? "desc" : "asc");
     };
-    return /* @__PURE__ */ (0, import_jsx_runtime101.jsx)(TableHead_default, { children: /* @__PURE__ */ (0, import_jsx_runtime101.jsx)(TableRow_default, { children: cells.map((cell, index) => /* @__PURE__ */ (0, import_jsx_runtime101.jsx)(TableCell_default, { align: cell.align || "left", sx: { whiteSpace: "nowrap", pt: 2, pb: 2 }, children: cell.orderKey ? /* @__PURE__ */ (0, import_jsx_runtime101.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime105.jsx)(TableHead_default, { children: /* @__PURE__ */ (0, import_jsx_runtime105.jsx)(TableRow_default, { children: cells.map((cell, index) => /* @__PURE__ */ (0, import_jsx_runtime105.jsx)(TableCell_default, { align: cell.align || "left", sx: { whiteSpace: "nowrap", pt: 2, pb: 2 }, children: cell.orderKey ? /* @__PURE__ */ (0, import_jsx_runtime105.jsx)(
       TableSortLabel_default,
       {
         active: orderBy === cell.orderKey,
@@ -48463,10 +48496,10 @@ To suppress this warning, you need to explicitly provide the \`palette.${key}Cha
   };
 
   // src/Components/Tables/Agent/Elements/ActionCoverageTableHeader.tsx
-  var import_jsx_runtime102 = __toESM(require_jsx_runtime());
+  var import_jsx_runtime106 = __toESM(require_jsx_runtime());
   var ActionCoverageTableHeader = (props) => {
     const { orderBy, setOrderBy, orderDirection, setOrderDirection } = props;
-    return /* @__PURE__ */ (0, import_jsx_runtime102.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime106.jsx)(
       BaseTableHeader,
       {
         cells: [
@@ -48482,24 +48515,24 @@ To suppress this warning, you need to explicitly provide the \`palette.${key}Cha
   };
 
   // src/Components/Tables/BaseTable.tsx
-  var import_jsx_runtime103 = __toESM(require_jsx_runtime());
+  var import_jsx_runtime107 = __toESM(require_jsx_runtime());
   var BaseTable = (props) => {
     const { header, children, containerSx } = props;
-    return /* @__PURE__ */ (0, import_jsx_runtime103.jsx)(TableContainer_default, { component: Paper_default, sx: __spreadProps(__spreadValues({}, containerSx), { width: "100%" }), children: /* @__PURE__ */ (0, import_jsx_runtime103.jsxs)(Table_default, { size: "small", children: [
+    return /* @__PURE__ */ (0, import_jsx_runtime107.jsx)(TableContainer_default, { component: Paper_default, sx: __spreadProps(__spreadValues({}, containerSx), { width: "100%" }), children: /* @__PURE__ */ (0, import_jsx_runtime107.jsxs)(Table_default, { size: "small", children: [
       header,
-      /* @__PURE__ */ (0, import_jsx_runtime103.jsx)(TableBody_default, { children })
+      /* @__PURE__ */ (0, import_jsx_runtime107.jsx)(TableBody_default, { children })
     ] }) });
   };
 
   // src/Components/Tables/Agent/Elements/ActionCoverageTable.tsx
-  var import_jsx_runtime104 = __toESM(require_jsx_runtime());
+  var import_jsx_runtime108 = __toESM(require_jsx_runtime());
   var ActionCoverageTable = ({ actions }) => {
     const { sortedItems, orderBy, setOrderBy, orderDirection, setOrderDirection } = useTableSorting({ items: actions });
-    return /* @__PURE__ */ (0, import_jsx_runtime104.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime108.jsx)(
       BaseTable,
       {
         containerSx: { mt: 3 },
-        header: /* @__PURE__ */ (0, import_jsx_runtime104.jsx)(
+        header: /* @__PURE__ */ (0, import_jsx_runtime108.jsx)(
           ActionCoverageTableHeader,
           {
             orderBy,
@@ -48508,33 +48541,33 @@ To suppress this warning, you need to explicitly provide the \`palette.${key}Cha
             setOrderDirection
           }
         ),
-        children: sortedItems.map((action, index) => /* @__PURE__ */ (0, import_jsx_runtime104.jsx)(ActionCoverageTableRow, { action }, index))
+        children: sortedItems.map((action, index) => /* @__PURE__ */ (0, import_jsx_runtime108.jsx)(ActionCoverageTableRow, { action }, index))
       }
     );
   };
 
   // src/Views/Agent/Elements/ElementDetailsView.tsx
-  var import_jsx_runtime105 = __toESM(require_jsx_runtime());
+  var import_jsx_runtime109 = __toESM(require_jsx_runtime());
   var ElementDetailsView = ({ element }) => {
-    return /* @__PURE__ */ (0, import_jsx_runtime105.jsxs)(Box_default, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime105.jsxs)(WidgetInfoRowsView, { containerSx: { mt: 0 }, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime105.jsx)(BaseInfoRowView, { name: "Selector", value: element.selector }),
-        /* @__PURE__ */ (0, import_jsx_runtime105.jsx)(BaseInfoRowView, { name: "Selector type", value: element.selectorType })
+    return /* @__PURE__ */ (0, import_jsx_runtime109.jsxs)(Box_default, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime109.jsxs)(WidgetInfoRowsView, { containerSx: { mt: 0 }, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime109.jsx)(BaseInfoRowView, { name: "Selector", value: element.selector }),
+        /* @__PURE__ */ (0, import_jsx_runtime109.jsx)(BaseInfoRowView, { name: "Selector type", value: element.selectorType })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime105.jsx)(ActionCoverageTable, { actions: element.actions }),
-      /* @__PURE__ */ (0, import_jsx_runtime105.jsx)(ElementHistoryChartView, { history: element.history })
+      /* @__PURE__ */ (0, import_jsx_runtime109.jsx)(ActionCoverageTable, { actions: element.actions }),
+      /* @__PURE__ */ (0, import_jsx_runtime109.jsx)(ElementHistoryChartView, { history: element.history })
     ] });
   };
 
   // src/Components/Modals/Agent/Elements/ElementDetailsModal.tsx
-  var import_jsx_runtime106 = __toESM(require_jsx_runtime());
+  var import_jsx_runtime110 = __toESM(require_jsx_runtime());
   var ElementDetailsModal = ({ sx, modal, setModal, element }) => {
-    return /* @__PURE__ */ (0, import_jsx_runtime106.jsx)(BaseModal, { sx, title: "Element details", modal, setModal, maxWidth: "md", children: /* @__PURE__ */ (0, import_jsx_runtime106.jsx)(ElementDetailsView, { element }) });
+    return /* @__PURE__ */ (0, import_jsx_runtime110.jsx)(BaseModal, { sx, title: "Element details", modal, setModal, maxWidth: "md", children: /* @__PURE__ */ (0, import_jsx_runtime110.jsx)(ElementDetailsView, { element }) });
   };
 
   // src/Components/Badges/Agent/Elements/ElementBadge.tsx
   var import_react31 = __toESM(require_react());
-  var import_jsx_runtime107 = __toESM(require_jsx_runtime());
+  var import_jsx_runtime111 = __toESM(require_jsx_runtime());
   var ElementBadge = ({ actions, settings }) => {
     const content = (0, import_react31.useMemo)(() => {
       switch (settings == null ? void 0 : settings.badgeContentType) {
@@ -48546,20 +48579,20 @@ To suppress this warning, you need to explicitly provide the \`palette.${key}Cha
           return 0;
       }
     }, [actions, settings == null ? void 0 : settings.badgeContentType]);
-    return /* @__PURE__ */ (0, import_jsx_runtime107.jsx)(Badge_default, { color: settings == null ? void 0 : settings.badgeColor, badgeContent: content });
+    return /* @__PURE__ */ (0, import_jsx_runtime111.jsx)(Badge_default, { color: settings == null ? void 0 : settings.badgeColor, badgeContent: content });
   };
 
   // src/Views/Agent/Elements/ElementView.tsx
-  var import_jsx_runtime108 = __toESM(require_jsx_runtime());
+  var import_jsx_runtime112 = __toESM(require_jsx_runtime());
   var ElementView = ({ element }) => {
     const { state } = useAgentInitialState();
     const { node: node2 } = useElement({ type: element.selectorType, value: element.selector, settings: state.settings });
     const [elementDetailsModal, setElementDetailsModal] = (0, import_react32.useState)(false);
     if (!node2) return null;
     const onElementDetails = () => setElementDetailsModal(true);
-    return /* @__PURE__ */ (0, import_jsx_runtime108.jsxs)(BasePopper, { anchor: node2, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime108.jsx)(IconButton_default, { onClick: onElementDetails, children: /* @__PURE__ */ (0, import_jsx_runtime108.jsx)(ElementBadge, { actions: element.actions, settings: state.settings }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime108.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime112.jsxs)(BasePopper, { anchor: node2, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime112.jsx)(IconButton_default, { onClick: onElementDetails, children: /* @__PURE__ */ (0, import_jsx_runtime112.jsx)(ElementBadge, { actions: element.actions, settings: state.settings }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime112.jsx)(
         ElementDetailsModal,
         {
           sx: { zIndex: 1900 },
@@ -48572,11 +48605,11 @@ To suppress this warning, you need to explicitly provide the \`palette.${key}Cha
   };
 
   // src/Views/Agent/Elements/ElementsView.tsx
-  var import_jsx_runtime109 = __toESM(require_jsx_runtime());
+  var import_jsx_runtime113 = __toESM(require_jsx_runtime());
   var ElementsView = () => {
     var _a;
     const { state } = useAgentInitialState();
-    return /* @__PURE__ */ (0, import_jsx_runtime109.jsx)(import_react33.Fragment, { children: (_a = state == null ? void 0 : state.elements) == null ? void 0 : _a.map((element, index) => /* @__PURE__ */ (0, import_jsx_runtime109.jsx)(ElementView, { element }, index)) });
+    return /* @__PURE__ */ (0, import_jsx_runtime113.jsx)(import_react33.Fragment, { children: (_a = state == null ? void 0 : state.elements) == null ? void 0 : _a.map((element, index) => /* @__PURE__ */ (0, import_jsx_runtime113.jsx)(ElementView, { element }, index)) });
   };
 
   // src/Providers/AgentThemeProvider.tsx
@@ -48584,7 +48617,7 @@ To suppress this warning, you need to explicitly provide the \`palette.${key}Cha
 
   // src/Providers/ThemeProvider.tsx
   var import_react34 = __toESM(require_react());
-  var import_jsx_runtime110 = __toESM(require_jsx_runtime());
+  var import_jsx_runtime114 = __toESM(require_jsx_runtime());
   var darkTheme = createTheme2({
     palette: { mode: "dark" /* Dark */ },
     components: { MuiPaper: { defaultProps: { elevation: 5 } } }
@@ -48596,20 +48629,20 @@ To suppress this warning, you need to explicitly provide the \`palette.${key}Cha
   var ThemeContext3 = (0, import_react34.createContext)(null);
 
   // src/Providers/AgentThemeProvider.tsx
-  var import_jsx_runtime111 = __toESM(require_jsx_runtime());
+  var import_jsx_runtime115 = __toESM(require_jsx_runtime());
   var AgentThemeContext = (0, import_react35.createContext)(null);
   var AgentThemeProvider = ({ children }) => {
     const { state } = useAgentInitialState();
-    return /* @__PURE__ */ (0, import_jsx_runtime111.jsx)(AgentThemeContext.Provider, { value: null, children: /* @__PURE__ */ (0, import_jsx_runtime111.jsx)(ThemeProvider4, { theme: state.themeMode === "light" /* Light */ ? lightTheme : darkTheme, children }) });
+    return /* @__PURE__ */ (0, import_jsx_runtime115.jsx)(AgentThemeContext.Provider, { value: null, children: /* @__PURE__ */ (0, import_jsx_runtime115.jsx)(ThemeProvider4, { theme: state.themeMode === "light" /* Light */ ? lightTheme : darkTheme, children }) });
   };
 
   // src/agent.index.tsx
-  var import_jsx_runtime112 = __toESM(require_jsx_runtime());
+  var import_jsx_runtime116 = __toESM(require_jsx_runtime());
   var IndexAgent = () => {
-    return /* @__PURE__ */ (0, import_jsx_runtime112.jsx)(AgentInitialStateProvider, { children: /* @__PURE__ */ (0, import_jsx_runtime112.jsx)(AgentThemeProvider, { children: /* @__PURE__ */ (0, import_jsx_runtime112.jsx)(ElementsView, {}) }) });
+    return /* @__PURE__ */ (0, import_jsx_runtime116.jsx)(AgentInitialStateProvider, { children: /* @__PURE__ */ (0, import_jsx_runtime116.jsx)(AgentThemeProvider, { children: /* @__PURE__ */ (0, import_jsx_runtime116.jsx)(ElementsView, {}) }) });
   };
   document.addEventListener("DOMContentLoaded", () => {
-    watchFrameRoot(() => /* @__PURE__ */ (0, import_jsx_runtime112.jsx)(IndexAgent, {}));
+    watchFrameRoot(() => /* @__PURE__ */ (0, import_jsx_runtime116.jsx)(IndexAgent, {}));
   });
 })();
 /*! Bundled license information:
