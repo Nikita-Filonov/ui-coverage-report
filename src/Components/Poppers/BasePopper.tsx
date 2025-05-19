@@ -1,8 +1,9 @@
 import { Popper } from '@mui/material';
 import { FC, PropsWithChildren } from 'react';
+import { VisualElement } from '../../Services/Frame/Element';
 
 type Props = {
-  anchor: HTMLElement;
+  anchor: VisualElement;
 } & PropsWithChildren;
 
 export const BasePopper: FC<Props> = ({ anchor, children }) => {
