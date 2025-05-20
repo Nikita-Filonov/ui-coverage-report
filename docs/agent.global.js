@@ -48617,6 +48617,18 @@ To suppress this warning, you need to explicitly provide the \`palette.${key}Cha
 
   // src/Providers/ThemeProvider.tsx
   var import_react34 = __toESM(require_react());
+
+  // src/Services/Storage.ts
+  var APP = "UI_COVERAGE_REPORT";
+  var StorageKey = ((StorageKey2) => {
+    StorageKey2["Features"] = `${APP}_FEATURES`;
+    StorageKey2["ThemeMode"] = `${APP}_THEME_MODE`;
+    StorageKey2["AgentFilters"] = `${APP}_AGENT_FILTERS`;
+    StorageKey2["AgentSettings"] = `${APP}_AGENT_SETTINGS`;
+    return StorageKey2;
+  })(StorageKey || {});
+
+  // src/Providers/ThemeProvider.tsx
   var import_jsx_runtime114 = __toESM(require_jsx_runtime());
   var darkTheme = createTheme2({
     palette: { mode: "dark" /* Dark */ },
