@@ -1,7 +1,10 @@
+const APP = 'UI_COVERAGE_REPORT';
+
 export enum StorageKey {
-  ThemeMode = 'UI_COVERAGE_THEME_MODE',
-  AgentFilters = 'UI_COVERAGE_REPORT_AGENT_FILTERS',
-  AgentSettings = 'UI_COVERAGE_REPORT_AGENT_SETTINGS'
+  Features = `${APP}_FEATURES`,
+  ThemeMode = `${APP}_THEME_MODE`,
+  AgentFilters = `${APP}_AGENT_FILTERS`,
+  AgentSettings = `${APP}_AGENT_SETTINGS`
 }
 
 type LoadFromStorageProps<T> = {

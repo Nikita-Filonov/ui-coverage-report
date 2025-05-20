@@ -6,3 +6,5 @@ export const hexToRGBA = (hex: string, alpha: number): string => {
 
   return `rgba(${(bigint >> 16) & 255}, ${(bigint >> 8) & 255}, ${bigint & 255}, ${alpha})`;
 };
+
+export const countNotNullValues = <T extends object>(input: T): number => Object.values(input).filter(Boolean).length;
