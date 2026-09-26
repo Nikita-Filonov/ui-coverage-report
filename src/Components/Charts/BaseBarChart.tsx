@@ -5,12 +5,11 @@ import {
   ChartsTooltip,
   ChartsXAxis,
   ChartsYAxis,
-  ResponsiveChartContainer
+  ChartsContainer
 } from '@mui/x-charts';
-import { AxisValueFormatterContext } from '@mui/x-charts/internals';
-import { DatasetType } from '@mui/x-charts/models/seriesType/config';
+import { AxisValueFormatterContext } from '@mui/x-charts/models';
 import { Box } from '@mui/material';
-import { Fragment } from 'react';
+import { ComponentProps, Fragment } from 'react';
 import { BaseBarChartLegend } from './BaseBarChartLegend';
 
 export interface BarChartYAxis {
@@ -31,14 +30,14 @@ interface BarChartXAxis<T> {
 type BaseLineChartProps<T> = {
   xAxis: BarChartXAxis<T>[];
   yAxis: BarChartYAxis[];
-  dataset?: DatasetType;
+  dataset?: ComponentProps<typeof ChartsContainer>['dataset'];
 };
 
 export const BaseBarChart = <T,>({ xAxis, yAxis, dataset }: BaseLineChartProps<T>) => {
   return (
     <Fragment>
       <Box sx={{ height: 300 }}>
-        <ResponsiveChartContainer
+        <ChartsContainer
           xAxis={xAxis}
           margin={{ top: 20, left: 35, right: 20, bottom: 35 }}
           series={yAxis.map((axis) => ({ ...axis, type: 'bar' }))}
@@ -47,9 +46,9 @@ export const BaseBarChart = <T,>({ xAxis, yAxis, dataset }: BaseLineChartProps<T
           <ChartsGrid vertical={true} horizontal={true} />
           <ChartsXAxis />
           <ChartsYAxis />
-          <ChartsTooltip slotProps={{ popper: { sx: { zIndex: 2000 } } }} />
+          <ChartsTooltip sx={{ zIndex: 2000 }} />
           <ChartsAxisHighlight x={'band'} />
-        </ResponsiveChartContainer>
+        </ChartsContainer>
       </Box>
       <BaseBarChartLegend yAxis={yAxis} />
     </Fragment>
