@@ -1,7 +1,7 @@
 import { BasePaper } from './BasePaper';
 import Typography from '@mui/material/Typography';
 import { FC, ReactNode } from 'react';
-import { Badge, Box, Grid2, SxProps, Theme } from '@mui/material';
+import { Badge, Box, Grid, SxProps, Theme } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import { getActionMarginRight } from '../../Services/Views';
 
@@ -28,16 +28,16 @@ export const WidgetView: FC<WidgetViewProps> = (props) => {
 
   return (
     <BasePaper id={id} sx={sx}>
-      <Grid2 container sx={{ display: 'flex', alignItems: 'center' }}>
-        <Grid2 sx={{ flexGrow: 1 }}>
+      <Grid container sx={{ display: 'flex', alignItems: 'center' }}>
+        <Grid sx={{ flexGrow: 1 }}>
           {title && (
             <Typography sx={{ mr: 2 }} variant={'h6'}>
               {title}
             </Typography>
           )}
-        </Grid2>
+        </Grid>
         {actions?.map((action, index) => (
-          <Grid2 key={index}>
+          <Grid key={index}>
             {action.icon ? (
               <IconButton key={index} sx={{ mr: getMarginRight(index) }} onClick={action.onClick}>
                 <Badge badgeContent={action.badgeContent} color="primary">
@@ -49,9 +49,9 @@ export const WidgetView: FC<WidgetViewProps> = (props) => {
                 {action.content}
               </Box>
             )}
-          </Grid2>
+          </Grid>
         ))}
-      </Grid2>
+      </Grid>
       <Box sx={childrenSx}>{children}</Box>
     </BasePaper>
   );
