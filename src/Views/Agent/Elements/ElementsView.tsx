@@ -5,5 +5,11 @@ import { useAgentInitialState } from '../../../Providers/AgentInitialStateProvid
 export const ElementsView = () => {
   const { state } = useAgentInitialState();
 
-  return <Fragment>{state?.elements?.map((element, index) => <ElementView key={index} element={element} />)}</Fragment>;
+  return (
+    <Fragment>
+      {state?.elements?.map((element, index) => (
+        <ElementView key={index} element={element} />
+      ))}
+    </Fragment>
+  );
 };
