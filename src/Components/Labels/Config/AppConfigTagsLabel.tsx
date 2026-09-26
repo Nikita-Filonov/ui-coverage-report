@@ -9,6 +9,10 @@ type Props = {
 
 export const AppConfigTagsLabel: FC<Props> = ({ config }) => {
   return (
-    <BaseLabelsView>{config.tags?.map((tag, index) => <AppConfigTagLabel key={index} tag={tag} />)}</BaseLabelsView>
+    <BaseLabelsView>
+      {config.tags?.map((tag, index) => (
+        <AppConfigTagLabel key={index} tag={tag} />
+      ))}
+    </BaseLabelsView>
   );
 };
