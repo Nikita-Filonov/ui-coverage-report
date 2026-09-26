@@ -1,12 +1,8 @@
 import { Chip, SxProps, Theme } from '@mui/material';
-import { OverridableStringUnion } from '@mui/types';
-import { ChipPropsColorOverrides } from '@mui/material/Chip/Chip';
+import { ChipProps } from '@mui/material/Chip';
 import { FC, MouseEvent, ReactElement } from 'react';
 
-export type LabelColor = OverridableStringUnion<
-  'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning',
-  ChipPropsColorOverrides
->;
+export type LabelColor = NonNullable<ChipProps['color']>;
 
 export type Props = {
   sx?: SxProps<Theme>;
