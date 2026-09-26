@@ -21,7 +21,7 @@ const getElementByXpath = (selector: string): XPathResult => {
 };
 
 export const getElement = ({ type, value }: GetElementProps): VisualElement | null => {
-  let node: Element | null = null;
+  let node: Element | null;
 
   switch (type) {
     case SelectorType.CSS: {
@@ -49,26 +49,25 @@ const MAP_COLOR_TO_BORDER_COLOR: Record<Color, string> = {
   [Color.Secondary]: purple['500']
 };
 
+const highlightElement = (el: VisualElement, color: string) => {
+  el.style.outline = `1px solid ${color}`;
+  el.style.backgroundColor = hexToRGBA(color, 0.1);
+};
+
+const clearHighlight = (el: VisualElement) => {
+  el.style.outline = '';
+  el.style.backgroundColor = '';
+};
+
 export const useElement = (props: GetElementProps & { settings?: AgentSettings }) => {
   const { type, value, settings } = props;
   const node = getElement({ type, value });
 
-  const highlightElement = (el: VisualElement) => {
-    const color = MAP_COLOR_TO_BORDER_COLOR[settings?.overlayColor || Color.Primary];
-
-    el.style.outline = `1px solid ${color}`;
-    el.style.backgroundColor = hexToRGBA(color, 0.1);
-  };
-
-  const clearHighlight = (el: VisualElement) => {
-    el.style.outline = '';
-    el.style.backgroundColor = '';
-  };
-
   useEffect(() => {
     if (!node) return;
 
-    highlightElement(node);
+    const color = MAP_COLOR_TO_BORDER_COLOR[settings?.overlayColor || Color.Primary];
+    highlightElement(node, color);
 
     return () => {
       clearHighlight(node);
