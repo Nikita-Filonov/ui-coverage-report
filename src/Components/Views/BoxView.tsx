@@ -11,7 +11,7 @@ type BoxViewProps = {
 export const BoxView: FC<BoxViewProps> = ({ title, children, containerSx }) => {
   return (
     <Box sx={{ mt: 3, ...containerSx }}>
-      {title && <Typography fontWeight={'bold'}>{title}</Typography>}
+      {title && <Typography sx={{ fontWeight: 'bold' }}>{title}</Typography>}
       {children}
     </Box>
   );
