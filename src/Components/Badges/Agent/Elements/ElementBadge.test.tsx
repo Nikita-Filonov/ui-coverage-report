@@ -39,4 +39,11 @@ describe('ElementBadge', () => {
 
     expect(screen.getByText('2')).toBeInTheDocument();
   });
+
+  it('does not display an action count before settings are received', () => {
+    render(<ElementBadge actions={actions} />);
+
+    expect(screen.queryByText('5')).not.toBeInTheDocument();
+    expect(screen.queryByText('2')).not.toBeInTheDocument();
+  });
 });
