@@ -1,0 +1,24 @@
+import js from '@eslint/js';
+import prettier from 'eslint-config-prettier';
+import prettierPlugin from 'eslint-plugin-prettier';
+import reactHooks from 'eslint-plugin-react-hooks';
+import globals from 'globals';
+import tseslint from 'typescript-eslint';
+
+export default tseslint.config(
+  {
+    ignores: ['build/**', 'coverage/**', 'docs/**', 'public/**']
+  },
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
+  reactHooks.configs.flat.recommended,
+  prettier,
+  {
+    files: ['**/*.{js,mjs,ts,tsx}'],
+    languageOptions: {
+      globals: { ...globals.browser, ...globals.node, ...globals.es2022, ...globals.vitest }
+    },
+    plugins: { prettier: prettierPlugin },
+    rules: { 'prettier/prettier': 'error' }
+  }
+);
