@@ -1,4 +1,4 @@
-import { createContext, Dispatch, FC, PropsWithChildren, SetStateAction, useContext, useEffect, useState } from 'react';
+import { createContext, Dispatch, FC, PropsWithChildren, SetStateAction, useContext, useState } from 'react';
 import { AppConfig } from '../Models/Config';
 import { AppCoverage } from '../Models/Coverage/Coverage';
 import { InitialState } from '../Models/InitialState';
@@ -46,26 +46,11 @@ export type InitialStateContextProps = {
 const InitialStateContext = createContext<InitialStateContextProps | null>(null);
 
 const InitialStateProvider: FC<PropsWithChildren> = ({ children }) => {
-  const [state, setState] = useState<InitialState>(loadInitialState());
-  const [appConfig, setAppConfig] = useState<AppConfig>(DEFAULT_APP_CONFIG);
-
-  useEffect(() => {
-    loadState();
-  }, []);
-
-  const loadState = () => {
-    const initialState = loadInitialState();
-    for (const app of initialState.config.apps || []) {
-      const appCoverage = initialState.appsCoverage[app.key];
-
-      if (appCoverage.elements.length > 0) {
-        setAppConfig(app);
-        break;
-      }
-    }
-
-    setState(initialState);
-  };
+  const [state] = useState<InitialState>(loadInitialState);
+  const [appConfig, setAppConfig] = useState<AppConfig>(
+    () =>
+      (state.config.apps || []).find((app) => state.appsCoverage[app.key]?.elements.length > 0) || DEFAULT_APP_CONFIG
+  );
 
   return (
     <InitialStateContext.Provider
