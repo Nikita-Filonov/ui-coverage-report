@@ -1,6 +1,6 @@
 import { filterElementCoverageByActions } from './Coverage';
 import { AgentState } from '../Models/Agent';
-import { RefObject, useEffect } from 'react';
+import { RefObject, useCallback, useEffect } from 'react';
 import { useAgentFilters } from '../Providers/AgentFiltersProvider';
 import { useAgentSettings } from '../Providers/AgentSettingsProvider';
 import { useInitialState } from '../Providers/InitialStateProvider';
@@ -17,21 +17,24 @@ export const useAgentActions = ({ frameRef }: UseAgentActionsProps) => {
   const { themeMode } = useTheme();
   const { appCoverage } = useInitialState();
 
-  useEffect(() => {
-    onSyncAgent();
-  }, [filters, settings, themeMode]);
+  const postMessage = useCallback(
+    (state: AgentState) => {
+      const frameWindow = frameRef?.current?.contentWindow;
+      if (frameWindow) {
+        frameWindow.postMessage(state, '*');
+      }
+    },
+    [frameRef]
+  );
 
-  const postMessage = (state: AgentState) => {
-    const frameWindow = frameRef?.current?.contentWindow;
-    if (frameWindow) {
-      frameWindow.postMessage(state, '*');
-    }
-  };
-
-  const onSyncAgent = () => {
+  const onSyncAgent = useCallback(() => {
     const elements = filterElementCoverageByActions({ elements: appCoverage.elements, actions: filters.actions });
     postMessage({ type: SettingsManager.agentType, settings, elements, themeMode });
-  };
+  }, [appCoverage.elements, filters.actions, postMessage, settings, themeMode]);
+
+  useEffect(() => {
+    onSyncAgent();
+  }, [onSyncAgent]);
 
   const onClearAgent = () => postMessage({ type: SettingsManager.agentType, settings, elements: [], themeMode });
 
