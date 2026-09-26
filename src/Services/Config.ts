@@ -23,12 +23,13 @@ export class SettingsManager {
 
   private static getEnvConfig(): Config {
     return {
-      agentType: process.env.REACT_APP_AGENT_TYPE || '',
+      agentType: import.meta.env.VITE_AGENT_TYPE || 'ui-coverage-report',
 
-      repositoryUrl: process.env.REACT_APP_REPOSITORY_URL || '',
+      repositoryUrl:
+        import.meta.env.VITE_REPOSITORY_URL || 'https://raw.githubusercontent.com/Nikita-Filonov/ui-coverage-report',
 
-      apiDateFormat: process.env.REACT_APP_API_DATE_FORMAT || '',
-      apiTimeFormat: process.env.REACT_APP_API_TIME_FORMAT || ''
+      apiDateFormat: import.meta.env.VITE_API_DATE_FORMAT || 'YYYY-MM-DD',
+      apiTimeFormat: import.meta.env.VITE_API_TIME_FORMAT || 'HH:mm'
     };
   }
 
